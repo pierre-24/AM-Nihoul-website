@@ -23,7 +23,7 @@ with open(path.join(here, 'requirements/requirements-dev.in')) as f:
 
 setup(
     name='AM-Nihoul-website',
-    version='0.1a',
+    version='0.1a0',
     
     # Description
     description=__doc__,
