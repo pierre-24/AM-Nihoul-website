@@ -50,8 +50,8 @@ def create_app():
     app.cli.add_command(init_db_command)
     app.cli.add_command(init_directories_command)
 
-    @app.route('/')
-    def index():
-        return 'test'
+    # add blueprint(s)
+    from AM_Nihoul_website.pages.views import pages_blueprint
+    app.register_blueprint(pages_blueprint)
 
     return app

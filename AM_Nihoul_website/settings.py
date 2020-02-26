@@ -7,11 +7,11 @@ APP_CONFIG = {
     # `python -c "import random; print(repr(''.join([chr(random.randrange(32, 126)) for _ in range(24)])))"`
     'SECRET_KEY': ';+b&#Yl] U$y7dzmW&IRh$GO',
 
-    'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     'USERNAME': 'admin',
     'PASSWORD': 'admin',
 
     # database
+    'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     'SQLALCHEMY_DATABASE_URI': 'sqlite:///' + os.path.join(os.path.abspath(DATA_DIRECTORY), 'database.db'),
 
     # upload
