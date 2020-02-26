@@ -51,7 +51,10 @@ def create_app():
     app.cli.add_command(init_directories_command)
 
     # add blueprint(s)
-    from AM_Nihoul_website.pages.views import pages_blueprint
-    app.register_blueprint(pages_blueprint)
+    from AM_Nihoul_website.visitor.views import visitor_blueprint
+    app.register_blueprint(visitor_blueprint)
+
+    from AM_Nihoul_website.admin.views import admin_blueprint
+    app.register_blueprint(admin_blueprint)
 
     return app
