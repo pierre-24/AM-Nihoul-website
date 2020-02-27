@@ -15,10 +15,10 @@ class Page(BaseModel):
     protected = db.Column(db.Boolean, default=False, nullable=False)
 
     @classmethod
-    def create(cls, title, text, protected=False):
+    def create(cls, title, content, protected=False):
         o = cls()
         o.title = title
-        o.text = text
+        o.content = content
         o.protected = protected
 
         return o
