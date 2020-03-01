@@ -11,17 +11,47 @@
 </head>
 
 <body>
-    <nav></nav>
+    <header>
+        <div id="logo"><a href="/"><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="logo"></a></div>
+
+        <nav id="main-nav">
+            <ul id="top-nav">
+                {% for i in range(4) %}
+                <li><a href="#">petit #{{ i }}</a></li>
+                {% endfor %}
+            </ul>
+            <ul id="main-nav">
+                {% for i in range(5) %}
+                <li><a href="#">Principal #{{ i }}</a></li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </header>
 
     <div id="page-content">
+        {% block page_content %}
+        <div id="content">
         {% block content %}{% endblock %}
+        </div>
+        {% endblock %}
     </div>
 
     <footer>
-            <p>
-                {{ site_name }} : {{ site_description }}<br />
-                Webmaster: <a href="{{ author_url }}">{{ author_name }}</a>  (version du site web: <a href="{{ repo_url }}">{{ site_version }}</a>)
-            </p>
+        <div id="bottom-nav">
+            {% for j in range(4) %}
+                <div class="bottom-nav-block">
+                <h3>Block #{{ j }}</h3>
+                <ul>
+                {% for i in range(4) %}
+                    <li><a href="#">Lien #{{ j }}-{{ i }}</a></li>
+                {% endfor %}
+            </ul></div>
+
+            {% endfor %}
+        </div>
+        <div id="bottom-txt">
+            &copy; {{ site_name }}. Site web par <a href="{{ author_url }}">{{ author_name }}</a>  (version: <a href="{{ repo_url }}">{{ site_version }}</a>)
+        </div>
     </footer>
 
     {% block scripts %}

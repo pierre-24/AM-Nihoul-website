@@ -1,0 +1,139 @@
+.truncate {
+    text-overflow: ellipsis;
+}
+
+@main-color: #FF5B5B;
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+a {
+    color: #777;
+
+    &:hover {
+        color: @main-color;
+    }
+}
+
+header {
+    max-width: 1280px;
+    margin: auto;
+    display: flex;
+    padding: 0;
+
+    #logo {
+        flex-grow: 1;
+    }
+}
+
+nav {
+    display: block !important;
+    flex-grow: 8;
+
+    #top-nav {
+        display: flex;
+        justify-content: flex-end;
+        font-size: 80%;
+
+        li {
+            display: block;
+            margin-left: 8px;
+        }
+    }
+
+    #main-nav {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 64px;
+
+        li {
+            display: block;
+
+            a {
+                text-decoration: none;
+                display: block;
+                margin-left: 16px;
+                padding: 8px 0;
+                font-weight: bold;
+                font-size: 110%;
+
+                &:hover {
+                    border-bottom: 3px solid @main-color;
+                }
+            }
+        }
+    }
+}
+
+#page-content {
+    background: #ddd;
+    margin: 0;
+    padding: 0;
+    border-top: 4px solid #ccc;
+    border-bottom: 4px solid #eee;
+
+    #content {
+        max-width: 1280px;
+        margin: auto;
+        padding: 32px 0;
+
+        section {
+            padding: 8px 16px;
+            background: white;
+            border-top: 4px solid @main-color;
+
+            h2 {
+                color: @main-color;
+            }
+        }
+    }
+
+
+}
+
+footer {
+    max-width: 1280px;
+    margin: auto;
+
+    #bottom-nav {
+        display: flex;
+        padding-top: 32px;
+
+        .bottom-nav-block {
+            min-width: 250px;
+
+            a {
+                text-decoration: none;
+                color: #777;
+                font-size: 90%;
+                &:hover {
+                    color: @main-color;
+                }
+            }
+
+            h3 {
+                color: @main-color;
+                font-weight: bold;
+                font-size: 95%;
+            }
+
+            ul {
+                padding: 0;
+                li {
+                    display: block;
+                    padding: 4px 0;
+                }
+            }
+        }
+    }
+
+    #bottom-txt {
+        padding: 24px 0;
+        color: #777;
+        font-size: 90%;
+    }
+}

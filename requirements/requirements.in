@@ -3,3 +3,4 @@ Flask-SQLAlchemy
 Flask-Uploads
 sqlalchemy-utils
 python-slugify
+lesscpy
