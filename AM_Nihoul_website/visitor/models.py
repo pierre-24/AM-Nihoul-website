@@ -2,7 +2,7 @@ import slugify
 from sqlalchemy import event
 
 from AM_Nihoul_website import db
-from AM_Nihoul_website.base_model import BaseModel
+from AM_Nihoul_website.base_models import BaseModel
 
 
 class Page(BaseModel):

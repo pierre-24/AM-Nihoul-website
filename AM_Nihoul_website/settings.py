@@ -19,10 +19,12 @@ APP_CONFIG = {
 }
 
 WEBPAGE_INFO = {
-    'repo_url': 'https://git.pierrebeaujean.net/pierre/AM-Nihoul-website',
-    'author_url': 'https://pierrebeaujean.net',
+    'author_url': 'https://pierrebeaujean.net/fr.html',
     'author_name': 'Pierre Beaujean',
-    'site_description': 'Association Anne-Marie Nihoul - Aide aux malades'
+    'repo_url': 'https://git.pierrebeaujean.net/pierre/AM-Nihoul-website',
+    'site_name': 'Association Anne-Marie Nihoul',
+    'site_description': 'aide aux malades',
+    'site_version': '0.1a0'
 }
 
 # Load the production settings, overwrite the existing ones if needed

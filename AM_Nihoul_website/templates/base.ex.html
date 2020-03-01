@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block page_title %}{% endblock %} - {{ site_name }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0">
+    <meta name="description" content="{{ site_name }} : {{ site_description }}">
+    <meta name="keywords" content="{{ site_keywords }}">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    {# <link href="{{ url_for('static', filename='images/favicon.png') }}" rel="icon"> #}
+</head>
+
+<body>
+    <nav></nav>
+
+    <div id="page-content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer>
+            <p>
+                {{ site_name }} : {{ site_description }}<br />
+                Webmaster: <a href="{{ author_url }}">{{ author_name }}</a>  (version du site web: <a href="{{ repo_url }}">{{ site_version }}</a>)
+            </p>
+    </footer>
+
+    {% block scripts %}
+        {# <script src="{{ url_for('static', filename='bundled.main.js') }}"></script>
+        <script src="https://kit.fontawesome.com/05ac4d5efb.js"></script> #}
+    {% endblock %}
+</body>
+</html>
