@@ -22,7 +22,7 @@
             </ul>
             <ul id="main-nav">
                 {% for i in range(5) %}
-                <li><a href="#">Principal #{{ i }}</a></li>
+                <li><a href="#" {% if i == 4 %}class="highlight-link"{% endif %}>Principal #{{ i }}</a></li>
                 {% endfor %}
             </ul>
         </nav>
