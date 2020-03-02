@@ -11,6 +11,10 @@ html, body {
     font-family: sans-serif;
 }
 
+body {
+    border-top: 6px solid @main-color;
+}
+
 a {
     color: #555;
 
@@ -67,7 +71,7 @@ nav {
                     padding: 8px 8px 12px 8px;
 
                     &:hover {
-                        background: lighten(@main-color, 10%);
+                        background: darken(@main-color, 10%);
                         border-bottom: none;
                     }
                 }
@@ -81,29 +85,71 @@ nav {
 }
 
 #page-content {
-    background: #ddd;
+    background: #ddd url("data:image/svg+xml;charset=utf-8, \
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' width='80px'> \
+      <polygon points='0,0 10,0 10,10 0,10' style='fill:white;'/> \
+    </svg>") top left repeat-x;
     margin: 0;
     padding: 0;
-    border-top: 4px solid #ccc;
-    border-bottom: 4px solid #eee;
 
     #content {
         max-width: 1280px;
         margin: auto;
-        padding: 32px 0;
+        padding: 0 0 64px;
 
         section {
             padding: 8px 16px;
             background: white;
             border-top: 4px solid @main-color;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
 
             h2 {
                 color: @main-color;
             }
         }
     }
+}
 
+#newsletter {
+    background: @main-color;
+    color: white;
 
+    form {
+        max-width: 1280px;
+        margin: auto;
+        padding: 48px 0;
+        display: flex;
+
+        p {
+            font-size: 150%;
+            font-weight: bold;
+            margin-right: 32px;
+        }
+
+        input {
+            height: 32px;
+            border: 2px solid white;
+            padding: 4px 24px;
+            align-self: center;
+        }
+
+        input[type=text] {
+            margin-right: 32px;
+        }
+
+        input[type=submit] {
+            background: @main-color;
+            color: white;
+            height: 44px;
+            cursor: pointer;
+
+            &:hover {
+                background: white;
+                color: @main-color;
+            }
+        }
+    }
 }
 
 footer {
@@ -115,7 +161,7 @@ footer {
         padding-top: 32px;
 
         .bottom-nav-block {
-            min-width: 250px;
+            flex-grow: 1;
 
             a {
                 text-decoration: none;
