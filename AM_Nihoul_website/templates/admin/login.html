@@ -1,0 +1,19 @@
+{% extends "base.ex.html" %}
+{% from "helpers.inc.html" import render_field %}
+
+{% block page_title %}Connexion{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Connexion à l'interface d'administration</h2>
+
+    <form method="post">
+        {{ form.csrf_token }}
+        <dl>
+            {{ render_field(form.login) }}
+            {{ render_field(form.password) }}
+        </dl>
+        <p>{{ form.login_button }}</p>
+    </form>
+    </section>
+{% endblock %}

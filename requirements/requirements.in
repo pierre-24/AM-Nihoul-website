@@ -4,3 +4,4 @@ Flask-Uploads
 sqlalchemy-utils
 python-slugify
 lesscpy
+Flask-WTF

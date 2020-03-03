@@ -17,8 +17,15 @@
         <nav id="main-nav">
             <ul id="top-nav">
                 {% for i in range(4) %}
-                <li><a href="#">petit #{{ i }}</a></li>
+                    <li><a href="#">petit #{{ i }}</a></li>
                 {% endfor %}
+
+                {# admin #}
+                {% if not logged_in %}
+                    <li><a href="{{ url_for('admin.login') }}">Sésame</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('admin.logout') }}">Se déconnecter</a></li>
+                {% endif %}
             </ul>
             <ul id="main-nav">
                 {% for i in range(5) %}
@@ -28,7 +35,12 @@
         </nav>
     </header>
 
+    {% for category,message in get_flashed_messages(with_categories=True) %}
+        <div class="flash-message flash-message-{{ category }}"><a href="#" class="close">&cross;</a> <p>{{ message }}</p></div>
+    {% endfor %}
+
     <div id="page-content">
+
         {% block page_content %}
         <div id="content">
         {% block content %}{% endblock %}
@@ -64,6 +76,13 @@
     </footer>
 
     {% block scripts %}
+        <script>
+            Array.from(document.querySelectorAll('.flash-message .close')).forEach(e => {
+                e.addEventListener('click', () => {
+                   e.parentNode.style.display = 'none';
+               });
+            });
+        </script>
         {# <script src="{{ url_for('static', filename='bundled.main.js') }}"></script>
         <script src="https://kit.fontawesome.com/05ac4d5efb.js"></script> #}
     {% endblock %}

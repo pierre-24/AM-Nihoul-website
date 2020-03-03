@@ -84,6 +84,32 @@ nav {
     }
 }
 
+.flash-message {
+    max-width: 1280px;
+    margin: auto;
+    margin-bottom: 24px;
+    border: 1px solid #55f;
+    border-left: 8px solid #55f;
+    background: #eef;
+
+    a.close {
+        float: right;
+        padding: 20px;
+        text-decoration: none;
+    }
+
+    &.flash-message-error {
+        border: 1px solid #f55;
+        border-left: 8px solid #f55;
+        background: #fee;
+    }
+
+    p {
+        padding: 4px 16px;
+    }
+
+}
+
 #page-content {
     background: #ddd url("data:image/svg+xml;charset=utf-8, \
     <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' width='80px'> \
