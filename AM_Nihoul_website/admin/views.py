@@ -1,9 +1,10 @@
 import flask
 from flask import Blueprint
 
-from AM_Nihoul_website import settings
-from AM_Nihoul_website.base_views import FormView, BaseMixin, LoginMixin, RenderTemplateView
-from AM_Nihoul_website.admin.forms import LoginForm
+from AM_Nihoul_website import settings, db
+from AM_Nihoul_website.base_views import FormView, BaseMixin, LoginMixin, RenderTemplateView, ObjectManagementMixin
+from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm
+from AM_Nihoul_website.visitor.models import Page
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -45,6 +46,92 @@ def logout():
 
 class IndexView(BaseMixin, RenderTemplateView):
     template_name = 'admin/index.html'
+    decorators = [LoginView.login_required]
 
 
 admin_blueprint.add_url_rule('/index.html', view_func=IndexView.as_view(name='index'))
+
+
+# -- Pages
+class PagesView(BaseMixin, RenderTemplateView):
+    template_name = 'admin/pages.html'
+    decorators = [LoginView.login_required]
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        # fetch list of pages
+        ctx['pages'] = Page.query.order_by(Page.slug).all()
+
+        return ctx
+
+
+admin_blueprint.add_url_rule('/pages.html', view_func=PagesView.as_view(name='pages'))
+
+
+class PageEditView(BaseMixin, ObjectManagementMixin, FormView):
+    template_name = 'admin/page-modify.html'
+    form_class = PageEditForm
+    decorators = [LoginView.login_required]
+
+    model = Page
+
+    def _fetch_object(self, *args, **kwargs):
+        """Add slug check"""
+
+        super()._fetch_object(*args, **kwargs)
+
+        if self.object.slug != kwargs.get('slug', None):
+            flask.abort(404)
+
+    def get(self, *args, **kwargs):
+        self._fetch_object(*args, **kwargs)
+        return super().get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        self._fetch_object(*args, **kwargs)
+        return super().post(*args, **kwargs)
+
+    def get_context_data(self, *args, **kwargs):
+
+        self.form_kwargs = {
+            'title': self.object.title,
+            'text': self.object.content
+        }
+
+        return super().get_context_data(*args, **kwargs)
+
+    def form_valid(self, form):
+        self.object.title = form.title.data
+        self.object.content = form.text.data
+
+        db.session.add(self.object)
+        db.session.commit()
+
+        flask.flash('La page a bien été modifiée')
+
+        self.success_url = flask.url_for('admin.pages')
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule('/page-edition-<int:id>-<string:slug>.html', view_func=PageEditView.as_view(name='page-edit'))
+
+
+class PageCreateView(BaseMixin, FormView):
+    template_name = 'admin/page-modify.html'
+    form_class = PageEditForm
+    decorators = [LoginView.login_required]
+
+    def form_valid(self, form):
+        page = Page.create(form.title.data, form.text.data)
+
+        db.session.add(page)
+        db.session.commit()
+
+        flask.flash('La page a bien été créée')
+
+        self.success_url = flask.url_for('admin.pages')
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule('/page-nouveau.html', view_func=PageCreateView.as_view(name='page-create'))

@@ -3,7 +3,7 @@ import functools
 import flask
 from flask.views import View
 
-from AM_Nihoul_website import settings
+from AM_Nihoul_website import settings, db
 
 
 class RenderTemplateView(View):
@@ -43,8 +43,10 @@ class FormView(RenderTemplateView):
     failure_url = '/'
     modal_form = False
 
+    form_kwargs = {}
+
     def get_form_kwargs(self):
-        return {}
+        return self.form_kwargs
 
     def get_form(self):
         """Return an instance of the form"""
@@ -93,6 +95,59 @@ class FormView(RenderTemplateView):
             return self.post(*args, **kwargs)
         elif flask.request.method == 'GET':
             return self.get(*args, **kwargs)
+        else:
+            flask.abort(403)
+
+
+class ObjectManagementMixin:
+    model = None
+    url_parameter_id = 'id'
+    object = None
+
+    def _fetch_object(self, *args, **kwargs):
+        self.object = self.model.query.get(kwargs.get(self.url_parameter_id))
+
+        if self.object is None:
+            flask.abort(404)
+
+
+class DeleteView(View):
+
+    methods = ['POST', 'DELETE']
+    success_url = '/'
+
+    def get_object(self):
+        raise NotImplementedError()
+
+    def pre_deletion(self, obj):
+        """Performs an action before deletion from database. Note: if return `False`, deletion is not performed"""
+        return True
+
+    def post_deletion(self, obj):
+        """Performs an action after deletion from database"""
+        pass
+
+    def delete(self, *args, **kwargs):
+        """Handle delete"""
+
+        obj = self.get_object()
+
+        if not self.pre_deletion(obj):
+            return flask.abort(403)
+
+        db.session.delete(obj)
+        db.session.commit()
+
+        self.post_deletion(obj)
+
+        return flask.redirect(self.success_url)
+
+    def dispatch_request(self, *args, **kwargs):
+
+        if flask.request.method == 'POST':
+            return self.delete(*args, **kwargs)
+        elif flask.request.method == 'DELETE':
+            return self.delete(*args, **kwargs)
         else:
             flask.abort(403)
 

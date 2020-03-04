@@ -1,0 +1,35 @@
+{% extends "admin/base.ex.html" %}
+
+{% set admin_current = 'page' %}
+
+{% block page_title %}Gestion des pages{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Gestion des pages</h2>
+
+    <p>
+        <a class="button-like" href="{{ url_for('admin.page-create') }}"><span class="fas fa-plus"></span> Ajouter une page</a>
+    </p>
+
+    <table class="admin-list">
+    <thead>
+    <tr>
+        <th>Titre</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+        {% for page in pages %}
+            <tr>
+                <td>{{ page.title }}</td>
+                <td>
+                    <span class="button-group">
+                    <a class="button-like" href="{{ url_for('admin.page-edit', id=page.id, slug=page.slug) }}"><span class="fas fa-edit"></span></a>
+                    <a class="button-like"><span class="fas fa-trash"></span></a>
+                    </span>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    </section>
+{% endblock %}

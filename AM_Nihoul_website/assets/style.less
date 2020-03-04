@@ -193,6 +193,7 @@ nav {
 
         #admin-content {
             width: 75%;
+            display: block;
         }
 
         #admin-menu {
@@ -201,6 +202,27 @@ nav {
             border: 1px solid #ddd;
             border-top: 4px solid @main-color;
             background: white;
+
+            ul {
+                margin: 0;
+                padding: 0;
+
+                li {
+                    list-style: none;
+                    display: block;
+
+                    a {
+                        display: block;
+                        text-decoration: none;
+                        padding: 16px 8px;
+                        border-bottom: 1px solid #ddd;
+
+                        &.selected {
+                            background: lighten(@main-color, 30%);
+                        }
+                    }
+                }
+            }
         }
     }
 }
