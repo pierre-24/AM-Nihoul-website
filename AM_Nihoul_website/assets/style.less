@@ -5,7 +5,7 @@
 @main-color: #FF5B5B;
 
 html, body {
-    height: 100%;
+    height: calc(100% - 4px);
     margin: 0;
     padding: 0;
     font-family: sans-serif;
@@ -20,6 +20,48 @@ a {
 
     &:hover {
         color: @main-color;
+    }
+}
+
+form {
+    ul.fields {
+        margin: 0;
+        padding: 0;
+
+        li {
+            display: block;
+	        list-style: none;
+            margin-right: 16px;
+            margin-top: 8px;
+
+            label {
+                margin:0 0 3px 0;
+                padding:0;
+                display:block;
+                font-weight: bold;
+                color: #555;
+            }
+
+            input[type=text], input[type=password] {
+                width: 100%;
+                border:1px solid #555;
+                padding: 7px;
+            }
+
+
+        }
+    }
+
+    p input[type=submit] {
+        border:1px solid #555;
+        padding: 8px 16px;
+        background: white;
+        cursor: pointer;
+
+        &:hover {
+            background: #555;
+            color: white;
+        }
     }
 }
 
@@ -46,6 +88,17 @@ nav {
         li {
             display: block;
             margin-left: 8px;
+        }
+
+        a.admin {
+            background: @main-color;
+            color:white;
+            text-decoration: none;
+            padding: 0 4px;
+
+            &:hover {
+                background: red;
+            }
         }
     }
 
@@ -126,13 +179,28 @@ nav {
         section {
             padding: 8px 16px;
             background: white;
+            border: 1px solid #ddd;
             border-top: 4px solid @main-color;
-            border-left: 1px solid #ddd;
-            border-right: 1px solid #ddd;
 
             h2 {
                 color: @main-color;
             }
+        }
+
+        &.admin  {
+            display: flex;
+        }
+
+        #admin-content {
+            width: 75%;
+        }
+
+        #admin-menu {
+            flex-grow: 1;
+            margin-left: 32px;
+            border: 1px solid #ddd;
+            border-top: 4px solid @main-color;
+            background: white;
         }
     }
 }

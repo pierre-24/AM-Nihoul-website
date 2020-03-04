@@ -1,0 +1,20 @@
+{% extends "base.ex.html" %}
+{% set no_newsletter = True %}
+
+{% block page_content %}
+
+    <div id="content" class="admin">
+
+        <div id="admin-content">
+        {% block content %}{% endblock %}
+        </div>
+
+        <div id="admin-menu">
+            <ul>
+                {% for i in range(5) %}
+                    <li><a href="#">Admin #{{ i }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}

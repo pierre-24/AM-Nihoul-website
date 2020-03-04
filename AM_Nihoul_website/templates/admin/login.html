@@ -9,10 +9,10 @@
 
     <form method="post">
         {{ form.csrf_token }}
-        <dl>
+        <ul class="fields">
             {{ render_field(form.login) }}
             {{ render_field(form.password) }}
-        </dl>
+        </ul>
         <p>{{ form.login_button }}</p>
     </form>
     </section>

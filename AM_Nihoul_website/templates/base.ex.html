@@ -24,7 +24,8 @@
                 {% if not logged_in %}
                     <li><a href="{{ url_for('admin.login') }}">Sésame</a></li>
                 {% else %}
-                    <li><a href="{{ url_for('admin.logout') }}">Se déconnecter</a></li>
+                    <li><a href="{{ url_for('admin.index') }}" class="admin">Administration</a></li>
+                    <li><a href="{{ url_for('admin.logout') }}" class="admin">Se déconnecter</a></li>
                 {% endif %}
             </ul>
             <ul id="main-nav">
@@ -48,6 +49,7 @@
         {% endblock %}
     </div>
 
+    {% if not no_newsletter %}
     <div id="newsletter">
         <form>
             <p>Pour ne rien rater, inscrivez vous à notre newsletter !</p>
@@ -56,6 +58,7 @@
             <input type="submit" value="S'inscrire">
         </form>
     </div>
+    {% endif %}
 
     <footer>
         <div id="bottom-nav">

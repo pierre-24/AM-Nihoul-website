@@ -2,7 +2,7 @@ import flask
 from flask import Blueprint
 
 from AM_Nihoul_website import settings
-from AM_Nihoul_website.base_views import FormView, BaseMixin, LoginMixin
+from AM_Nihoul_website.base_views import FormView, BaseMixin, LoginMixin, RenderTemplateView
 from AM_Nihoul_website.admin.forms import LoginForm
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
@@ -28,7 +28,7 @@ class LoginView(BaseMixin, FormView):
 
         flask.session['logged_in'] = True
 
-        self.success_url = flask.url_for('visitor.index')
+        self.success_url = flask.url_for('admin.index')
         return super().form_valid(form)
 
 
@@ -41,3 +41,10 @@ def logout():
     flask.session['logged_in'] = False
     flask.flash('Vous êtes déconnecté.')
     return flask.redirect(flask.url_for('visitor.index'))
+
+
+class IndexView(BaseMixin, RenderTemplateView):
+    template_name = 'admin/index.html'
+
+
+admin_blueprint.add_url_rule('/index.html', view_func=IndexView.as_view(name='index'))
