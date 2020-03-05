@@ -11,3 +11,17 @@
       {% endif %}
   </li>
 {% endmacro %}
+{% macro create_delete_modal(model, id, info, link) %}
+  <div id="delete-{{ model }}-{{ id }}" class="modal" role="dialog">
+        <form class="modal-dialog" method="post" action="{{ url_for(link, id=id) }}">
+            <h3>Suppression</h3>
+            <div class="modal-content">
+            <p>Voulez vous vraiment supprimer {{ info }} ?</p>
+            </div>
+            <p class="modal-bottom">
+                <input type="submit" value="Oui" class="modal-yes" />
+                <button type="button" class="modal-close">Non</button>
+            </p>
+        </form>
+    </div>
+{% endmacro %}

@@ -2,7 +2,8 @@ import flask
 from flask import Blueprint
 
 from AM_Nihoul_website import settings, db
-from AM_Nihoul_website.base_views import FormView, BaseMixin, LoginMixin, RenderTemplateView, ObjectManagementMixin
+from AM_Nihoul_website.base_views import FormView, BaseMixin, LoginMixin, RenderTemplateView, ObjectManagementMixin, \
+    DeleteView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm
 from AM_Nihoul_website.visitor.models import Page
 
@@ -108,7 +109,7 @@ class PageEditView(BaseMixin, ObjectManagementMixin, FormView):
         db.session.add(self.object)
         db.session.commit()
 
-        flask.flash('La page a bien été modifiée')
+        flask.flash('Page "{}" modifiée.'.format(self.object.title))
 
         self.success_url = flask.url_for('admin.pages')
         return super().form_valid(form)
@@ -128,10 +129,29 @@ class PageCreateView(BaseMixin, FormView):
         db.session.add(page)
         db.session.commit()
 
-        flask.flash('La page a bien été créée')
+        flask.flash('Page "{}" créée.'.format(page.title))
 
         self.success_url = flask.url_for('admin.pages')
         return super().form_valid(form)
 
 
 admin_blueprint.add_url_rule('/page-nouveau.html', view_func=PageCreateView.as_view(name='page-create'))
+
+
+class PageDeleteView(BaseMixin, ObjectManagementMixin, DeleteView):
+    model = Page
+    decorators = [LoginView.login_required]
+
+    def delete(self, *args, **kwargs):
+        self._fetch_object(*args, **kwargs)
+        self.success_url = flask.url_for('admin.pages')
+        return super().delete(*args, **kwargs)
+
+    def get_object(self):
+        return self.object
+
+    def post_deletion(self, obj):
+        flask.flash('Page "{}" supprimée.'.format(obj.title))
+
+
+admin_blueprint.add_url_rule('/page-suppression-<int:id>.html', view_func=PageDeleteView.as_view('page-delete'))
