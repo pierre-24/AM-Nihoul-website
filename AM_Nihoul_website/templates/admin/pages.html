@@ -10,7 +10,21 @@
 
     <p>
         <a class="button-like" href="{{ url_for('admin.page-create') }}"><span class="fas fa-plus"></span> Ajouter une page</a>
+        <a class="button-like" href="#tmpModal" data-toggle="modal">Ouvrir modale</a>
     </p>
+
+    <form id="tmpModal" class="modal" role="dialog">
+        <div class="modal-dialog">
+            <h3>Titre</h3>
+            <div class="modal-content">
+            <p>Ceci est le contenu de la modale</p>
+            </div>
+            <p class="modal-bottom">
+                <button>Oui</button>
+                <button class="modal-close">Nan</button>
+            </p>
+        </div>
+    </form>
 
     <table class="admin-list">
     <thead>

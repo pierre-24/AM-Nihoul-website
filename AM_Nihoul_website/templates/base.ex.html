@@ -80,13 +80,7 @@
     </footer>
 
     {% block scripts %}
-        <script>
-            Array.from(document.querySelectorAll('.flash-message .close')).forEach(e => {
-                e.addEventListener('click', () => {
-                   e.parentNode.style.display = 'none';
-               });
-            });
-        </script>
+        <script src="{{ url_for('static', filename='main.bundled.js') }}"></script>
 
         {# add FontAwesome kit if available #}
         {% if fa_kit != '' %}

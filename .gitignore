@@ -251,5 +251,5 @@ fabric.properties
 # Personal
 venv
 data
-AM_Nihoul_website/static/style.css
+AM_Nihoul_website/static
 settings_prod.py
