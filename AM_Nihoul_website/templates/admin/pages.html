@@ -22,7 +22,7 @@
     </thead>
         {% for page in pages %}
             <tr>
-                <td>{{ page.title }}</td>
+                <td><a href="{{ url_for('visitor.page-view', id=page.id, slug=page.slug) }}">{{ page.title }}</a></td>
                 <td>
                     <span class="button-group">
                         <a class="button-like" href="{{ url_for('admin.page-edit', id=page.id, slug=page.slug) }}"><span class="fas fa-edit"></span></a>
