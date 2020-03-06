@@ -203,3 +203,34 @@ class CategoriesView(BaseMixin, FormView):
 
 
 admin_blueprint.add_url_rule('/categories.html', view_func=CategoriesView.as_view('categories'))
+
+
+class CategoryDeleteView(BaseMixin, ObjectManagementMixin, DeleteView):
+    model = Category
+    decorators = [LoginView.login_required]
+
+    def delete(self, *args, **kwargs):
+        self._fetch_object(*args, **kwargs)
+        self.success_url = flask.url_for('admin.categories')
+        return super().delete(*args, **kwargs)
+
+    def get_object(self):
+        return self.object
+
+    def pre_deletion(self, obj):
+        """Set the page category to NULL"""
+
+        pages = Page.query.filter(Page.category_id == obj.id).all()
+        for p in pages:
+            p.category_id = None
+            db.session.add(p)
+
+        return True  # keep going !
+
+    def post_deletion(self, obj):
+
+        flask.flash('Catégorie "{}" supprimée.'.format(obj.name))
+
+
+admin_blueprint.add_url_rule(
+    '/catégorie-suppression-<int:id>.html', view_func=CategoryDeleteView.as_view('category-delete'))

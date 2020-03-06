@@ -50,9 +50,8 @@
                             'Éditer une catégorie',
                             modal_edit_content,
                             form.submit_button) }}
-                        {# <a class="button-like" href="{{ url_for('admin.page-edit', id=category.id) }}"><span class="fas fa-edit"></span></a>
-                        <a class="button-like" href="#delete-page-{{ page.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
-                        {{ create_delete_modal('page', page.id, 'la page "' + page.title + '"', 'admin.page-delete') }}  #}
+                        <a class="button-like" href="#delete-category-{{ category.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
+                        {{ create_delete_modal('category', category.id, 'la catégorie "' + category.name + '"', 'admin.category-delete') }}
                     </span>
                 </td>
             </tr>
