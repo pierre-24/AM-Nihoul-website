@@ -43,6 +43,8 @@ class FormView(RenderTemplateView):
     failure_url = '/'
     modal_form = False
 
+    DEBUG = False
+
     form_kwargs = {}
 
     def get_form_kwargs(self):
@@ -83,6 +85,12 @@ class FormView(RenderTemplateView):
 
     def form_invalid(self, form):
         """If the form is invalid, go back to the same page with an error"""
+
+        if self.DEBUG:
+            print('form is invalid ::')
+            for i in form:
+                if len(i.errors) != 0:
+                    print('-', i, '→', i.errors)
 
         if not self.modal_form:
             return self.get(form=form, *self.url_args, **self.url_kwargs)

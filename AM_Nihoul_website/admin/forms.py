@@ -19,7 +19,17 @@ class TrumbowygTextarea(f.widgets.TextArea):
 
 class PageEditForm(FlaskForm):
     title = f.StringField(
-        'Titre', validators=[f.validators.InputRequired()], render_kw={'placeholder': 'Titre de la page'})
+        'Titre', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
     text = f.TextAreaField('Texte', widget=TrumbowygTextarea())
+    category = f.SelectField('Catégorie', coerce=int)
+
+    submit_button = f.SubmitField('Enregistrer')
+
+
+class CategoryEditForm(FlaskForm):
+
+    name = f.StringField('Nom', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
+    is_create = f.BooleanField(widget=f.widgets.HiddenInput(), default=False)
+    id_category = f.IntegerField(widget=f.widgets.HiddenInput(), default=-1)
 
     submit_button = f.SubmitField('Enregistrer')
