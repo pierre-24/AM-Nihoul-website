@@ -1,0 +1,61 @@
+{% extends "admin/base.ex.html" %}
+{% from "helpers.inc.html" import create_delete_modal, create_modal, render_field %}
+
+{% set admin_current = 'category' %}
+
+{% block page_title %}Gestion des pages{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Gestion des catégories</h2>
+
+    <p>
+        <a class="button-like" href="#createCat" data-toggle="modal"><span class="fas fa-plus"></span> Ajouter une catégorie</a>
+        {% set modal_create_content %}
+            {{ form.hidden_tag() }}
+            <ul class="fields">
+                <li>{{ render_field(form.name) }}</li>
+            </ul>
+        {% endset %}
+        {{ create_modal(
+            'createCat',
+            'Créer une catégorie',
+            modal_create_content,
+            form.submit_button) }}
+    </p>
+
+    <table class="admin-list">
+    <thead>
+    <tr>
+        <th>Titre</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+        {% for category in categories %}
+            <tr>
+                <td>{{ category.name }}</td>
+                <td>
+                    <span class="button-group">
+                        <a class="button-like" href="#editCat{{ category.id }}" data-toggle="modal"><span class="fas fa-edit"></span></a>
+                        {% set modal_edit_content %}
+                            {{ form.csrf_token }}
+                            {{ form.is_create(value=False) }}
+                            {{ form.id_category(value=category.id) }}
+                            <ul class="fields">
+                                <li>{{ form.name.label }} {{ form.name(value=category.name) }}</li>
+                            </ul>
+                        {% endset %}
+                        {{ create_modal(
+                            'editCat' + category.id|string,
+                            'Éditer une catégorie',
+                            modal_edit_content,
+                            form.submit_button) }}
+                        <a class="button-like" href="#delete-category-{{ category.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
+                        {{ create_delete_modal('category', category.id, 'la catégorie "' + category.name + '"', 'admin.category-delete') }}
+                    </span>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    </section>
+{% endblock %}

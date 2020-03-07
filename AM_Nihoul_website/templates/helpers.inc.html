@@ -11,3 +11,27 @@
       {% endif %}
   </li>
 {% endmacro %}
+
+{% macro create_modal(id, title, content, bottom='', action='') %}
+  <div id="{{ id }}" class="modal" role="dialog">
+        <form class="modal-dialog" method="post" {% if action %}action="{{ action }}"{% endif %}>
+            <h3>{{ title|safe }}</h3>
+            <div class="modal-content">
+            {{ content|safe }}
+            </div>
+            {%  if bottom != '' %}
+            <p class="modal-bottom">
+                {{ bottom|safe }}
+            </p>
+            {% endif %}
+        </form>
+    </div>
+{% endmacro %}
+
+{% macro create_delete_modal(model, id, info, link) %}
+    {{ create_modal(
+        'delete-' + model + '-' + id|string,
+        'Suppression', '<p>Voulez vous vraiment supprimer ' + info + ' ?</p>',
+        '<input type="submit" value="Oui" class="modal-yes" /> <button type="button" class="modal-close">Non</button>',
+        url_for(link, id=id)) }}
+{% endmacro %}

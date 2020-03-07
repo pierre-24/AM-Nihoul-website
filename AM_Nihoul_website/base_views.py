@@ -3,7 +3,7 @@ import functools
 import flask
 from flask.views import View
 
-from AM_Nihoul_website import settings
+from AM_Nihoul_website import settings, db
 
 
 class RenderTemplateView(View):
@@ -43,8 +43,12 @@ class FormView(RenderTemplateView):
     failure_url = '/'
     modal_form = False
 
+    DEBUG = False
+
+    form_kwargs = {}
+
     def get_form_kwargs(self):
-        return {}
+        return self.form_kwargs
 
     def get_form(self):
         """Return an instance of the form"""
@@ -82,6 +86,12 @@ class FormView(RenderTemplateView):
     def form_invalid(self, form):
         """If the form is invalid, go back to the same page with an error"""
 
+        if self.DEBUG:
+            print('form is invalid ::')
+            for i in form:
+                if len(i.errors) != 0:
+                    print('-', i, '→', i.errors)
+
         if not self.modal_form:
             return self.get(form=form, *self.url_args, **self.url_kwargs)
         else:
@@ -93,6 +103,59 @@ class FormView(RenderTemplateView):
             return self.post(*args, **kwargs)
         elif flask.request.method == 'GET':
             return self.get(*args, **kwargs)
+        else:
+            flask.abort(403)
+
+
+class ObjectManagementMixin:
+    model = None
+    url_parameter_id = 'id'
+    object = None
+
+    def _fetch_object(self, *args, **kwargs):
+        self.object = self.model.query.get(kwargs.get(self.url_parameter_id))
+
+        if self.object is None:
+            flask.abort(404)
+
+
+class DeleteView(View):
+
+    methods = ['POST', 'DELETE']
+    success_url = '/'
+
+    def get_object(self):
+        raise NotImplementedError()
+
+    def pre_deletion(self, obj):
+        """Performs an action before deletion from database. Note: if return `False`, deletion is not performed"""
+        return True
+
+    def post_deletion(self, obj):
+        """Performs an action after deletion from database"""
+        pass
+
+    def delete(self, *args, **kwargs):
+        """Handle delete"""
+
+        obj = self.get_object()
+
+        if not self.pre_deletion(obj):
+            return flask.abort(403)
+
+        db.session.delete(obj)
+        db.session.commit()
+
+        self.post_deletion(obj)
+
+        return flask.redirect(self.success_url)
+
+    def dispatch_request(self, *args, **kwargs):
+
+        if flask.request.method == 'POST':
+            return self.delete(*args, **kwargs)
+        elif flask.request.method == 'DELETE':
+            return self.delete(*args, **kwargs)
         else:
             flask.abort(403)
 
@@ -131,7 +194,28 @@ class BaseMixin(LoginMixin):
     """Add a few variables to the page context"""
 
     def get_context_data(self, *args, **kwargs):
-        """Add webpage infos"""
+        """Add some info into context"""
+
+        # webpage info
         ctx = super().get_context_data(*args, **kwargs)
         ctx.update(**settings.WEBPAGE_INFO)
+
+        # bottom
+        from AM_Nihoul_website.visitor.models import Page, Category
+
+        categories = Category.query.all()
+        pages = Page.query.filter(Page.category_id.isnot(None)).all()
+
+        cats = {}
+        bottom_menu = {}
+        for c in categories:
+            cats[c.id] = c.name
+
+        for p in pages:
+            cname = cats[p.category_id]
+            if cname not in bottom_menu:
+                bottom_menu[cname] = []
+            bottom_menu[cname].append(p)
+
+        ctx['bottom_menu'] = bottom_menu
         return ctx

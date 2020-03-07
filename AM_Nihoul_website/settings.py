@@ -24,7 +24,8 @@ WEBPAGE_INFO = {
     'repo_url': 'https://git.pierrebeaujean.net/pierre/AM-Nihoul-website',
     'site_name': 'Association Anne-Marie Nihoul',
     'site_description': 'aide aux malades',
-    'site_version': '0.1a0'
+    'site_version': '0.1a0',
+    'fa_kit': ''
 }
 
 # Load the production settings, overwrite the existing ones if needed

@@ -52,7 +52,7 @@ form {
         }
     }
 
-    p input[type=submit] {
+    p input[type=submit], p button {
         border:1px solid #555;
         padding: 8px 16px;
         background: white;
@@ -193,6 +193,7 @@ nav {
 
         #admin-content {
             width: 75%;
+            display: block;
         }
 
         #admin-menu {
@@ -201,6 +202,87 @@ nav {
             border: 1px solid #ddd;
             border-top: 4px solid @main-color;
             background: white;
+
+            ul {
+                margin: 0;
+                padding: 0;
+
+                li {
+                    list-style: none;
+                    display: block;
+
+                    a {
+                        display: block;
+                        text-decoration: none;
+                        padding: 16px 8px;
+                        border-bottom: 1px solid #ddd;
+
+                        &.selected {
+                            background: lighten(@main-color, 30%);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// modal boxes
+.modal {
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, .5);
+
+    &.modal-open {
+        display: block !important;
+    }
+
+    .modal-dialog {
+        margin: 0;
+        padding: 0;
+        width: 70%;
+        max-width: 800px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+
+        h3 {
+            margin: 0;
+            padding: 16px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .modal-close-cross {
+            float: right;
+            padding: 24px;
+            cursor: pointer;
+        }
+
+        .modal-content {
+            padding: 16px;
+        }
+
+        .modal-bottom {
+            margin: 0;
+            text-align: right;
+            padding: 16px;
+            border-top: 1px solid #ddd;
+
+            .modal-yes {
+                border: 1px solid @main-color;
+                color: @main-color;
+
+                &:hover {
+                    background: @main-color;
+                    color: white;
+                }
+            }
         }
     }
 }
