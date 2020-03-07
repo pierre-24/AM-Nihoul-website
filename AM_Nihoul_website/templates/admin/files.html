@@ -1,5 +1,5 @@
 {% extends "admin/base.ex.html" %}
-{% from "helpers.inc.html" import create_modal, render_field %}
+{% from "helpers.inc.html" import create_modal, render_field, create_delete_modal %}
 
 {% set admin_current = 'file' %}
 
@@ -36,17 +36,12 @@
         {% for f in files %}
             <tr>
                 <td><a href="{{ url_for('visitor.upload-view', id=f.id, filename=f.file_name) }}">{{ f.file_name }}</a></td>
-                {# <td>
+                <td>
                     <span class="button-group">
-                        <a class="button-like" href="{{ url_for('admin.page-edit', id=page.id, slug=page.slug) }}"><span class="fas fa-edit"></span></a>
-                        {% if not page.protected %}
-                            <a class="button-like" href="#delete-page-{{ page.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
-                            {{ create_delete_modal('page', page.id, 'la page "' + page.title + '"', 'admin.page-delete') }}
-                        {% else %}
-                            <a class="button-like"><span class="fas fa-lock"></span></a>
-                        {% endif %}
+                        <a class="button-like" href="#delete-file-{{ f.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
+                        {{ create_delete_modal('file', f.id, 'le fichier "' + f.file_name + '"', 'admin.file-delete') }}
                     </span>
-                </td> #}
+                </td>
             </tr>
         {% endfor %}
     </table>

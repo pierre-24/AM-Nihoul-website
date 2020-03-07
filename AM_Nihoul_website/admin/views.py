@@ -280,3 +280,23 @@ class FilesView(BaseMixin, FormView):
 
 
 admin_blueprint.add_url_rule('/fichiers.html', view_func=FilesView.as_view('files'))
+
+
+class FileDeleteView(BaseMixin, ObjectManagementMixin, DeleteView):
+    model = UploadedFile
+    decorators = [LoginView.login_required]
+
+    def delete(self, *args, **kwargs):
+        self._fetch_object(*args, **kwargs)
+        self.success_url = flask.url_for('admin.files')
+        return super().delete(*args, **kwargs)
+
+    def get_object(self):
+        return self.object
+
+    def post_deletion(self, obj):
+        flask.flash('Fichier "{}" supprimé.'.format(obj.file_name))
+
+
+admin_blueprint.add_url_rule(
+    '/fichier-suppression-<int:id>.html', view_func=FileDeleteView.as_view('file-delete'))
