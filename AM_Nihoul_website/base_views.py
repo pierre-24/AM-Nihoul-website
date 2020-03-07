@@ -184,7 +184,7 @@ class LoginMixin(object):
         @functools.wraps(f)
         def decorated_function(*args, **kwargs):
             if 'logged_in' not in flask.session or not flask.session['logged_in']:
-                return flask.redirect(flask.url_for('login', next=flask.request.url))
+                return flask.redirect(flask.url_for('admin.login'))
             return f(*args, **kwargs)
 
         return decorated_function
