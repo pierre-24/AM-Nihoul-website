@@ -194,7 +194,28 @@ class BaseMixin(LoginMixin):
     """Add a few variables to the page context"""
 
     def get_context_data(self, *args, **kwargs):
-        """Add webpage infos"""
+        """Add some info into context"""
+
+        # webpage info
         ctx = super().get_context_data(*args, **kwargs)
         ctx.update(**settings.WEBPAGE_INFO)
+
+        # bottom
+        from AM_Nihoul_website.visitor.models import Page, Category
+
+        categories = Category.query.all()
+        pages = Page.query.filter(Page.category_id.isnot(None)).all()
+
+        cats = {}
+        bottom_menu = {}
+        for c in categories:
+            cats[c.id] = c.name
+
+        for p in pages:
+            cname = cats[p.category_id]
+            if cname not in bottom_menu:
+                bottom_menu[cname] = []
+            bottom_menu[cname].append(p)
+
+        ctx['bottom_menu'] = bottom_menu
         return ctx

@@ -63,14 +63,15 @@
 
     <footer>
         <div id="bottom-nav">
-            {% for j in range(4) %}
+            {% for k, pages in bottom_menu.items() %}
                 <div class="bottom-nav-block">
-                <h3>Block #{{ j }}</h3>
-                <ul>
-                {% for i in range(4) %}
-                    <li><a href="#">Lien #{{ j }}-{{ i }}</a></li>
-                {% endfor %}
-            </ul></div>
+                <h3>{{ k }}</h3>
+                    <ul>
+                    {% for p in pages %}
+                        <li><a href="{{ url_for('visitor.page-view', id=p.id, slug=p.slug) }}">{{ p.title }}</a></li>
+                    {% endfor %}
+                    </ul>
+                </div>
 
             {% endfor %}
         </div>
