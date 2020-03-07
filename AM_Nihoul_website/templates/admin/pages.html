@@ -26,8 +26,12 @@
                 <td>
                     <span class="button-group">
                         <a class="button-like" href="{{ url_for('admin.page-edit', id=page.id, slug=page.slug) }}"><span class="fas fa-edit"></span></a>
-                        <a class="button-like" href="#delete-page-{{ page.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
-                        {{ create_delete_modal('page', page.id, 'la page "' + page.title + '"', 'admin.page-delete') }}
+                        {% if not page.protected %}
+                            <a class="button-like" href="#delete-page-{{ page.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
+                            {{ create_delete_modal('page', page.id, 'la page "' + page.title + '"', 'admin.page-delete') }}
+                        {% else %}
+                            <a class="button-like"><span class="fas fa-lock"></span></a>
+                        {% endif %}
                     </span>
                 </td>
             </tr>

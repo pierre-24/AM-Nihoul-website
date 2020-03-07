@@ -162,6 +162,12 @@ class PageDeleteView(BaseMixin, ObjectManagementMixin, DeleteView):
     def get_object(self):
         return self.object
 
+    def pre_deletion(self, obj):
+        if obj.protected:
+            return False
+
+        return False
+
     def post_deletion(self, obj):
         flask.flash('Page "{}" supprimée.'.format(obj.title))
 
