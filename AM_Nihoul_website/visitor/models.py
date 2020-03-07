@@ -80,3 +80,31 @@ class UploadedFile(BaseModel):
 
     def path(self):
         return uploads_set.path(self.file_name)
+
+    def get_fa_icon(self):
+        icons = {
+            # documents
+            'application/pdf': 'fas fa-file-pdf',
+            'application/msword': 'fas fa-file-word',
+            'application/vnd.ms-word': 'fas fa-file-word',
+            'application/vnd.oasis.opendocument.text': 'fas fa-file-word',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml': 'fas fa-file-word',
+            'application/vnd.ms-excel': 'fas fa-file-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml': 'fas fa-file-excel',
+            'application/vnd.oasis.opendocument.spreadsheet': 'fas fa-file-excel',
+            'application/vnd.ms-powerpoint': 'fas fa-file-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml': 'fas fa-file-powerpoint',
+            'application/vnd.oasis.opendocument.presentation': 'fas fa-file-powerpoint',
+            'text/plain': 'fas fa-file-alt',
+            'text/html': 'fas fa-file-code',
+            # archive
+            'application/json': 'fas fa-file-code',
+            'application/gzip': 'fas fa-file-archive',
+            'application/zip': 'fas fa-file-archive',
+            # images
+            'image/png': 'fas fa-file-image',
+            'image/jpeg': 'fas fa-file-image'
+        }
+
+        return icons[self.possible_mime] if self.possible_mime in icons else 'fas fa-file'
+

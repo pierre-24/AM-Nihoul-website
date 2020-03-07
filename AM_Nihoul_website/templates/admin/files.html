@@ -29,21 +29,32 @@
     <table class="admin-list">
     <thead>
     <tr>
+        <th style="min-width: 5%;"></th>
         <th>Titre</th>
         <th>Actions</th>
     </tr>
     </thead>
         {% for f in files %}
             <tr>
+                <td><span class="{{ f.get_fa_icon() }}"></span></td>
                 <td><a href="{{ url_for('visitor.upload-view', id=f.id, filename=f.file_name) }}">{{ f.file_name }}</a></td>
                 <td>
                     <span class="button-group">
                         <a class="button-like" href="#delete-file-{{ f.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
                         {{ create_delete_modal('file', f.id, 'le fichier "' + f.file_name + '"', 'admin.file-delete') }}
+                        <a class="button-like btn-copy" data-clipboard-text="{{ url_for('visitor.upload-view', id=f.id, filename=f.file_name) }}"><span class="fas fa-paperclip"></span></a>
                     </span>
                 </td>
             </tr>
         {% endfor %}
     </table>
     </section>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script>
+        const clipboard = new ClipboardJS('.btn-copy');
+    </script>
 {% endblock %}
