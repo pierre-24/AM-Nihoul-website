@@ -1,0 +1,54 @@
+{% extends "admin/base.ex.html" %}
+{% from "helpers.inc.html" import create_modal, render_field %}
+
+{% set admin_current = 'file' %}
+
+{% block page_title %}Gestion des fichier{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Gestion des fichiers</h2>
+
+    <p>
+        <a class="button-like" href="#uploadFile" data-toggle="modal"><span class="fas fa-plus"></span> <i>Uploader</i> un fichier</a>
+        {% set modal_create_content %}
+            {{ form.hidden_tag() }}
+            <ul class="fields">
+                <li>{{ render_field(form.file_uploaded) }}</li>
+                <li>{{ render_field(form.description) }}</li>
+            </ul>
+        {% endset %}
+        {{ create_modal(
+            'uploadFile',
+            'Uploader un fichier',
+            modal_create_content,
+            form.submit_button,
+            multipart=True) }}
+    </p>
+
+    <table class="admin-list">
+    <thead>
+    <tr>
+        <th>Titre</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+        {% for f in files %}
+            <tr>
+                <td><a href="#">{{ f.file_name }}</a></td>
+                {# <td>
+                    <span class="button-group">
+                        <a class="button-like" href="{{ url_for('admin.page-edit', id=page.id, slug=page.slug) }}"><span class="fas fa-edit"></span></a>
+                        {% if not page.protected %}
+                            <a class="button-like" href="#delete-page-{{ page.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
+                            {{ create_delete_modal('page', page.id, 'la page "' + page.title + '"', 'admin.page-delete') }}
+                        {% else %}
+                            <a class="button-like"><span class="fas fa-lock"></span></a>
+                        {% endif %}
+                    </span>
+                </td> #}
+            </tr>
+        {% endfor %}
+    </table>
+    </section>
+{% endblock %}

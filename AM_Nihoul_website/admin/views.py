@@ -4,8 +4,8 @@ from flask import Blueprint
 from AM_Nihoul_website import settings, db
 from AM_Nihoul_website.base_views import FormView, BaseMixin, LoginMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteView
-from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm
-from AM_Nihoul_website.visitor.models import Page, Category
+from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm
+from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -240,3 +240,43 @@ class CategoryDeleteView(BaseMixin, ObjectManagementMixin, DeleteView):
 
 admin_blueprint.add_url_rule(
     '/catégorie-suppression-<int:id>.html', view_func=CategoryDeleteView.as_view('category-delete'))
+
+
+# -- Files
+class FilesView(BaseMixin, FormView):
+    template_name = 'admin/files.html'
+    decorators = [LoginView.login_required]
+
+    form_class = UploadForm
+
+    DEBUG = True
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        # fetch list of pages
+        ctx['files'] = UploadedFile.query.order_by(UploadedFile.file_name).all()
+        return ctx
+
+    def form_valid(self, form):
+        filename = form.file_uploaded.data.filename
+
+        f = UploadedFile.query.filter(UploadedFile.base_file_name == filename).all()
+        if len(f) > 0:
+            to_add = '_{}'.format(len(f))
+            if filename.find('.') >= 0:
+                fsplit = filename.split('.')
+                fsplit[-2] += to_add
+                filename = '.'.join(fsplit)
+            else:
+                filename += to_add
+
+        u = UploadedFile.create(form.file_uploaded.data, description=form.description.data, filename=filename)
+        db.session.add(u)
+        db.session.commit()
+
+        self.success_url = flask.url_for('admin.files')
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule('/fichiers.html', view_func=FilesView.as_view('files'))

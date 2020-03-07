@@ -1,4 +1,4 @@
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm, file as wtf_file
 import wtforms as f
 
 
@@ -33,3 +33,10 @@ class CategoryEditForm(FlaskForm):
     id_category = f.IntegerField(widget=f.widgets.HiddenInput(), default=-1)
 
     submit_button = f.SubmitField('Enregistrer')
+
+
+class UploadForm(FlaskForm):
+    file_uploaded = wtf_file.FileField('Fichier', validators=[wtf_file.FileRequired()])
+    description = f.StringField('Description')
+
+    submit_button = f.SubmitField('Envoyer')
