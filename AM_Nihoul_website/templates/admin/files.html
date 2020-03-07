@@ -35,7 +35,7 @@
     </thead>
         {% for f in files %}
             <tr>
-                <td><a href="#">{{ f.file_name }}</a></td>
+                <td><a href="{{ url_for('visitor.upload-view', id=f.id, filename=f.file_name) }}">{{ f.file_name }}</a></td>
                 {# <td>
                     <span class="button-group">
                         <a class="button-like" href="{{ url_for('admin.page-edit', id=page.id, slug=page.slug) }}"><span class="fas fa-edit"></span></a>
