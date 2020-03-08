@@ -5,11 +5,15 @@ import click
 from flask import Flask, current_app
 from flask.cli import with_appcontext
 from flask_sqlalchemy import SQLAlchemy
-# from flask_uploads import UploadSet, ALL as ALL_EXTENSIONS, configure_uploads
+import flask_uploads
+from flask_uploads import UploadSet, configure_uploads
 
 from AM_Nihoul_website import settings
+from AM_Nihoul_website.base_filters import filters
 
 db = SQLAlchemy()
+
+uploads_set = UploadSet('uploads', flask_uploads.DEFAULTS)
 
 
 @click.command('init-db')
@@ -44,7 +48,7 @@ def create_app():
     app = Flask(__name__)
     app.config.update(settings.APP_CONFIG)
     db.init_app(app)
-    # configure_uploads(app, (UploadSet('uploads', ALL_EXTENSIONS),))
+    configure_uploads(app, (uploads_set, ))
 
     # add cli
     app.cli.add_command(init_db_command)
@@ -56,5 +60,8 @@ def create_app():
 
     from AM_Nihoul_website.admin.views import admin_blueprint
     app.register_blueprint(admin_blueprint)
+
+    # add filters
+    app.jinja_env.filters.update(**filters)
 
     return app

@@ -21,6 +21,10 @@ a {
     &:hover {
         color: @main-color;
     }
+
+    &.button-like {
+        cursor: pointer;
+    }
 }
 
 form {
@@ -236,6 +240,7 @@ nav {
     top: 0;
     left: 0;
     background: rgba(0, 0, 0, .5);
+    text-align: left;
 
     &.modal-open {
         display: block !important;
@@ -282,6 +287,40 @@ nav {
                     background: @main-color;
                     color: white;
                 }
+            }
+        }
+    }
+}
+
+// admin lists
+table.admin-list {
+    width: 100%;
+    border-collapse: collapse;
+
+    tr {
+        border-top: 1px solid #ddd;
+
+        td {
+            padding: 16px 0;
+
+            &.icon {
+                font-size: 200%;
+            }
+
+            .info {
+                display: block;
+                font-size: 80%;
+                color: #555;
+                padding-top: 8px;
+            }
+
+            &.left .title {
+                color: black;
+                font-weight: bold;
+            }
+
+            &.right {
+                text-align: right;
             }
         }
     }

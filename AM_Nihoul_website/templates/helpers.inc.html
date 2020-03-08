@@ -12,9 +12,9 @@
   </li>
 {% endmacro %}
 
-{% macro create_modal(id, title, content, bottom='', action='') %}
+{% macro create_modal(id, title, content, bottom='', action='', multipart=False) %}
   <div id="{{ id }}" class="modal" role="dialog">
-        <form class="modal-dialog" method="post" {% if action %}action="{{ action }}"{% endif %}>
+        <form class="modal-dialog" method="post" {% if action %}action="{{ action }}"{% endif %} {% if multipart %}enctype="multipart/form-data"{% endif %}>
             <h3>{{ title|safe }}</h3>
             <div class="modal-content">
             {{ content|safe }}
