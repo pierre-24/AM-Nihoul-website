@@ -118,6 +118,9 @@ class ObjectManagementMixin:
         if self.object is None:
             flask.abort(404)
 
+    def get_object(self):
+        return self.object
+
 
 class DeleteView(View):
 
@@ -200,22 +203,25 @@ class BaseMixin(LoginMixin):
         ctx = super().get_context_data(*args, **kwargs)
         ctx.update(**settings.WEBPAGE_INFO)
 
-        # bottom
+        # bottom menu
         from AM_Nihoul_website.visitor.models import Page, Category
 
-        categories = Category.query.all()
+        categories = Category.query.order_by(Category.order).all()
         pages = Page.query.filter(Page.category_id.isnot(None)).all()
 
         cats = {}
-        bottom_menu = {}
-        for c in categories:
-            cats[c.id] = c.name
 
         for p in pages:
-            cname = cats[p.category_id]
-            if cname not in bottom_menu:
-                bottom_menu[cname] = []
-            bottom_menu[cname].append(p)
+            cid = p.category_id
+            if cid is not None:
+                if cid not in cats:
+                    cats[cid] = []
+                cats[cid].append(p)
+
+        bottom_menu = {}
+        for c in categories:
+            if c.id in cats:
+                bottom_menu[c.name] = cats[c.id]
 
         ctx['bottom_menu'] = bottom_menu
         return ctx
