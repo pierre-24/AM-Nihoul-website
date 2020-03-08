@@ -25,17 +25,11 @@
     </p>
 
     <table class="admin-list">
-    <thead>
-    <tr>
-        <th>Titre</th>
-        <th>Actions</th>
-    </tr>
-    </thead>
         {% for category in categories %}
             <tr>
-                <td>{{ category.name }}</td>
-                <td>
-                    <span class="button-group">
+                <td class="left"><span class="title">{{ category.name }}</span></td>
+                <td class="right">
+                    <span class="buttons">
                         <a class="button-like" href="#editCat{{ category.id }}" data-toggle="modal"><span class="fas fa-edit"></span></a>
                         {% set modal_edit_content %}
                             {{ form.csrf_token }}

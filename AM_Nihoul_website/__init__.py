@@ -9,6 +9,7 @@ import flask_uploads
 from flask_uploads import UploadSet, configure_uploads
 
 from AM_Nihoul_website import settings
+from AM_Nihoul_website.base_filters import filters
 
 db = SQLAlchemy()
 
@@ -59,5 +60,8 @@ def create_app():
 
     from AM_Nihoul_website.admin.views import admin_blueprint
     app.register_blueprint(admin_blueprint)
+
+    # add filters
+    app.jinja_env.filters.update(**filters)
 
     return app

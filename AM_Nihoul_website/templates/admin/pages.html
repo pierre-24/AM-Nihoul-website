@@ -14,17 +14,14 @@
     </p>
 
     <table class="admin-list">
-    <thead>
-    <tr>
-        <th>Titre</th>
-        <th>Actions</th>
-    </tr>
-    </thead>
         {% for page in pages %}
             <tr>
-                <td><a href="{{ url_for('visitor.page-view', id=page.id, slug=page.slug) }}">{{ page.title }}</a></td>
-                <td>
-                    <span class="button-group">
+                <td class="left">
+                    <span class="title"><a href="{{ url_for('visitor.page-view', id=page.id, slug=page.slug) }}">{{ page.title }}</a></span>
+                    <span class="info">{% if page.category_id != None %}{{ categories[page.category_id].name }}{% else %}<i>pas de catégorie</i>{% endif %}</span>
+                </td>
+                <td class="right">
+                    <span class="buttons">
                         <a class="button-like" href="{{ url_for('admin.page-edit', id=page.id, slug=page.slug) }}"><span class="fas fa-edit"></span></a>
                         {% if not page.protected %}
                             <a class="button-like" href="#delete-page-{{ page.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
@@ -33,6 +30,7 @@
                             <a class="button-like"><span class="fas fa-lock"></span></a>
                         {% endif %}
                     </span>
+                    <span class="info">Dernière modification: {{ page.date_modified|date_formatter }}</span>
                 </td>
             </tr>
         {% endfor %}

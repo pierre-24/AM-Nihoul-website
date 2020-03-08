@@ -63,6 +63,7 @@ class PagesView(BaseMixin, RenderTemplateView):
 
         # fetch list of pages
         ctx['pages'] = Page.query.order_by(Page.slug).all()
+        ctx['categories'] = dict((c.id, c) for c in Category.query.all())
 
         return ctx
 
@@ -255,7 +256,11 @@ class FilesView(BaseMixin, FormView):
         ctx = super().get_context_data(*args, **kwargs)
 
         # fetch list of pages
-        ctx['files'] = UploadedFile.query.order_by(UploadedFile.file_name).all()
+        files = UploadedFile.query.order_by(UploadedFile.file_name).all()
+
+        ctx['files'] = files
+        ctx['total_size'] = sum(f.file_size for f in files)
+
         return ctx
 
     def form_valid(self, form):

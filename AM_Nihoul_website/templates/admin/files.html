@@ -9,6 +9,8 @@
     <section>
     <h2>Gestion des fichiers</h2>
 
+    <p>Taille totale des fichiers: {{ total_size|file_size_formatter }}</p>
+
     <p>
         <a class="button-like" href="#uploadFile" data-toggle="modal"><span class="fas fa-plus"></span> <i>Uploader</i> un fichier</a>
         {% set modal_create_content %}
@@ -27,23 +29,20 @@
     </p>
 
     <table class="admin-list">
-    <thead>
-    <tr>
-        <th style="min-width: 5%;"></th>
-        <th>Titre</th>
-        <th>Actions</th>
-    </tr>
-    </thead>
         {% for f in files %}
             <tr>
-                <td><span class="{{ f.get_fa_icon() }}"></span></td>
-                <td><a href="{{ url_for('visitor.upload-view', id=f.id, filename=f.file_name) }}">{{ f.file_name }}</a></td>
-                <td>
-                    <span class="button-group">
+                <td class="icon"><span class="{{ f.get_fa_icon() }}"></span></td>
+                <td class="left">
+                    <span class="title"><a href="{{ url_for('visitor.upload-view', id=f.id, filename=f.file_name) }}">{{ f.file_name }}</a></span>
+                    <span class="info">{{ f.description }}</span>
+                </td>
+                <td class="right">
+                    <span class="buttons">
+                        <a class="button-like btn-copy" data-clipboard-text="{{ url_for('visitor.upload-view', id=f.id, filename=f.file_name) }}"><span class="fas fa-paperclip"></span></a>
                         <a class="button-like" href="#delete-file-{{ f.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
                         {{ create_delete_modal('file', f.id, 'le fichier "' + f.file_name + '"', 'admin.file-delete') }}
-                        <a class="button-like btn-copy" data-clipboard-text="{{ url_for('visitor.upload-view', id=f.id, filename=f.file_name) }}"><span class="fas fa-paperclip"></span></a>
                     </span>
+                    <span class="info">{{ f.file_size|file_size_formatter }}. Uploadé: {{ f.date_created|date_formatter }}</span>
                 </td>
             </tr>
         {% endfor %}

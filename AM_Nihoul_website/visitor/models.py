@@ -107,4 +107,3 @@ class UploadedFile(BaseModel):
         }
 
         return icons[self.possible_mime] if self.possible_mime in icons else 'fas fa-file'
-
