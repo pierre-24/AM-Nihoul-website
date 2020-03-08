@@ -30,11 +30,12 @@ class Page(BaseModel):
     category = db.relationship('Category')
 
     @classmethod
-    def create(cls, title, content, protected=False):
+    def create(cls, title, content, protected=False, category_id=None):
         o = cls()
         o.title = title
         o.content = content
         o.protected = protected
+        o.category_id = category_id
 
         return o
 

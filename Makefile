@@ -1,11 +1,8 @@
 install:
 	python setup.py develop
 
-init-db:
-	export FLASK_APP=AM_Nihoul_website; flask init-db
-
-init-directories:
-	export FLASK_APP=AM_Nihoul_website; flask init-directories
+init-back:
+	export FLASK_APP=AM_Nihoul_website; flask init
 
 front:
 	mkdir -p AM_Nihoul_website/static
@@ -14,7 +11,7 @@ front:
 	python -mrjsmin < AM_Nihoul_website/assets/editor.js > AM_Nihoul_website/static/editor.bundled.js
 	if [ ! -L "AM_Nihoul_website/static/images" ]; then ln -s ../assets/images AM_Nihoul_website/static; fi;
 
-init: install init-directories init-db front
+init: install init-back front
 
 lint:
 	flake8 AM_Nihoul_website --max-line-length=120 --ignore=N802
