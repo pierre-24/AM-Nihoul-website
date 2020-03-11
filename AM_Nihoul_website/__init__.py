@@ -16,24 +16,23 @@ db = SQLAlchemy()
 uploads_set = UploadSet('uploads', flask_uploads.DEFAULTS)
 
 
-@click.command('init-db')
+@click.command('init')
 @with_appcontext
-def init_db_command():
-    """Initializes the database."""
-    db.create_all()
-    print('!! database created')
+def init_command():
+    """Initializes stuffs:
 
+    + directories
+    + database
+    + bootstrap data
+    """
 
-@click.command('init-directories')
-@with_appcontext
-def init_directories_command():
-    """Initializes the upload and data directories."""
-
+    # directories
     data_dir = settings.DATA_DIRECTORY
     upload_dir = current_app.config['UPLOADED_UPLOADS_DEST']
 
     if os.path.exists(data_dir):
         shutil.rmtree(data_dir)
+
     os.mkdir(data_dir)
     print('!! Data directory in {}'.format(data_dir))
 
@@ -43,6 +42,14 @@ def init_directories_command():
     os.mkdir(upload_dir)
     print('!! Upload directory in {}'.format(upload_dir))
 
+    # DB:
+    db.create_all()
+    print('!! database created')
+
+    # bootstrap
+    from AM_Nihoul_website.app_bootstrap import bootstrap
+    bootstrap()
+
 
 def create_app():
     app = Flask(__name__)
@@ -51,8 +58,7 @@ def create_app():
     configure_uploads(app, (uploads_set, ))
 
     # add cli
-    app.cli.add_command(init_db_command)
-    app.cli.add_command(init_directories_command)
+    app.cli.add_command(init_command)
 
     # add blueprint(s)
     from AM_Nihoul_website.visitor.views import visitor_blueprint

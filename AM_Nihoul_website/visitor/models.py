@@ -9,12 +9,65 @@ from AM_Nihoul_website.base_models import BaseModel
 
 class Category(BaseModel):
     name = db.Column(db.VARCHAR(length=150), nullable=False)
+    order = db.Column(db.Integer, nullable=False)
 
     @classmethod
     def create(cls, name):
         o = cls()
         o.name = name
+
+        # set order
+        last_c = Category.query.order_by(Category.order.desc()).first()
+        o.order = last_c.order + 1 if last_c else 0
+
         return o
+
+    def __str__(self):
+        return 'Catégorie {} ({})'.format(self.id, self.name)
+
+    def _move(self, offset):
+        if offset == 0:
+            return
+        if self.id is None:
+            raise Exception('should get an id first')
+
+        categories = Category.query.order_by(Category.order).all()
+
+        # find self
+        _self = -1
+        for i, c in enumerate(categories):
+            if c.id == self.id:
+                _self = i
+                break
+
+        if _self == -1:
+            raise Exception('cannot find self !?')
+
+        # compute new position
+        final_position = _self + offset
+        if final_position < 0:
+            final_position = 0
+        if final_position >= len(categories):
+            final_position = len(categories) - 1
+        if final_position == _self:
+            return
+
+        # change everyone's order:
+        self.order = final_position
+        db.session.add(self)
+
+        minimum = (_self + 1) if _self < final_position else final_position
+        for i in range(minimum, minimum + abs(offset)):
+            categories[i].order += 1 if offset < 0 else -1
+            db.session.add(categories[i])
+
+        db.session.commit()
+
+    def up(self):
+        self._move(1)
+
+    def down(self):
+        self._move(-1)
 
 
 class Page(BaseModel):
@@ -30,11 +83,12 @@ class Page(BaseModel):
     category = db.relationship('Category')
 
     @classmethod
-    def create(cls, title, content, protected=False):
+    def create(cls, title, content, protected=False, category_id=None):
         o = cls()
         o.title = title
         o.content = content
         o.protected = protected
+        o.category_id = category_id
 
         return o
 

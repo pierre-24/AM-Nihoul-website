@@ -1,5 +1,6 @@
 import flask
 from flask import Blueprint
+from flask.views import View
 
 from AM_Nihoul_website import settings, db
 from AM_Nihoul_website.base_views import FormView, BaseMixin, LoginMixin, RenderTemplateView, ObjectManagementMixin, \
@@ -186,8 +187,8 @@ class CategoriesView(BaseMixin, FormView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
 
-        # fetch list of pages
-        ctx['categories'] = Category.query.order_by(Category.name).all()
+        # fetch list of category
+        ctx['categories'] = Category.query.order_by(Category.order).all()
         return ctx
 
     def form_valid(self, form):
@@ -241,6 +242,35 @@ class CategoryDeleteView(BaseMixin, ObjectManagementMixin, DeleteView):
 
 admin_blueprint.add_url_rule(
     '/catégorie-suppression-<int:id>.html', view_func=CategoryDeleteView.as_view('category-delete'))
+
+
+class CategoryMoveView(ObjectManagementMixin, View):
+    decorators = [LoginView.login_required]
+    methods = ['GET']
+    model = Category
+
+    def get(self, *args, **kwargs):
+        self._fetch_object(*args, **kwargs)
+        action = kwargs.get('action')
+
+        if action == 'up':
+            self.object.up()
+        elif action == 'down':
+            self.object.down()
+        else:
+            flask.abort(403)
+
+        return flask.redirect(flask.url_for('admin.categories'))
+
+    def dispatch_request(self, *args, **kwargs):
+        if flask.request.method == 'GET':
+            return self.get(*args, **kwargs)
+        else:
+            flask.abort(403)
+
+
+admin_blueprint.add_url_rule(
+    '/catégorie-mouvement-<string:action>-<int:id>.html', view_func=CategoryMoveView.as_view('category-move'))
 
 
 # -- Files
