@@ -1,12 +1,14 @@
 import flask
 from flask import Blueprint, views
 
-from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin
+from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
 from AM_Nihoul_website.visitor.models import Page, UploadedFile
+from AM_Nihoul_website.visitor.forms import NewsletterForm
 
 visitor_blueprint = Blueprint('visitor', __name__)
 
 
+# -- Index
 class IndexView(BaseMixin, RenderTemplateView):
     template_name = 'index.html'
 
@@ -14,6 +16,7 @@ class IndexView(BaseMixin, RenderTemplateView):
 visitor_blueprint.add_url_rule('/', view_func=IndexView.as_view(name='index'))
 
 
+# -- Pages
 class PageView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
     template_name = 'page.html'
     model = Page
@@ -35,6 +38,7 @@ class PageView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
 visitor_blueprint.add_url_rule('/page/<int:id>-<string:slug>.html', view_func=PageView.as_view(name='page-view'))
 
 
+# -- Uploads
 class UploadView(views.View):
     methods = ['GET']
 
@@ -67,3 +71,15 @@ class UploadView(views.View):
 
 
 visitor_blueprint.add_url_rule('/fichier/<int:id>/<string:filename>', view_func=UploadView.as_view(name='upload-view'))
+
+
+# -- Newsletter
+class NewsletterRegisterView(BaseMixin, FormView):
+    form_class = NewsletterForm
+    template_name = 'newsletter.html'
+
+    DEBUG = True
+
+
+visitor_blueprint.add_url_rule('/newsletter.html', view_func=NewsletterRegisterView.as_view(name='newsletter-register'))
+

@@ -4,6 +4,7 @@ import flask
 from flask.views import View
 
 from AM_Nihoul_website import settings, db
+from AM_Nihoul_website.visitor.forms import NewsletterForm
 
 
 class RenderTemplateView(View):
@@ -90,7 +91,7 @@ class FormView(RenderTemplateView):
             print('form is invalid ::')
             for i in form:
                 if len(i.errors) != 0:
-                    print('-', i, '→', i.errors)
+                    print('-', i, '→', i.errors, '(value is=', i.data, ')')
 
         if not self.modal_form:
             return self.get(form=form, *self.url_args, **self.url_kwargs)
@@ -224,4 +225,8 @@ class BaseMixin(LoginMixin):
                 bottom_menu[c.name] = cats[c.id]
 
         ctx['bottom_menu'] = bottom_menu
+
+        # newsletter form
+        ctx['newsletter_form'] = NewsletterForm()
+
         return ctx
