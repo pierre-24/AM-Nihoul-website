@@ -52,7 +52,7 @@
 
     {% if not no_newsletter %}
     <div id="newsletter">
-        <form action="{{ url_for('visitor.newsletter-register') }}" method="post">
+        <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post">
             <p>Pour ne rien rater, inscrivez vous à notre newsletter !</p>
             {{ newsletter_form.hidden_tag() }}
             {{ newsletter_form.name(placeholder='Prénom et nom') }}

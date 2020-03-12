@@ -6,3 +6,4 @@ python-slugify
 Flask-WTF
 lesscpy
 rjsmin
+python-slugify

@@ -1,8 +1,9 @@
 import flask
 from flask import Blueprint, views
 
+from AM_Nihoul_website import db, settings
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
-from AM_Nihoul_website.visitor.models import Page, UploadedFile
+from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient
 from AM_Nihoul_website.visitor.forms import NewsletterForm
 
 visitor_blueprint = Blueprint('visitor', __name__)
@@ -80,6 +81,56 @@ class NewsletterRegisterView(BaseMixin, FormView):
 
     DEBUG = True
 
+    def form_valid(self, form):
+        r = NewsletterRecipient.create(form.name.data, form.email.data)
 
-visitor_blueprint.add_url_rule('/newsletter.html', view_func=NewsletterRegisterView.as_view(name='newsletter-register'))
+        db.session.add(r)
+        db.session.commit()
 
+        ctx = {
+            'name': form.name.data,
+            'site_name': settings.WEBPAGE_INFO['site_name'],
+            'rid': r.id,
+            'rhash': r.hash
+        }
+
+        t = flask.render_template(
+            'newsletter/newsletter-in.html',
+            **ctx
+        )
+
+        print(t)
+
+        flask.flash('Vous êtes bien inscrit à la newsletter')
+        self.success_url = flask.url_for('visitor.index')
+
+        return super().form_valid(form)
+
+
+visitor_blueprint.add_url_rule('/newsletter.html', view_func=NewsletterRegisterView.as_view(name='newsletter-subscribe'))
+
+
+class NewsletterUnregisterView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
+    template_name = 'newsletter-out.html'
+    model = NewsletterRecipient
+
+    def _fetch_object(self, *args, **kwargs):
+        super()._fetch_object(*args, **kwargs)
+
+        if self.object.hash != kwargs.get('hash'):
+            flask.abort(403)
+
+    def get_context_data(self, *args, **kwargs):
+        # fetch and delete
+        self._fetch_object(*args, **kwargs)
+
+        db.session.delete(self.object)
+        db.session.commit()
+
+        # and go
+        return super().get_context_data(*args, **kwargs)
+
+
+visitor_blueprint.add_url_rule(
+    '/newsletter-out-<int:id>-<string:hash>.html',
+    view_func=NewsletterUnregisterView.as_view(name='newsletter-unsubscribe'))

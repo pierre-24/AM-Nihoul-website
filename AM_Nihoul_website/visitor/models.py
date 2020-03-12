@@ -1,6 +1,7 @@
 import os
-
 import slugify
+import secrets
+
 from sqlalchemy import event
 
 from AM_Nihoul_website import db, uploads_set
@@ -8,6 +9,7 @@ from AM_Nihoul_website.base_models import BaseModel
 
 
 class Category(BaseModel):
+    """Category (of the pages)"""
     name = db.Column(db.VARCHAR(length=150), nullable=False)
     order = db.Column(db.Integer, nullable=False)
 
@@ -161,3 +163,20 @@ class UploadedFile(BaseModel):
         }
 
         return icons[self.possible_mime] if self.possible_mime in icons else 'fas fa-file'
+
+
+class NewsletterRecipient(BaseModel):
+    """Recipient of the newsletter"""
+
+    name = db.Column(db.VARCHAR(length=150), nullable=False)
+    email = db.Column(db.Text(), nullable=False)
+    hash = db.Column(db.VARCHAR(length=150), nullable=False)
+
+    @classmethod
+    def create(cls, name, email):
+        o = cls()
+        o.name = name
+        o.email = email
+        o.hash = secrets.token_urlsafe(nbytes=16)
+
+        return o
