@@ -82,24 +82,24 @@ class NewsletterRegisterView(BaseMixin, FormView):
     DEBUG = True
 
     def form_valid(self, form):
-        r = NewsletterRecipient.create(form.name.data, form.email.data)
 
-        db.session.add(r)
-        db.session.commit()
+        if NewsletterRecipient.query.filter(NewsletterRecipient.email == form.email.data).count() == 0:
+            r = NewsletterRecipient.create(form.name.data, form.email.data)
 
-        ctx = {
-            'name': form.name.data,
-            'site_name': settings.WEBPAGE_INFO['site_name'],
-            'rid': r.id,
-            'rhash': r.hash
-        }
+            db.session.add(r)
+            db.session.commit()
 
-        t = flask.render_template(
-            'newsletter/newsletter-in.html',
-            **ctx
-        )
+            t = flask.render_template(
+                'newsletter/newsletter-in.html',
+                **{
+                    'name': form.name.data,
+                    'site_name': settings.WEBPAGE_INFO['site_name'],
+                    'rid': r.id,
+                    'rhash': r.hash
+                }
+            )
 
-        print(t)
+            print(t)
 
         flask.flash('Vous êtes bien inscrit à la newsletter')
         self.success_url = flask.url_for('visitor.index')
@@ -118,7 +118,7 @@ class NewsletterUnregisterView(BaseMixin, ObjectManagementMixin, RenderTemplateV
         super()._fetch_object(*args, **kwargs)
 
         if self.object.hash != kwargs.get('hash'):
-            flask.abort(403)
+            flask.abort(404)
 
     def get_context_data(self, *args, **kwargs):
         # fetch and delete
