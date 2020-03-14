@@ -6,7 +6,7 @@ from AM_Nihoul_website import settings, db
 from AM_Nihoul_website.base_views import FormView, BaseMixin, LoginMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm
-from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile
+from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -280,8 +280,6 @@ class FilesView(BaseMixin, FormView):
 
     form_class = UploadForm
 
-    DEBUG = True
-
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
 
@@ -335,3 +333,40 @@ class FileDeleteView(BaseMixin, ObjectManagementMixin, DeleteView):
 
 admin_blueprint.add_url_rule(
     '/fichier-suppression-<int:id>.html', view_func=FileDeleteView.as_view('file-delete'))
+
+
+# -- Newsletter
+class NewsletterRecipientsView(BaseMixin, RenderTemplateView):
+    template_name = 'admin/newsletter-recipients.html'
+    decorators = [LoginView.login_required]
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        ctx['recipients'] = NewsletterRecipient.query.order_by(NewsletterRecipient.name).all()
+        return ctx
+
+
+admin_blueprint.add_url_rule(
+    '/newsletter-inscrits.html', view_func=NewsletterRecipientsView.as_view('newsletter-recipients'))
+
+
+class NewsletterRecipientDelete(ObjectManagementMixin, DeleteView):
+    decorators = [LoginView.login_required]
+    model = NewsletterRecipient
+
+    def delete(self, *args, **kwargs):
+        self._fetch_object(*args, **kwargs)
+        self.success_url = flask.url_for('admin.newsletter-recipients')
+        return super().delete(*args, **kwargs)
+
+    def get_object(self):
+        return self.object
+
+    def post_deletion(self, obj):
+        flask.flash('Destinataire "{}" supprimé.'.format(obj.name))
+
+
+admin_blueprint.add_url_rule(
+    '/newsletter-inscit-suppression-<int:id>.html',
+    view_func=NewsletterRecipientDelete.as_view('newsletter-recipient-delete'))

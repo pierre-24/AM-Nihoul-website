@@ -107,7 +107,8 @@ class NewsletterRegisterView(BaseMixin, FormView):
         return super().form_valid(form)
 
 
-visitor_blueprint.add_url_rule('/newsletter.html', view_func=NewsletterRegisterView.as_view(name='newsletter-subscribe'))
+visitor_blueprint.add_url_rule(
+    '/newsletter.html', view_func=NewsletterRegisterView.as_view(name='newsletter-subscribe'))
 
 
 class NewsletterUnregisterView(BaseMixin, ObjectManagementMixin, RenderTemplateView):

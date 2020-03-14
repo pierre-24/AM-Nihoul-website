@@ -114,13 +114,16 @@ class ObjectManagementMixin:
     object = None
 
     def _fetch_object(self, *args, **kwargs):
-        self.object = self.model.query.get(kwargs.get(self.url_parameter_id))
+        self.object = self._get_object(kwargs.get(self.url_parameter_id))
 
         if self.object is None:
             flask.abort(404)
 
     def get_object(self):
         return self.object
+
+    def _get_object(self, id_):
+        return self.model.query.get(id_)
 
 
 class DeleteView(View):

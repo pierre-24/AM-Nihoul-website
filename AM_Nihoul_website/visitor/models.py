@@ -1,6 +1,6 @@
 import os
-import slugify
 import secrets
+import slugify
 
 from sqlalchemy import event
 
@@ -180,3 +180,8 @@ class NewsletterRecipient(BaseModel):
         o.hash = secrets.token_urlsafe(nbytes=16)
 
         return o
+
+    def get_scrambled_email(self):
+        n = len(self.name) % 3
+        s = self.email.split('@')
+        return s[0][:1 + n] + '***' + s[0][n - 3:] + '@***.' + s[1].split('.')[-1]

@@ -1,0 +1,30 @@
+{% extends "admin/base.ex.html" %}
+{% from "helpers.inc.html" import create_delete_modal %}
+
+{% set admin_current = 'recipient' %}
+
+{% block page_title %}Inscrits à la newsletter{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Inscrits à la newsletter</h2>
+
+    <table class="admin-list">
+        {% for recipient in recipients %}
+            <tr>
+                <td class="left">
+                    <span class="title">{{ recipient.name }}</span>
+                    <span class="info">{{ recipient.get_scrambled_email() }}</span>
+                </td>
+                <td class="right">
+                    <span class="buttons">
+                        <a class="button-like" href="#delete-recipient-{{ recipient.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
+                        {{ create_delete_modal('recipient', recipient.id, 'le destinataire nommé "' + recipient.name + '"', 'admin.newsletter-recipient-delete') }}
+                    </span>
+                    <span class="info">Inscription: {{ recipient.date_created|date_formatter }}</span>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    </section>
+{% endblock %}
