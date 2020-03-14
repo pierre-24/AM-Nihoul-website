@@ -4,7 +4,7 @@ from flask.views import View
 
 from AM_Nihoul_website import settings, db
 from AM_Nihoul_website.base_views import FormView, BaseMixin, LoginMixin, RenderTemplateView, ObjectManagementMixin, \
-    DeleteView
+    DeleteObjectView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm
 from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient
 
@@ -15,11 +15,16 @@ class LoginView(BaseMixin, FormView):
     form_class = LoginForm
     template_name = 'admin/login.html'
 
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx['next'] = flask.request.args.get('next', '')
+        return ctx
+
     def dispatch_request(self, *args, **kwargs):
 
         if LoginMixin.logged_in():
             flask.flash('Vous êtes déjà connecté', category='error')
-            return flask.redirect(flask.url_for('visitor.index'))
+            return flask.redirect(flask.request.args.get('next', flask.url_for('visitor.index')))
 
         return super().dispatch_request(*args, **kwargs)
 
@@ -31,7 +36,8 @@ class LoginView(BaseMixin, FormView):
 
         flask.session['logged_in'] = True
 
-        self.success_url = flask.url_for('admin.index')
+        next = form.next.data
+        self.success_url = flask.url_for('admin.index') if next == '' else next
         return super().form_valid(form)
 
 
@@ -46,7 +52,12 @@ def logout():
     return flask.redirect(flask.url_for('visitor.index'))
 
 
-class IndexView(BaseMixin, RenderTemplateView):
+# -- Index
+class AdminBaseMixin(BaseMixin):
+    decorators = [LoginView.login_required]
+    
+
+class IndexView(AdminBaseMixin, RenderTemplateView):
     template_name = 'admin/index.html'
     decorators = [LoginView.login_required]
 
@@ -55,9 +66,8 @@ admin_blueprint.add_url_rule('/index.html', view_func=IndexView.as_view(name='in
 
 
 # -- Pages
-class PagesView(BaseMixin, RenderTemplateView):
+class PagesView(AdminBaseMixin, RenderTemplateView):
     template_name = 'admin/pages.html'
-    decorators = [LoginView.login_required]
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
@@ -72,10 +82,9 @@ class PagesView(BaseMixin, RenderTemplateView):
 admin_blueprint.add_url_rule('/pages.html', view_func=PagesView.as_view(name='pages'))
 
 
-class BasePageEditView(BaseMixin, FormView):
+class BasePageEditView(AdminBaseMixin, FormView):
     form_class = PageEditForm
     template_name = 'admin/page-edit.html'
-    decorators = [LoginView.login_required]
 
     def get_form(self):
         form = super().get_form()
@@ -91,20 +100,20 @@ class BasePageEditView(BaseMixin, FormView):
 class PageEditView(ObjectManagementMixin, BasePageEditView):
     model = Page
 
-    def _fetch_object(self, *args, **kwargs):
+    def get_object_or_abort(self, *args, **kwargs):
         """Add slug check"""
 
-        super()._fetch_object(*args, **kwargs)
+        super().get_object_or_abort(*args, **kwargs)
 
         if self.object.slug != kwargs.get('slug', None):
             flask.abort(404)
 
     def get(self, *args, **kwargs):
-        self._fetch_object(*args, **kwargs)
+        self.get_object_or_abort(*args, **kwargs)
         return super().get(*args, **kwargs)
 
     def post(self, *args, **kwargs):
-        self._fetch_object(*args, **kwargs)
+        self.get_object_or_abort(*args, **kwargs)
         return super().post(*args, **kwargs)
 
     def get_form_kwargs(self):
@@ -152,17 +161,8 @@ class PageCreateView(BasePageEditView):
 admin_blueprint.add_url_rule('/page-nouveau.html', view_func=PageCreateView.as_view(name='page-create'))
 
 
-class PageDeleteView(BaseMixin, ObjectManagementMixin, DeleteView):
+class PageDeleteView(DeleteObjectView):
     model = Page
-    decorators = [LoginView.login_required]
-
-    def delete(self, *args, **kwargs):
-        self._fetch_object(*args, **kwargs)
-        self.success_url = flask.url_for('admin.pages')
-        return super().delete(*args, **kwargs)
-
-    def get_object(self):
-        return self.object
 
     def pre_deletion(self, obj):
         if obj.protected:
@@ -171,6 +171,7 @@ class PageDeleteView(BaseMixin, ObjectManagementMixin, DeleteView):
         return False
 
     def post_deletion(self, obj):
+        self.success_url = flask.url_for('admin.pages')
         flask.flash('Page "{}" supprimée.'.format(obj.title))
 
 
@@ -178,9 +179,8 @@ admin_blueprint.add_url_rule('/page-suppression-<int:id>.html', view_func=PageDe
 
 
 # -- Categories
-class CategoriesView(BaseMixin, FormView):
+class CategoriesView(AdminBaseMixin, FormView):
     template_name = 'admin/categories.html'
-    decorators = [LoginView.login_required]
 
     form_class = CategoryEditForm
 
@@ -213,17 +213,8 @@ class CategoriesView(BaseMixin, FormView):
 admin_blueprint.add_url_rule('/categories.html', view_func=CategoriesView.as_view('categories'))
 
 
-class CategoryDeleteView(BaseMixin, ObjectManagementMixin, DeleteView):
+class CategoryDeleteView(AdminBaseMixin, DeleteObjectView):
     model = Category
-    decorators = [LoginView.login_required]
-
-    def delete(self, *args, **kwargs):
-        self._fetch_object(*args, **kwargs)
-        self.success_url = flask.url_for('admin.categories')
-        return super().delete(*args, **kwargs)
-
-    def get_object(self):
-        return self.object
 
     def pre_deletion(self, obj):
         """Set the page category to NULL"""
@@ -236,7 +227,7 @@ class CategoryDeleteView(BaseMixin, ObjectManagementMixin, DeleteView):
         return True  # keep going !
 
     def post_deletion(self, obj):
-
+        self.success_url = flask.url_for('admin.categories')
         flask.flash('Catégorie "{}" supprimée.'.format(obj.name))
 
 
@@ -245,12 +236,11 @@ admin_blueprint.add_url_rule(
 
 
 class CategoryMoveView(ObjectManagementMixin, View):
-    decorators = [LoginView.login_required]
     methods = ['GET']
     model = Category
 
     def get(self, *args, **kwargs):
-        self._fetch_object(*args, **kwargs)
+        self.get_object_or_abort(*args, **kwargs)
         action = kwargs.get('action')
 
         if action == 'up':
@@ -274,9 +264,8 @@ admin_blueprint.add_url_rule(
 
 
 # -- Files
-class FilesView(BaseMixin, FormView):
+class FilesView(AdminBaseMixin, FormView):
     template_name = 'admin/files.html'
-    decorators = [LoginView.login_required]
 
     form_class = UploadForm
 
@@ -315,19 +304,11 @@ class FilesView(BaseMixin, FormView):
 admin_blueprint.add_url_rule('/fichiers.html', view_func=FilesView.as_view('files'))
 
 
-class FileDeleteView(BaseMixin, ObjectManagementMixin, DeleteView):
+class FileDeleteView(DeleteObjectView):
     model = UploadedFile
-    decorators = [LoginView.login_required]
-
-    def delete(self, *args, **kwargs):
-        self._fetch_object(*args, **kwargs)
-        self.success_url = flask.url_for('admin.files')
-        return super().delete(*args, **kwargs)
-
-    def get_object(self):
-        return self.object
 
     def post_deletion(self, obj):
+        self.success_url = flask.url_for('admin.files')
         flask.flash('Fichier "{}" supprimé.'.format(obj.file_name))
 
 
@@ -336,9 +317,8 @@ admin_blueprint.add_url_rule(
 
 
 # -- Newsletter
-class NewsletterRecipientsView(BaseMixin, RenderTemplateView):
+class NewsletterRecipientsView(AdminBaseMixin, RenderTemplateView):
     template_name = 'admin/newsletter-recipients.html'
-    decorators = [LoginView.login_required]
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
@@ -351,19 +331,11 @@ admin_blueprint.add_url_rule(
     '/newsletter-inscrits.html', view_func=NewsletterRecipientsView.as_view('newsletter-recipients'))
 
 
-class NewsletterRecipientDelete(ObjectManagementMixin, DeleteView):
-    decorators = [LoginView.login_required]
+class NewsletterRecipientDelete(DeleteObjectView):
     model = NewsletterRecipient
 
-    def delete(self, *args, **kwargs):
-        self._fetch_object(*args, **kwargs)
-        self.success_url = flask.url_for('admin.newsletter-recipients')
-        return super().delete(*args, **kwargs)
-
-    def get_object(self):
-        return self.object
-
     def post_deletion(self, obj):
+        self.success_url = flask.url_for('admin.newsletter-recipients')
         flask.flash('Destinataire "{}" supprimé.'.format(obj.name))
 
 

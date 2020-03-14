@@ -11,9 +11,6 @@ class RenderTemplateView(View):
     methods = ['GET']
     template_name = None
 
-    url_args = []
-    url_kwargs = {}
-
     def get_context_data(self, *args, **kwargs):
         return {}
 
@@ -27,9 +24,6 @@ class RenderTemplateView(View):
         return flask.render_template(self.template_name, **context_data)
 
     def dispatch_request(self, *args, **kwargs):
-        self.url_args = args
-        self.url_kwargs = kwargs
-
         if flask.request.method == 'GET':
             return self.get(*args, **kwargs)
         else:
@@ -108,30 +102,12 @@ class FormView(RenderTemplateView):
             flask.abort(403)
 
 
-class ObjectManagementMixin:
-    model = None
-    url_parameter_id = 'id'
-    object = None
-
-    def _fetch_object(self, *args, **kwargs):
-        self.object = self._get_object(kwargs.get(self.url_parameter_id))
-
-        if self.object is None:
-            flask.abort(404)
-
-    def get_object(self):
-        return self.object
-
-    def _get_object(self, id_):
-        return self.model.query.get(id_)
-
-
 class DeleteView(View):
 
     methods = ['POST', 'DELETE']
     success_url = '/'
 
-    def get_object(self):
+    def get_object_to_delete(self, *args, **kwargs):
         raise NotImplementedError()
 
     def pre_deletion(self, obj):
@@ -145,7 +121,7 @@ class DeleteView(View):
     def delete(self, *args, **kwargs):
         """Handle delete"""
 
-        obj = self.get_object()
+        obj = self.get_object_to_delete(*args, **kwargs)
 
         if not self.pre_deletion(obj):
             return flask.abort(403)
@@ -167,6 +143,34 @@ class DeleteView(View):
             flask.abort(403)
 
 
+# --- Object management
+class ObjectManagementMixin:
+    model = None
+    url_parameter_id = 'id'
+    object = None
+
+    def get_object_or_abort(self, error_code=404, *args, **kwargs):
+        if self.object is None:
+            self.object = self._get_object(*args, **kwargs)
+
+            if self.object is None:
+                flask.abort(error_code)
+
+    def get_object(self, *args, **kwargs):
+        if self.object is None:
+            self.object = self._get_object(*args, **kwargs)
+
+    def _get_object(self, *args, **kwargs):
+        return self.model.query.get(kwargs.get(self.url_parameter_id))
+
+
+class DeleteObjectView(ObjectManagementMixin, DeleteView):
+
+    def get_object_to_delete(self, *args, **kwargs):
+        return self._get_object(*args, **kwargs)
+
+
+# --- Other mixins
 class LoginMixin(object):
     """Maintain the logged_in information in context"""
 
@@ -191,7 +195,7 @@ class LoginMixin(object):
         @functools.wraps(f)
         def decorated_function(*args, **kwargs):
             if 'logged_in' not in flask.session or not flask.session['logged_in']:
-                return flask.redirect(flask.url_for('admin.login'))
+                return flask.redirect(flask.url_for('admin.login', next=flask.request.url))
             return f(*args, **kwargs)
 
         return decorated_function
