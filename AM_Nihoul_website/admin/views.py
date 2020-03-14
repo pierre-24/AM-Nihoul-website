@@ -5,8 +5,8 @@ from flask.views import View
 from AM_Nihoul_website import settings, db
 from AM_Nihoul_website.base_views import FormView, BaseMixin, LoginMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteObjectView
-from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm
-from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient
+from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm
+from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient, Newsletter
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -55,7 +55,7 @@ def logout():
 # -- Index
 class AdminBaseMixin(BaseMixin):
     decorators = [LoginView.login_required]
-    
+
 
 class IndexView(AdminBaseMixin, RenderTemplateView):
     template_name = 'admin/index.html'
@@ -342,3 +342,94 @@ class NewsletterRecipientDelete(DeleteObjectView):
 admin_blueprint.add_url_rule(
     '/newsletter-inscit-suppression-<int:id>.html',
     view_func=NewsletterRecipientDelete.as_view('newsletter-recipient-delete'))
+
+
+class NewslettersView(AdminBaseMixin, RenderTemplateView):
+    template_name = 'admin/newsletters.html'
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        ctx['newsletters'] = Newsletter.query.order_by(Newsletter.id.desc()).all()
+        return ctx
+
+
+admin_blueprint.add_url_rule(
+    '/newsletters.html', view_func=NewslettersView.as_view('newsletters'))
+
+
+class BaseNewsletterEditView(AdminBaseMixin, FormView):
+    form_class = NewsletterEditForm
+    template_name = 'admin/newsletter-edit.html'
+
+
+class NewsletterEditView(ObjectManagementMixin, BaseNewsletterEditView):
+    model = Newsletter
+
+    def get_object_or_abort(self, *args, **kwargs):
+        """Add slug check"""
+
+        super().get_object_or_abort(*args, **kwargs)
+
+        if self.object.slug != kwargs.get('slug', None):
+            flask.abort(404)
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().post(*args, **kwargs)
+
+    def get_form_kwargs(self):
+        return {
+            'title': self.object.title,
+            'text': self.object.content,
+        }
+
+    def form_valid(self, form):
+        self.object.title = form.title.data
+        self.object.content = form.text.data
+
+        db.session.add(self.object)
+        db.session.commit()
+
+        flask.flash('Newsletter "{}" modifiée.'.format(self.object.title))
+
+        self.success_url = flask.url_for('admin.newsletters')
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule(
+    '/newsletter-edition-<int:id>-<string:slug>.html', view_func=NewsletterEditView.as_view(name='newsletter-edit'))
+
+
+class NewsletterCreateView(BaseNewsletterEditView):
+
+    def form_valid(self, form):
+        newsletter = Newsletter.create(form.title.data, form.text.data)
+
+        db.session.add(newsletter)
+        db.session.commit()
+
+        flask.flash('Newsletter "{}" créée.'.format(newsletter.title))
+
+        self.success_url = flask.url_for('admin.newsletters')
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule(
+    '/newsletter-nouveau.html', view_func=NewsletterCreateView.as_view(name='newsletter-create'))
+
+
+class NewsletterDeleteView(DeleteObjectView):
+    model = Newsletter
+
+    def post_deletion(self, obj):
+        self.success_url = flask.url_for('admin.newsletters')
+        flask.flash('Newsletter "{}" supprimée.'.format(obj.title))
+
+
+admin_blueprint.add_url_rule(
+    '/newsletter-suppression-<int:id>.html', view_func=NewsletterDeleteView.as_view('newsletter-delete'))

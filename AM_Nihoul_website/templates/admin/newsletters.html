@@ -1,0 +1,35 @@
+{% extends "admin/base.ex.html" %}
+{% from "helpers.inc.html" import create_delete_modal %}
+
+{% set admin_current = 'newsletter' %}
+
+{% block page_title %}Gestion des newsletters{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Gestion des newsletters</h2>
+
+    <p>
+        <a class="button-like" href="{{ url_for('admin.newsletter-create') }}"><span class="fas fa-plus"></span> Ajouter une newsletter</a>
+    </p>
+
+    <table class="admin-list">
+        {% for newsletter in newsletters %}
+            <tr>
+                <td class="left">
+                    <span class="title"><a href="{# {{ url_for('visitor.newsletter-view', id=newsletter.id, slug=newsletter.slug) }} #}">{{ newsletter.title }}</a></span>
+                    <span class="info">({% if newsletter.draft %}brouillon{% else %}publiée{% endif %})</span>
+                </td>
+                <td class="right">
+                    <span class="buttons">
+                        <a class="button-like" href="{{ url_for('admin.newsletter-edit', id=newsletter.id, slug=newsletter.slug) }}"><span class="fas fa-pen-square"></span></a>
+                        <a class="button-like" href="#delete-newsletter-{{ newsletter.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
+                        {{ create_delete_modal('newsletter', newsletter.id, 'la newsletter "' + newsletter.title + '"', 'admin.newsletter-delete') }}
+                    </span>
+                    <span class="info">Dernière modification: {{ newsletter.date_modified|date_formatter }}</span>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    </section>
+{% endblock %}

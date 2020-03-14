@@ -185,3 +185,30 @@ class NewsletterRecipient(BaseModel):
         n = len(self.name) % 3
         s = self.email.split('@')
         return s[0][:1 + n] + '***' + s[0][n - 3:] + '@***.' + s[1].split('.')[-1]
+
+
+class Newsletter(BaseModel):
+    """Newsletter
+    """
+
+    title = db.Column(db.VARCHAR(length=150), nullable=False)
+    slug = db.Column(db.VARCHAR(150), nullable=False)
+    content = db.Column(db.Text)
+    draft = db.Column(db.Boolean, default=True)
+    date_published = db.Column(db.DateTime)
+
+    @classmethod
+    def create(cls, title, content):
+        o = cls()
+        o.draft = True
+        o.title = title
+        o.content = content
+
+        return o
+
+
+@event.listens_for(Newsletter.title, 'set', named=True)
+def receive_newsletter_title_set(target, value, oldvalue, initiator):
+    """Set the slug accordingly, but only if it is a draft"""
+    if target.draft:
+        target.slug = slugify.slugify(value)
