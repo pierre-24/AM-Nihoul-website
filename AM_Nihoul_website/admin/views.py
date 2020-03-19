@@ -336,6 +336,17 @@ class NewsletterRecipientDelete(DeleteObjectView):
     model = NewsletterRecipient
 
     def post_deletion(self, obj):
+        t = flask.render_template(
+            'newsletter/newsletter-out-admin.html',
+            **{
+                'name': obj.name,
+                'site_name': settings.WEBPAGE_INFO['site_name'],
+                'no_unsubscribe': True
+            }
+        )
+
+        print(t)
+
         self.success_url = flask.url_for('admin.newsletter-recipients')
         flask.flash('Destinataire "{}" supprimé.'.format(obj.name))
 

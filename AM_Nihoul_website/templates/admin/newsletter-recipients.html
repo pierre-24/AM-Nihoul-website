@@ -19,12 +19,15 @@
                 <td class="right">
                     <span class="buttons">
                         <a class="button-like" href="#delete-recipient-{{ recipient.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
-                        {{ create_delete_modal('recipient', recipient.id, 'le destinataire nommé "' + recipient.name + '"', 'admin.newsletter-recipient-delete') }}
+                        {{ create_delete_modal('recipient', recipient.id, 'le destinataire nommé "' + recipient.name + '" (attention, il recevra un mail l\'informant de cette décision)', 'admin.newsletter-recipient-delete') }}
                     </span>
                     <span class="info">Inscription: {{ recipient.date_created|date_formatter }}</span>
                 </td>
             </tr>
         {% endfor %}
+        {% if recipients|length == 0 %}
+            <tr><i>Pas d'inscrits pour le moment.</i></tr>
+        {% endif %}
     </table>
     </section>
 {% endblock %}
