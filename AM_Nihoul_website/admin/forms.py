@@ -49,3 +49,10 @@ class NewsletterEditForm(FlaskForm):
     text = f.TextAreaField('Texte', widget=TrumbowygTextarea())
 
     submit_button = f.SubmitField('Enregistrer')
+    submit_button_2 = f.SubmitField('Enregistrer et prévisualiser')
+
+
+class NewsletterPublishForm(FlaskForm):
+    confirm = f.BooleanField(widget=f.widgets.HiddenInput(), default=False)
+
+    submit_button = f.SubmitField('Publier')

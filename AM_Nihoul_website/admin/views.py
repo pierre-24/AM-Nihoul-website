@@ -5,7 +5,8 @@ from flask.views import View
 from AM_Nihoul_website import settings, db
 from AM_Nihoul_website.base_views import FormView, BaseMixin, LoginMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteObjectView
-from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm
+from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm, \
+    NewsletterPublishForm
 from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient, Newsletter
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
@@ -344,14 +345,18 @@ admin_blueprint.add_url_rule(
     view_func=NewsletterRecipientDelete.as_view('newsletter-recipient-delete'))
 
 
-class NewslettersView(AdminBaseMixin, RenderTemplateView):
+class NewslettersView(AdminBaseMixin, FormView):
     template_name = 'admin/newsletters.html'
+    form_class = NewsletterPublishForm
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
 
         ctx['newsletters'] = Newsletter.query.order_by(Newsletter.id.desc()).all()
         return ctx
+
+    def form_valid(self, form):
+        flask.abort(403)
 
 
 admin_blueprint.add_url_rule(
@@ -397,7 +402,11 @@ class NewsletterEditView(ObjectManagementMixin, BaseNewsletterEditView):
 
         flask.flash('Newsletter "{}" modifiée.'.format(self.object.title))
 
-        self.success_url = flask.url_for('admin.newsletters')
+        if form.submit_button_2.data:
+            self.success_url = flask.url_for('admin.newsletter-view', id=self.object.id)
+        else:
+            self.success_url = flask.url_for('admin.newsletters')
+
         return super().form_valid(form)
 
 
@@ -415,7 +424,11 @@ class NewsletterCreateView(BaseNewsletterEditView):
 
         flask.flash('Newsletter "{}" créée.'.format(newsletter.title))
 
-        self.success_url = flask.url_for('admin.newsletters')
+        if form.submit_button_2.data:
+            self.success_url = flask.url_for('admin.newsletter-view', id=newsletter.id)
+        else:
+            self.success_url = flask.url_for('admin.newsletters')
+
         return super().form_valid(form)
 
 
@@ -433,3 +446,57 @@ class NewsletterDeleteView(DeleteObjectView):
 
 admin_blueprint.add_url_rule(
     '/newsletter-suppression-<int:id>.html', view_func=NewsletterDeleteView.as_view('newsletter-delete'))
+
+
+class NewsletterPublishView(ObjectManagementMixin, FormView):
+    form_class = NewsletterPublishForm
+    model = Newsletter
+
+    def get(self, *args, **kwargs):
+        flask.abort(403)
+
+    def post(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().post(*args, **kwargs)
+
+    def form_valid(self, form):
+        self.success_url = flask.url_for('admin.newsletters')
+        if not self.object.draft:
+            flask.flash('La newsletter "{}" est déjà publiée'.format(self.object.title))
+            return super().form_valid(form)
+        else:
+            self.object.draft = False
+            self.object.date_published = db.func.current_timestamp()
+            db.session.add(self.object)
+            db.session.commit()
+
+            # TODO: emailing stuff
+
+            flask.flash('Newsletter "{}" publiée.'.format(self.object.title))
+
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule(
+    '/newsletter-publie-<int:id>.html', view_func=NewsletterPublishView.as_view('newsletter-publish'))
+
+
+class NewsletterView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
+    template_name = 'admin/newsletter.html'
+    model = Newsletter
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().get(*args, **kwargs)
+
+    def get_object_or_abort(self, error_code=404, *args, **kwargs):
+        super().get_object_or_abort(error_code, *args, **kwargs)
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx['newsletter'] = self.object
+        return ctx
+
+
+admin_blueprint.add_url_rule(
+    '/newsletter-voir-<int:id>.html', view_func=NewsletterView.as_view(name='newsletter-view'))
