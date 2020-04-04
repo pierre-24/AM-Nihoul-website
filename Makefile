@@ -1,5 +1,8 @@
 install:
-	python setup.py develop
+	pip install -e .
+
+install-dev
+	pip install -r requirements-dev.txt
 
 init-back:
 	export FLASK_APP=AM_Nihoul_website; flask init
