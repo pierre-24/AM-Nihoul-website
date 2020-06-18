@@ -1,8 +1,5 @@
 install:
-	pip install -e .
-
-install-dev
-	pip install -r requirements-dev.txt
+	pip-sync && pip3 install -e .
 
 init-back:
 	export FLASK_APP=AM_Nihoul_website; flask init
