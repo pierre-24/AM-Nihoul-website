@@ -7,13 +7,34 @@ from flask.cli import with_appcontext
 from flask_sqlalchemy import SQLAlchemy
 import flask_uploads
 from flask_uploads import UploadSet, configure_uploads
+import flask_login
 
 from AM_Nihoul_website import settings
 from AM_Nihoul_website.base_filters import filters
 
+
+# init modules
 db = SQLAlchemy()
 
 uploads_set = UploadSet('uploads', flask_uploads.DEFAULTS)
+
+
+# login manager
+login_manager = flask_login.LoginManager()
+
+
+class User(flask_login.UserMixin):
+    def __init__(self, id_):
+        super().__init__()
+        self.id = id_
+
+
+@login_manager.user_loader
+def load_user(login):
+    if login != settings.APP_CONFIG['USERNAME']:
+        return
+
+    return User(login)
 
 
 @click.command('init')
@@ -56,6 +77,8 @@ def create_app():
     app.config.update(settings.APP_CONFIG)
     db.init_app(app)
     configure_uploads(app, (uploads_set, ))
+    login_manager.init_app(app)
+    login_manager.login_view = 'admin.login'  # automatic redirection
 
     # add cli
     app.cli.add_command(init_command)

@@ -8,3 +8,4 @@ lesscpy
 rjsmin
 python-slugify
 email_validator
+Flask-Login

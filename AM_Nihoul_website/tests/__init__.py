@@ -15,7 +15,7 @@ class TestFlask(TestCase):
 
         self.app.config['TESTING'] = True
         self.app.config['WTF_CSRF_ENABLED'] = False
-        self.app.config['SERVER_NAME'] = 'localhost'
+        self.app.config['SERVER_NAME'] = 'local.domain'
 
         # use temp directory
         self.data_files_directory = tempfile.mkdtemp()
@@ -40,20 +40,20 @@ class TestFlask(TestCase):
         shutil.rmtree(self.data_files_directory)
         self.app_context.pop()
 
-    def login(self, username, password):
+    def login(self):
         """Login client."""
 
         self.client.post(flask.url_for('admin.login'), data={
-            'login': username,
-            'password': password
+            'login': settings.APP_CONFIG['USERNAME'],
+            'password': settings.APP_CONFIG['PASSWORD']
         }, follow_redirects=False)
 
-        with self.client.session_transaction() as session:
-            return 'logged_in' in session
+        response = self.client.get(flask.url_for('admin.index'), follow_redirects=False)
+        self.assertEqual(response.status_code, 200)
 
     def logout(self):
         """Logout client"""
         self.client.get(flask.url_for('admin.logout'), follow_redirects=False)
 
-        with self.client.session_transaction() as session:
-            return 'logged_in' not in session or session.get('logged_in') is False
+        response = self.client.get(flask.url_for('admin.index'), follow_redirects=False)
+        self.assertEqual(response.status_code, 302)

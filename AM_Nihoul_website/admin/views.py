@@ -1,9 +1,11 @@
 import flask
 from flask import Blueprint
 from flask.views import View
+import flask_login
+from flask_login import login_required
 
-from AM_Nihoul_website import settings, db
-from AM_Nihoul_website.base_views import FormView, BaseMixin, LoginMixin, RenderTemplateView, ObjectManagementMixin, \
+from AM_Nihoul_website import settings, db, User
+from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteObjectView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm, \
     NewsletterPublishForm
@@ -23,7 +25,7 @@ class LoginView(BaseMixin, FormView):
 
     def dispatch_request(self, *args, **kwargs):
 
-        if LoginMixin.logged_in():
+        if flask_login.current_user.is_authenticated:
             flask.flash('Vous êtes déjà connecté', category='error')
             return flask.redirect(flask.request.args.get('next', flask.url_for('visitor.index')))
 
@@ -35,7 +37,7 @@ class LoginView(BaseMixin, FormView):
             flask.flash('Utilisateur ou mot de passe incorrect', 'error')
             return self.form_invalid(form)
 
-        flask.session['logged_in'] = True
+        flask_login.login_user(User(form.login.data))
 
         next = form.next.data
         self.success_url = flask.url_for('admin.index') if next == '' else next
@@ -45,22 +47,22 @@ class LoginView(BaseMixin, FormView):
 admin_blueprint.add_url_rule('/login.html', view_func=LoginView.as_view(name='login'))
 
 
-@LoginMixin.login_required
+@login_required
 @admin_blueprint.route('/logout', endpoint='logout')
 def logout():
-    flask.session['logged_in'] = False
+    flask_login.logout_user()
     flask.flash('Vous êtes déconnecté.')
     return flask.redirect(flask.url_for('visitor.index'))
 
 
 # -- Index
 class AdminBaseMixin(BaseMixin):
-    decorators = [LoginView.login_required]
+    decorators = [login_required]
 
 
 class IndexView(AdminBaseMixin, RenderTemplateView):
     template_name = 'admin/index.html'
-    decorators = [LoginView.login_required]
+    decorators = [login_required]
 
 
 admin_blueprint.add_url_rule('/index.html', view_func=IndexView.as_view(name='index'))

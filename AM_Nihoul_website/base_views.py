@@ -1,5 +1,3 @@
-import functools
-
 import flask
 from flask.views import View
 
@@ -171,37 +169,7 @@ class DeleteObjectView(ObjectManagementMixin, DeleteView):
 
 
 # --- Other mixins
-class LoginMixin(object):
-    """Maintain the logged_in information in context"""
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-
-        if LoginMixin.logged_in():
-            context['logged_in'] = True
-
-        return context
-
-    @staticmethod
-    def logged_in():
-        """Check if the admin is logged in"""
-        if 'logged_in' in flask.session and flask.session['logged_in']:
-            return True
-
-        return False
-
-    @staticmethod
-    def login_required(f):
-        @functools.wraps(f)
-        def decorated_function(*args, **kwargs):
-            if 'logged_in' not in flask.session or not flask.session['logged_in']:
-                return flask.redirect(flask.url_for('admin.login', next=flask.request.url))
-            return f(*args, **kwargs)
-
-        return decorated_function
-
-
-class BaseMixin(LoginMixin):
+class BaseMixin:
     """Add a few variables to the page context"""
 
     def get_context_data(self, *args, **kwargs):
