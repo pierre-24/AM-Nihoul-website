@@ -12,7 +12,7 @@ def bootstrap():
 
     # pages
     pages = [
-        Page.create('Accueil', '<i>Placez un petit message d\'accueil</i>', protected=True),
+        Page.create('Accueil', "<i>Placez un petit message d'accueil</i>", protected=True),
         Page.create('À propos de', '<i>Indiquez ici des détails sur le site web</i>', protected=True, category_id=c.id),
         Page.create('Contact', '<i>Donnez vos informations de contact ici</i>', protected=True, category_id=c.id)
     ]
