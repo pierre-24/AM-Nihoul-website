@@ -15,3 +15,6 @@ lint:
 
 run:
 	export FLASK_APP=AM_Nihoul_website; export FLASK_DEBUG=1; flask run -h 127.0.0.1 -p 5000
+
+test:
+	python -m unittest discover -s AM_Nihoul_website.tests

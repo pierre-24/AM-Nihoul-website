@@ -10,4 +10,5 @@ steps:
   # install and init stuffs
     - make init
   # test
+    - make test
     - make lint
