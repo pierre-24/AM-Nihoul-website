@@ -5,11 +5,8 @@ init-back:
 	export FLASK_APP=AM_Nihoul_website; flask init
 
 front:
-	mkdir -p AM_Nihoul_website/static
-	lesscpy AM_Nihoul_website/assets/style.less AM_Nihoul_website/static/style.css
-	python -mrjsmin < AM_Nihoul_website/assets/main.js > AM_Nihoul_website/static/main.bundled.js
-	python -mrjsmin < AM_Nihoul_website/assets/editor.js > AM_Nihoul_website/static/editor.bundled.js
-	if [ ! -L "AM_Nihoul_website/static/images" ]; then ln -s ../assets/images AM_Nihoul_website/static; fi;
+	npm i
+	npm run gulp
 
 init: install init-back front
 

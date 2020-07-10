@@ -1,0 +1,10 @@
+flask
+Flask-SQLAlchemy
+Flask-Uploads @ git+https://github.com/maxcountryman/flask-uploads.git@f66d7dc93e684fa0a3a4350a38e41ae00483a796
+sqlalchemy-utils
+python-slugify
+Flask-WTF
+lesscpy
+rjsmin
+python-slugify
+email_validator
