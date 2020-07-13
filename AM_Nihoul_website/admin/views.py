@@ -164,14 +164,14 @@ class PageCreateView(BasePageEditView):
 admin_blueprint.add_url_rule('/page-nouveau.html', view_func=PageCreateView.as_view(name='page-create'))
 
 
-class PageDeleteView(DeleteObjectView):
+class PageDeleteView(AdminBaseMixin, DeleteObjectView):
     model = Page
 
     def pre_deletion(self, obj):
         if obj.protected:
             return False
 
-        return False
+        return True
 
     def post_deletion(self, obj):
         self.success_url = flask.url_for('admin.pages')

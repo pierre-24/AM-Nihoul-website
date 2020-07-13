@@ -22,7 +22,7 @@
                 {% endfor %}
 
                 {# admin #}
-                {% if not logged_in %}
+                {% if not current_user.is_authenticated %}
                     <li><a href="{{ url_for('admin.login') }}">Sésame</a></li>
                 {% else %}
                     <li><a href="{{ url_for('admin.index') }}" class="admin">Administration</a></li>
