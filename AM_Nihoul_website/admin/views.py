@@ -238,7 +238,7 @@ admin_blueprint.add_url_rule(
     '/catégorie-suppression-<int:id>.html', view_func=CategoryDeleteView.as_view('category-delete'))
 
 
-class CategoryMoveView(ObjectManagementMixin, View):
+class CategoryMoveView(AdminBaseMixin, ObjectManagementMixin, View):
     methods = ['GET']
     model = Category
 

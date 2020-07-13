@@ -66,9 +66,11 @@ class Category(BaseModel):
         db.session.commit()
 
     def up(self):
+        """Increase current order"""
         self._move(1)
 
     def down(self):
+        """Decrease current order"""
         self._move(-1)
 
 
