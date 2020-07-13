@@ -1,0 +1,85 @@
+import flask
+import os
+
+from AM_Nihoul_website.visitor.models import UploadedFile
+from AM_Nihoul_website.tests import TestFlask
+
+
+class TestCategories(TestFlask):
+
+    def setUp(self):
+        super().setUp()
+
+        self.dir = os.path.dirname(os.path.abspath(__file__))
+        self.file = os.path.join(self.dir, 'random_pic.jpg')
+
+        self.num_uploads = UploadedFile.query.count()
+        self.login()
+
+    def test_upload_ok(self):
+        self.assertEqual(UploadedFile.query.count(), self.num_uploads)
+
+        desc = 'a description'
+        fname = 'tmp.jpg'
+
+        response = self.client.post(
+            flask.url_for('admin.files'), data={
+                'description': desc,
+                'file_uploaded': (open(self.file, 'rb'), fname)
+            })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(UploadedFile.query.count(), self.num_uploads + 1)
+
+        u = UploadedFile.query.order_by(UploadedFile.id.desc()).first()
+        self.assertIsNotNone(u)
+
+        self.assertEqual(u.description, desc)
+        self.assertEqual(u.base_file_name, fname)
+        self.assertTrue(os.path.exists(u.path()))
+        self.assertEqual(u.possible_mime, 'image/jpeg')
+
+        # test delete directly, as it is easier to upload a file this way
+        self.client.delete(flask.url_for('admin.file-delete', id=u.id))
+        self.assertEqual(UploadedFile.query.count(), self.num_uploads)
+        self.assertIsNone(UploadedFile.query.get(u.id))
+        self.assertFalse(os.path.exists(u.path()))
+
+    def test_upload_not_admin_ko(self):
+        self.assertEqual(UploadedFile.query.count(), self.num_uploads)
+        self.logout()
+
+        desc = 'a description'
+        fname = 'tmp.jpg'
+
+        response = self.client.post(
+            flask.url_for('admin.files'), data={
+                'description': desc,
+                'file_uploaded': (open(self.file, 'rb'), fname)
+            })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(UploadedFile.query.count(), self.num_uploads)
+
+    def test_delete_file_not_admin_ko(self):
+        # upload file first (as admin)
+        desc = 'a description'
+        fname = 'tmp.jpg'
+
+        response = self.client.post(
+            flask.url_for('admin.files'), data={
+                'description': desc,
+                'file_uploaded': (open(self.file, 'rb'), fname)
+            })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(UploadedFile.query.count(), self.num_uploads + 1)
+
+        u = UploadedFile.query.order_by(UploadedFile.id.desc()).first()
+        self.assertIsNotNone(u)
+
+        # try to delete
+        self.logout()
+        self.client.delete(flask.url_for('admin.file-delete', id=u.id))
+        self.assertEqual(UploadedFile.query.count(), self.num_uploads + 1)
+        self.assertIsNotNone(UploadedFile.query.get(u.id))

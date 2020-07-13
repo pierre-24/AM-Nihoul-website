@@ -307,7 +307,7 @@ class FilesView(AdminBaseMixin, FormView):
 admin_blueprint.add_url_rule('/fichiers.html', view_func=FilesView.as_view('files'))
 
 
-class FileDeleteView(DeleteObjectView):
+class FileDeleteView(AdminBaseMixin, DeleteObjectView):
     model = UploadedFile
 
     def post_deletion(self, obj):
@@ -334,7 +334,7 @@ admin_blueprint.add_url_rule(
     '/newsletter-inscrits.html', view_func=NewsletterRecipientsView.as_view('newsletter-recipients'))
 
 
-class NewsletterRecipientDelete(DeleteObjectView):
+class NewsletterRecipientDelete(AdminBaseMixin, DeleteObjectView):
     model = NewsletterRecipient
 
     def post_deletion(self, obj):

@@ -167,6 +167,13 @@ class UploadedFile(BaseModel):
         return icons[self.possible_mime] if self.possible_mime in icons else 'fas fa-file'
 
 
+@event.listens_for(UploadedFile, 'before_delete')
+def after_delete_shop_category(mapper, connect, target):
+    """Remove file before deletion from BDD"""
+    if os.path.exists(target.path()):
+        os.remove(target.path())
+
+
 class NewsletterRecipient(BaseModel):
     """Recipient of the newsletter"""
 
