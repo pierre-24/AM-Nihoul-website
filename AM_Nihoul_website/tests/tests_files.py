@@ -45,6 +45,38 @@ class TestCategories(TestFlask):
         self.assertIsNone(UploadedFile.query.get(u.id))
         self.assertFalse(os.path.exists(u.path()))
 
+    def test_visitor_view_ok(self):
+        # upload file first (as admin)
+        desc = 'a description'
+        fname = 'tmp.jpg'
+
+        response = self.client.post(
+            flask.url_for('admin.files'), data={
+                'description': desc,
+                'file_uploaded': (open(self.file, 'rb'), fname)
+            })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(UploadedFile.query.count(), self.num_uploads + 1)
+
+        u = UploadedFile.query.order_by(UploadedFile.id.desc()).first()
+        self.assertIsNotNone(u)
+
+        # view file as admin
+        with open(self.file, 'rb') as f:
+            content = f.read()
+
+        response = self.client.get(flask.url_for('visitor.upload-view', id=u.id, filename=u.file_name))
+        self.assertEqual(content, response.data)
+        self.assertEqual(response.headers.get('Content-Disposition'), 'attachment; filename={}'.format(u.file_name))
+
+        # view file as visitor
+        self.logout()
+
+        response = self.client.get(flask.url_for('visitor.upload-view', id=u.id, filename=u.file_name))
+        self.assertEqual(content, response.data)
+        self.assertEqual(response.headers.get('Content-Disposition'), 'attachment; filename={}'.format(u.file_name))
+
     def test_upload_not_admin_ko(self):
         self.assertEqual(UploadedFile.query.count(), self.num_uploads)
         self.logout()
@@ -62,7 +94,7 @@ class TestCategories(TestFlask):
         self.assertEqual(UploadedFile.query.count(), self.num_uploads)
 
     def test_delete_file_not_admin_ko(self):
-        # upload file first (as admin)
+        # upload file (as admin)
         desc = 'a description'
         fname = 'tmp.jpg'
 

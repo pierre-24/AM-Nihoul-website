@@ -258,3 +258,22 @@ class TestPage(TestFlask):
 
         self.assertEqual(Page.query.count(), self.num_pages)
         self.assertIsNotNone(Page.query.get(self.unprotected_page.id))
+
+    def test_visitor_view_ok(self):
+        title = 'a special title'
+        content = 'test with a very special content: "pôtichat"!'
+
+        p = Page.create(title, content)
+        db.session.add(p)
+        db.session.commit()
+
+        # view as admin
+        response = self.client.get(flask.url_for('visitor.page-view', id=p.id, slug=p.slug))
+        self.assertIn(title, response.get_data(as_text=True))
+        self.assertIn(content, response.get_data(as_text=True))
+
+        # view as visitor
+        self.logout()
+        response = self.client.get(flask.url_for('visitor.page-view', id=p.id, slug=p.slug))
+        self.assertIn(title, response.get_data(as_text=True))
+        self.assertIn(content, response.get_data(as_text=True))
