@@ -223,3 +223,21 @@ def receive_newsletter_title_set(target, value, oldvalue, initiator):
     """Set the slug accordingly, but only if it is a draft"""
     if target.draft:
         target.slug = slugify.slugify(value)
+
+
+class Email(BaseModel):
+    title = db.Column(db.VARCHAR(length=150), nullable=False)
+    content = db.Column(db.Text(), nullable=False)
+    sent = db.Column(db.Boolean(), default=False, nullable=False)
+
+    recipient_id = db.Column(db.Integer, db.ForeignKey('newsletter_recipient.id'))
+    recipient = db.relationship('NewsletterRecipient')
+
+    @classmethod
+    def create(cls, title, content, recipient_id):
+        o = cls()
+        o.title = title
+        o.content = content
+        o.recipient_id = recipient_id
+
+        return o

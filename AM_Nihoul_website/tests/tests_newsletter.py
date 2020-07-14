@@ -1,7 +1,8 @@
 import flask
+import datetime
 
-from AM_Nihoul_website import db
-from AM_Nihoul_website.visitor.models import NewsletterRecipient
+from AM_Nihoul_website import db, settings, bot
+from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email
 from AM_Nihoul_website.tests import TestFlask
 
 
@@ -41,6 +42,9 @@ class TestNewsletter(TestFlask):
         self.assertEqual(r.email, email)
         self.assertFalse(r.confirmed)
 
+        # an email was sent:
+        self.assertEqual(1, Email.query.filter(Email.recipient_id.is_(r.id)).count())
+
     def test_subscribe_first_step_already_in_ko(self):
         name = 'test3'
 
@@ -58,6 +62,9 @@ class TestNewsletter(TestFlask):
         self.assertEqual(
             1,
             NewsletterRecipient.query.filter(NewsletterRecipient.email.is_(self.subscribed_first_step.email)).count())
+
+        # no email was sent
+        self.assertEqual(0, Email.query.filter(Email.recipient_id.is_(self.subscribed_first_step.id)).count())
 
     def test_subscribe_second_step_ok(self):
         self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
@@ -89,10 +96,7 @@ class TestNewsletter(TestFlask):
         wrong_hash = self.subscribed_first_step.hash
         wrong_hash = wrong_hash[:-1] + ('a' if wrong_hash[-1] != 'a' else 'b')
 
-        self.client.get(flask.url_for(
-            'visitor.newsletter-confirm',
-            id=self.subscribed_first_step.id,
-            hash=wrong_hash))
+        self.client.get(flask.url_for('visitor.newsletter-confirm', id=self.subscribed_first_step.id, hash=wrong_hash))
 
         r = NewsletterRecipient.query.get(self.subscribed_first_step.id)
         self.assertFalse(r.confirmed)
@@ -103,10 +107,47 @@ class TestNewsletter(TestFlask):
         wrong_hash = self.subscribed_first_step.hash
         wrong_hash = wrong_hash[:-1] + ('a' if wrong_hash[-1] != 'a' else 'b')
 
-        self.client.get(flask.url_for(
-            'visitor.newsletter-unsubscribe',
-            id=self.subscribed.id,
-            hash=wrong_hash))
+        self.client.get(flask.url_for('visitor.newsletter-unsubscribe', id=self.subscribed.id, hash=wrong_hash))
 
         self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
         self.assertIsNotNone(NewsletterRecipient.query.get(self.subscribed.id))
+
+    def test_removed_by_bot_ok(self):
+        self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
+        self.subscribed_first_step.date_created -= settings.APP_CONFIG['REMOVE_RECIPIENTS_DELTA']
+        self.subscribed_first_step.date_created -= datetime.timedelta(seconds=1)  # now I'm sure it's good!
+
+        bot.bot_iteration()
+
+        self.assertEqual(self.num_recipients - 1, NewsletterRecipient.query.count())
+        self.assertIsNone(NewsletterRecipient.query.get(self.subscribed_first_step.id))
+
+    def test_not_removed_by_bot_above_limit_ok(self):
+        self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
+
+        bot.bot_iteration()
+
+        self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
+        self.assertIsNotNone(NewsletterRecipient.query.get(self.subscribed_first_step.id))
+
+    def test_not_removed_by_bot_confirmed_ok(self):
+        self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
+
+        self.subscribed.date_created -= settings.APP_CONFIG['REMOVE_RECIPIENTS_DELTA']
+        self.subscribed.date_created -= datetime.timedelta(seconds=1)  # now I'm sure it's good!
+
+        bot.bot_iteration()
+
+        self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
+        self.assertIsNotNone(NewsletterRecipient.query.get(self.subscribed.id))
+
+    def test_sent_by_bot(self):
+        # add an email
+        e = Email.create('test', 'test', recipient_id=self.subscribed_first_step.id)
+        self.assertFalse(e.sent)
+        db.session.add(e)
+        db.session.commit()
+
+        bot.bot_iteration()
+
+        self.assertTrue(Email.query.get(e.id).sent)

@@ -3,7 +3,7 @@ from flask import Blueprint, views
 
 from AM_Nihoul_website import db, settings
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
-from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter
+from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email
 from AM_Nihoul_website.visitor.forms import NewsletterForm
 
 visitor_blueprint = Blueprint('visitor', __name__)
@@ -99,6 +99,10 @@ class NewsletterRegisterView(BaseMixin, FormView):
             )
 
             print(t)
+
+            e = Email.create('Inscription à la newsletter', t, r.id)
+            db.session.add(e)
+            db.session.commit()
 
         # done on purpose, so that nobody knows if a given address has subscribed or not:
         flask.flash(

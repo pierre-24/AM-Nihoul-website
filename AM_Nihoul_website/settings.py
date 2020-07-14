@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 DATA_DIRECTORY = 'data/'
 
@@ -16,6 +17,9 @@ APP_CONFIG = {
 
     # upload
     'UPLOADED_UPLOADS_DEST': os.path.join(DATA_DIRECTORY, 'uploads/'),
+
+    # newsletter
+    'REMOVE_RECIPIENTS_DELTA': timedelta(days=1)
 }
 
 WEBPAGE_INFO = {
