@@ -180,13 +180,15 @@ class NewsletterRecipient(BaseModel):
     name = db.Column(db.VARCHAR(length=150), nullable=False)
     email = db.Column(db.Text(), nullable=False)
     hash = db.Column(db.VARCHAR(length=150), nullable=False)
+    confirmed = db.Column(db.Boolean, default=False, nullable=False)
 
     @classmethod
-    def create(cls, name, email):
+    def create(cls, name, email, confirmed=False):
         o = cls()
         o.name = name
         o.email = email
         o.hash = secrets.token_urlsafe(nbytes=16)
+        o.confirmed = confirmed
 
         return o
 

@@ -80,8 +80,6 @@ class NewsletterRegisterView(BaseMixin, FormView):
     form_class = NewsletterForm
     template_name = 'newsletter-in.html'
 
-    DEBUG = True
-
     def form_valid(self, form):
 
         if NewsletterRecipient.query.filter(NewsletterRecipient.email == form.email.data).count() == 0:
@@ -102,7 +100,9 @@ class NewsletterRegisterView(BaseMixin, FormView):
 
             print(t)
 
-        flask.flash('Vous êtes bien inscrit à la newsletter')
+        # done on purpose, so that nobody knows if a given address has subscribed or not:
+        flask.flash(
+            'Nous vous avons envoyé un mail. Consultez-le pour confirmer votre inscription à notre newsletter.')
         self.success_url = flask.url_for('visitor.index')
 
         return super().form_valid(form)
@@ -112,19 +112,8 @@ visitor_blueprint.add_url_rule(
     '/newsletter.html', view_func=NewsletterRegisterView.as_view(name='newsletter-subscribe'))
 
 
-class NewsletterUnregisterView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
-    template_name = 'newsletter-out.html'
+class BaseNewsletterMixin(BaseMixin, ObjectManagementMixin, views.View):
     model = NewsletterRecipient
-
-    def get(self, *args, **kwargs):
-        self.get_object_or_abort(*args, **kwargs)
-
-        # fetch and delete
-        db.session.delete(self.object)
-        db.session.commit()
-
-        # and go
-        return super().get(*args, **kwargs)
 
     def get_object_or_abort(self, error_code=404, *args, **kwargs):
         super().get_object_or_abort(error_code, *args, **kwargs)
@@ -132,10 +121,49 @@ class NewsletterUnregisterView(BaseMixin, ObjectManagementMixin, RenderTemplateV
         if self.object.hash != kwargs.get('hash'):
             flask.abort(error_code)
 
+    def get(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    def dispatch_request(self, *args, **kwargs):
+        if flask.request.method == 'GET':
+            return self.get(*args, **kwargs)
+        else:
+            flask.abort(403)
+
+
+class NewsletterSubscribeConfirmView(BaseNewsletterMixin):
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+
+        self.object.confirmed = True
+        db.session.add(self.object)
+        db.session.commit()
+
+        flask.flash('Votre inscription à la newsletter est bien confirmée, merci !')
+        return flask.redirect(flask.url_for('visitor.index'))
+
+
+visitor_blueprint.add_url_rule(
+    '/newsletter-confirmation-<int:id>-<string:hash>.html',
+    view_func=NewsletterSubscribeConfirmView.as_view(name='newsletter-confirm'))
+
+
+class NewsletterUnsubscribeView(BaseNewsletterMixin):
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+
+        db.session.delete(self.object)
+        db.session.commit()
+
+        flask.flash('Vous êtes bien désinscrit, vous ne recevrez plus de message de notre part.')
+        return flask.redirect(flask.url_for('visitor.index'))
+
 
 visitor_blueprint.add_url_rule(
     '/newsletter-out-<int:id>-<string:hash>.html',
-    view_func=NewsletterUnregisterView.as_view(name='newsletter-unsubscribe'))
+    view_func=NewsletterUnsubscribeView.as_view(name='newsletter-unsubscribe'))
 
 
 class NewsletterView(BaseMixin, ObjectManagementMixin, RenderTemplateView):

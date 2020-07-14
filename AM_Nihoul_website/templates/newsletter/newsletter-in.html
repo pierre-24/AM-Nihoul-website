@@ -1,9 +1,12 @@
 {% extends 'newsletter/base.ex.html' %}
+{% set no_unsubscribe=True %}
 
 {% block content %}
     <p>Bonjour, {{ name }}</p>
     <p>
-        Vous êtes maintenant inscrit à notre newsletter.
-        Merci pour votre inscription, nous vous donnerons vite de nos nouvelles !
+        Vous avez été inscrit à notre newsletter. Si c'est une erreur, <b>vous ne devez rien faire</b>.
+        Dans le cas contraire, vous avez 24 heures pour <b>confirmer votre inscription</b> en cliquant sur le lien suivant:
+        <a href="{{ url_for('visitor.newsletter-confirm', id=rid, hash=rhash) }}">{{ url_for('visitor.newsletter-confirm', id=rid, hash=rhash) }}</a>
+        (faites un copier-coller si le lien ne peut être cliqué).
     </p>
 {% endblock %}

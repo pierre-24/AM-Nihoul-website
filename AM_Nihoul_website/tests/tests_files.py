@@ -5,7 +5,7 @@ from AM_Nihoul_website.visitor.models import UploadedFile
 from AM_Nihoul_website.tests import TestFlask
 
 
-class TestCategories(TestFlask):
+class TestFiles(TestFlask):
 
     def setUp(self):
         super().setUp()
@@ -16,7 +16,7 @@ class TestCategories(TestFlask):
         self.num_uploads = UploadedFile.query.count()
         self.login()
 
-    def test_upload_ok(self):
+    def test_upload_and_delete_ok(self):
         self.assertEqual(UploadedFile.query.count(), self.num_uploads)
 
         desc = 'a description'
