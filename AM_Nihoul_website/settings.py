@@ -3,6 +3,8 @@ from datetime import timedelta
 
 DATA_DIRECTORY = 'data/'
 
+LOGLEVEL = 'INFO'
+
 APP_CONFIG = {
     # Flask secret key: generate a new one with
     # `python -c "import random; print(repr(''.join([chr(random.randrange(32, 126)) for _ in range(24)])))"`

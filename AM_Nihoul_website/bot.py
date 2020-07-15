@@ -4,6 +4,10 @@ import logging
 from AM_Nihoul_website import db, settings
 from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email
 
+logging.basicConfig(level=settings.LOGLEVEL, format='%(asctime)s (%(levelname)s) %(message)s')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 
 def bot_iteration():
     """The bot handles:
@@ -19,7 +23,7 @@ def bot_iteration():
         .all()
 
     for r in recipients:
-        logging.debug('removing {} (id={})'.format(r.get_scrambled_email(), r.id))
+        logger.info('clean-recipients:: removed {} (id={})'.format(r.get_scrambled_email(), r.id))
         db.session.delete(r)
 
     # send emails
@@ -28,7 +32,10 @@ def bot_iteration():
         .all()
 
     for e in emails:
-        e.sent = True  # TODO: actually send something
+        e.sent = True
+        # TODO: actually send something
+        logger.info('email:: sent `{}` to {} (id={}, recipient.id={})'.format(
+            e.title, e.recipient.get_scrambled_email(), e.id, e.recipient.id))
         db.session.add(e)
 
     if len(recipients) > 0 or len(emails) > 0:

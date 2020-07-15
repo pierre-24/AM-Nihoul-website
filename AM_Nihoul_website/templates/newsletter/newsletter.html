@@ -1,0 +1,10 @@
+{% extends 'newsletter/base.ex.html' %}
+
+{% block content %}
+    <p>
+        Vous pouvez directement consulter ce contenu à l'adresse suivante:
+        <a href="{{ url_for('visitor.newsletter-view', id=nid, slug=nslug) }}">{{ url_for('visitor.newsletter-view', id=nid, slug=nslug) }}</a>.
+    </p>
+
+    {{ newsletter_content|safe }}
+{% endblock %}

@@ -9,7 +9,7 @@ from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView
     DeleteObjectView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm, \
     NewsletterPublishForm
-from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient, Newsletter
+from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient, Newsletter, Email
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -450,7 +450,7 @@ admin_blueprint.add_url_rule(
     '/newsletter-suppression-<int:id>.html', view_func=NewsletterDeleteView.as_view('newsletter-delete'))
 
 
-class NewsletterPublishView(ObjectManagementMixin, FormView):
+class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
     form_class = NewsletterPublishForm
     model = Newsletter
 
@@ -472,7 +472,26 @@ class NewsletterPublishView(ObjectManagementMixin, FormView):
             db.session.add(self.object)
             db.session.commit()
 
-            # TODO: emailing stuff
+            # schedule emailing
+            recipients = NewsletterRecipient.query.filter(NewsletterRecipient.confirmed.is_(True)).all()
+            for r in recipients:
+                e = Email.create(
+                    'Newsletter: {}'.format(self.object.title),
+                    flask.render_template(
+                        'newsletter/newsletter.html',
+                        **{
+                            'site_name': settings.WEBPAGE_INFO['site_name'],
+                            'nid': self.object.id,
+                            'nslug': self.object.slug,
+                            'newsletter_content': self.object.content,
+                            'rid': r.id,
+                            'rhash': r.hash
+                        }
+                    ),
+                    r.id)
+                db.session.add(e)
+
+            db.session.commit()
 
             flask.flash('Newsletter "{}" publiée.'.format(self.object.title))
 

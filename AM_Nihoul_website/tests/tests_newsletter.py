@@ -174,6 +174,7 @@ class TestNewsletter(TestFlask):
 
         self.num_recipients = NewsletterRecipient.query.count()
         self.num_newsletter = Newsletter.query.count()
+        self.num_email = Email.query.count()
         self.login()
 
     def test_create_newsletter_ok(self):
@@ -220,6 +221,40 @@ class TestNewsletter(TestFlask):
         response = self.client.get(flask.url_for('admin.newsletter-view', id=self.draft_newsletter.id))
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.draft_newsletter.title, response.get_data(as_text=True))
+
+    def test_view_newsletter_not_admin_ko(self):
+        self.logout()
+
+        response = self.client.get(flask.url_for('admin.newsletter-view', id=self.draft_newsletter.id))
+        self.assertEqual(response.status_code, 302)
+
+    def test_view_newsletter_ok(self):
+        # admin
+        response = self.client.get(flask.url_for(
+            'visitor.newsletter-view', id=self.published_newsletter.id, slug=self.published_newsletter.slug))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.published_newsletter.content, response.get_data(as_text=True))
+
+        # visitor
+        self.logout()
+        response = self.client.get(flask.url_for(
+            'visitor.newsletter-view', id=self.published_newsletter.id, slug=self.published_newsletter.slug))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.published_newsletter.content, response.get_data(as_text=True))
+
+    def test_visit_draft_newsletter_ko(self):
+        # admin
+        response = self.client.get(flask.url_for(
+            'visitor.newsletter-view', id=self.draft_newsletter.id, slug=self.draft_newsletter.slug))
+        self.assertEqual(response.status_code, 404)
+
+        # visitor
+        self.logout()
+        response = self.client.get(flask.url_for(
+            'visitor.newsletter-view', id=self.draft_newsletter.id, slug=self.draft_newsletter.slug))
+        self.assertEqual(response.status_code, 404)
 
     def test_edit_newsletter_draft_ok(self):
         title = 'this is a new title'
@@ -303,3 +338,30 @@ class TestNewsletter(TestFlask):
 
         self.assertEqual(self.num_newsletter, Newsletter.query.count())
         self.assertIsNotNone(Newsletter.query.get(self.draft_newsletter.id))
+
+    def test_publish_newsletter_ok(self):
+        self.assertTrue(self.draft_newsletter.draft)
+
+        response = self.client.post(
+            flask.url_for('admin.newsletter-publish', id=self.draft_newsletter.id), data={'confirm': True})
+
+        self.assertEqual(response.status_code, 302)
+
+        n = Newsletter.query.get(self.draft_newsletter.id)
+        self.assertFalse(n.draft)
+
+        self.assertEqual(self.num_email + 1, Email.query.count())
+        e = Email.query.order_by(Email.id.desc()).first()
+        self.assertEqual(e.recipient, self.subscribed)
+
+    def test_publish_newsletter_not_admin_ko(self):
+        self.assertTrue(self.draft_newsletter.draft)
+        self.logout()
+
+        response = self.client.post(
+            flask.url_for('admin.newsletter-publish', id=self.draft_newsletter.id), data={'confirm': True})
+
+        self.assertEqual(response.status_code, 302)
+
+        n = Newsletter.query.get(self.draft_newsletter.id)
+        self.assertTrue(n.draft)

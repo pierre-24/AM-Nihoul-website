@@ -88,19 +88,18 @@ class NewsletterRegisterView(BaseMixin, FormView):
             db.session.add(r)
             db.session.commit()
 
-            t = flask.render_template(
-                'newsletter/newsletter-in.html',
-                **{
-                    'name': form.name.data,
-                    'site_name': settings.WEBPAGE_INFO['site_name'],
-                    'rid': r.id,
-                    'rhash': r.hash
-                }
-            )
-
-            print(t)
-
-            e = Email.create('Inscription à la newsletter', t, r.id)
+            e = Email.create(
+                'Inscription à la newsletter',
+                flask.render_template(
+                    'newsletter/newsletter-in.html',
+                    **{
+                        'name': form.name.data,
+                        'site_name': settings.WEBPAGE_INFO['site_name'],
+                        'rid': r.id,
+                        'rhash': r.hash
+                    }
+                ),
+                r.id)
             db.session.add(e)
             db.session.commit()
 
