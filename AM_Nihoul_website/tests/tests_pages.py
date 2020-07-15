@@ -37,7 +37,7 @@ class TestPage(TestFlask):
 
         response = self.client.post(flask.url_for('admin.page-create'), data={
             'title': title,
-            'text': text,
+            'content': text,
             'category': -1
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
@@ -60,7 +60,7 @@ class TestPage(TestFlask):
 
         response = self.client.post(flask.url_for('admin.page-create'), data={
             'title': title,
-            'text': text,
+            'content': text,
             'category': -1
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
@@ -75,7 +75,7 @@ class TestPage(TestFlask):
 
         response = self.client.post(flask.url_for('admin.page-create'), data={
             'title': title,
-            'text': text,
+            'content': text,
             'category': self.category.id
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
@@ -103,7 +103,7 @@ class TestPage(TestFlask):
             flask.url_for('admin.page-edit', id=self.unprotected_page.id, slug=self.unprotected_page.slug),
             data={
                 'title': new_title,
-                'text': new_text,
+                'content': new_text,
                 'category': self.unprotected_page.category_id
             }, follow_redirects=False)
 
@@ -126,7 +126,7 @@ class TestPage(TestFlask):
             flask.url_for('admin.page-edit', id=self.unprotected_page.id, slug=self.unprotected_page.slug),
             data={
                 'title': new_title,
-                'text': new_text,
+                'content': new_text,
                 'category': self.unprotected_page.category_id
             }, follow_redirects=False)
 
@@ -152,7 +152,7 @@ class TestPage(TestFlask):
             flask.url_for('admin.page-edit', id=self.protected_page.id, slug=self.protected_page.slug),
             data={
                 'title': new_title,
-                'text': new_text,
+                'content': new_text,
                 'category': self.protected_page.category_id
             }, follow_redirects=False)
 
@@ -178,7 +178,7 @@ class TestPage(TestFlask):
             flask.url_for('admin.page-edit', id=self.page_with_cat.id, slug=self.page_with_cat.slug),
             data={
                 'title': new_title,
-                'text': new_text,
+                'content': new_text,
                 'category': self.category.id
             }, follow_redirects=False)
 
@@ -203,7 +203,7 @@ class TestPage(TestFlask):
             flask.url_for('admin.page-edit', id=self.page_with_cat.id, slug=self.page_with_cat.slug),
             data={
                 'title': self.page_with_cat.title,
-                'text': self.page_with_cat.content,
+                'content': self.page_with_cat.content,
                 'category': cat.id
             }, follow_redirects=False)
 

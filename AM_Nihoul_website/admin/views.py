@@ -128,7 +128,7 @@ class PageEditView(ObjectManagementMixin, BasePageEditView):
 
     def form_valid(self, form):
         self.object.title = form.title.data
-        self.object.content = form.text.data
+        self.object.content = form.content.data
         self.object.category_id = form.category.data if form.category.data >= 0 else None
 
         db.session.add(self.object)
@@ -147,7 +147,7 @@ admin_blueprint.add_url_rule(
 class PageCreateView(BasePageEditView):
 
     def form_valid(self, form):
-        page = Page.create(form.title.data, form.text.data)
+        page = Page.create(form.title.data, form.content.data)
 
         if form.category.data >= 0:
             page.category_id = form.category.data
@@ -397,7 +397,7 @@ class NewsletterEditView(ObjectManagementMixin, BaseNewsletterEditView):
 
     def form_valid(self, form):
         self.object.title = form.title.data
-        self.object.content = form.text.data
+        self.object.content = form.content.data
 
         db.session.add(self.object)
         db.session.commit()
@@ -419,7 +419,7 @@ admin_blueprint.add_url_rule(
 class NewsletterCreateView(BaseNewsletterEditView):
 
     def form_valid(self, form):
-        newsletter = Newsletter.create(form.title.data, form.text.data)
+        newsletter = Newsletter.create(form.title.data, form.content.data)
 
         db.session.add(newsletter)
         db.session.commit()
@@ -438,7 +438,7 @@ admin_blueprint.add_url_rule(
     '/newsletter-nouveau.html', view_func=NewsletterCreateView.as_view(name='newsletter-create'))
 
 
-class NewsletterDeleteView(DeleteObjectView):
+class NewsletterDeleteView(AdminBaseMixin, DeleteObjectView):
     model = Newsletter
 
     def post_deletion(self, obj):
@@ -483,7 +483,7 @@ admin_blueprint.add_url_rule(
     '/newsletter-publie-<int:id>.html', view_func=NewsletterPublishView.as_view('newsletter-publish'))
 
 
-class NewsletterView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
+class NewsletterView(AdminBaseMixin, ObjectManagementMixin, RenderTemplateView):
     template_name = 'admin/newsletter.html'
     model = Newsletter
 

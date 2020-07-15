@@ -21,7 +21,7 @@ class TrumbowygTextarea(f.widgets.TextArea):
 class PageEditForm(FlaskForm):
     title = f.StringField(
         'Titre', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
-    text = f.TextAreaField('Texte', widget=TrumbowygTextarea())
+    content = f.TextAreaField('Texte', widget=TrumbowygTextarea())
     category = f.SelectField('Catégorie', coerce=int)
 
     submit_button = f.SubmitField('Enregistrer')
@@ -46,7 +46,7 @@ class UploadForm(FlaskForm):
 class NewsletterEditForm(FlaskForm):
     title = f.StringField(
         'Titre', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
-    text = f.TextAreaField('Texte', widget=TrumbowygTextarea())
+    content = f.TextAreaField('Texte', widget=TrumbowygTextarea())
 
     submit_button = f.SubmitField('Enregistrer')
     submit_button_2 = f.SubmitField('Enregistrer et prévisualiser')

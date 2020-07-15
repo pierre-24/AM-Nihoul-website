@@ -1,6 +1,7 @@
 import os
 import secrets
 import slugify
+import datetime
 
 from sqlalchemy import event
 
@@ -209,11 +210,15 @@ class Newsletter(BaseModel):
     date_published = db.Column(db.DateTime)
 
     @classmethod
-    def create(cls, title, content):
+    def create(cls, title, content, draft=True):
         o = cls()
-        o.draft = True
+        o.draft = draft
         o.title = title
         o.content = content
+
+        if not draft:
+            o.slug = slugify.slugify(title)
+            o.date_published = datetime.datetime.now()
 
         return o
 

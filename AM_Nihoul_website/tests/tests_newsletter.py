@@ -2,11 +2,11 @@ import flask
 import datetime
 
 from AM_Nihoul_website import db, settings, bot
-from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email
+from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email, Newsletter
 from AM_Nihoul_website.tests import TestFlask
 
 
-class TestNewsletter(TestFlask):
+class TestNewsletterRecipient(TestFlask):
 
     def setUp(self):
         super().setUp()
@@ -151,3 +151,155 @@ class TestNewsletter(TestFlask):
         bot.bot_iteration()
 
         self.assertTrue(Email.query.get(e.id).sent)
+
+
+class TestNewsletter(TestFlask):
+
+    def setUp(self):
+        super().setUp()
+
+        self.subscribed_first_step = NewsletterRecipient.create('test1', 'x1@yz.com')
+        self.subscribed = NewsletterRecipient.create('test2', 'x2@yz.com', confirmed=True)
+
+        db.session.add(self.subscribed_first_step)
+        db.session.add(self.subscribed)
+
+        self.draft_newsletter = Newsletter.create('test1', 'content of test1')
+        self.published_newsletter = Newsletter.create('test2', 'content of test2', draft=False)
+
+        db.session.add(self.draft_newsletter)
+        db.session.add(self.published_newsletter)
+
+        db.session.commit()
+
+        self.num_recipients = NewsletterRecipient.query.count()
+        self.num_newsletter = Newsletter.query.count()
+        self.login()
+
+    def test_create_newsletter_ok(self):
+        self.assertEqual(self.num_newsletter, Newsletter.query.count())
+
+        title = 'this is a new title'
+        content = 'this is a new text'
+
+        response = self.client.post(
+            flask.url_for('admin.newsletter-create'),
+            data={
+                'title': title,
+                'content': content
+            }, follow_redirects=False)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.num_newsletter + 1, Newsletter.query.count())
+
+        n = Newsletter.query.order_by(Newsletter.id.desc()).first()
+        self.assertEqual(n.title, title)
+        self.assertEqual(n.content, content)
+        self.assertTrue(n.draft)
+
+    def test_create_newsletter_not_admin_ko(self):
+        self.assertEqual(self.num_newsletter, Newsletter.query.count())
+        self.logout()
+
+        title = 'this is a new title'
+        content = 'this is a new text'
+
+        response = self.client.post(
+            flask.url_for('admin.newsletter-create'),
+            data={
+                'title': title,
+                'content': content
+            }, follow_redirects=False)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.num_newsletter, Newsletter.query.count())
+
+    def test_view_newsletter_admin_ok(self):
+        self.assertEqual(self.num_newsletter, Newsletter.query.count())
+
+        response = self.client.get(flask.url_for('admin.newsletter-view', id=self.draft_newsletter.id))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.draft_newsletter.title, response.get_data(as_text=True))
+
+    def test_edit_newsletter_draft_ok(self):
+        title = 'this is a new title'
+        content = 'this is a new text'
+
+        old_slug = self.draft_newsletter.slug
+
+        response = self.client.post(
+            flask.url_for(
+                'admin.newsletter-edit', id=self.draft_newsletter.id, slug=self.draft_newsletter.slug),
+            data={
+                'title': title,
+                'content': content
+            }, follow_redirects=False)
+
+        self.assertEqual(response.status_code, 302)
+
+        n = Newsletter.query.get(self.draft_newsletter.id)
+        self.assertEqual(n.title, title)
+        self.assertEqual(n.content, content)
+        self.assertNotEqual(n.slug, old_slug)
+
+    def test_edit_newsletter_draft_not_admin_ko(self):
+        title = 'this is a new title'
+        content = 'this is a new text'
+        self.logout()
+
+        old_slug = self.draft_newsletter.slug
+
+        response = self.client.post(
+            flask.url_for(
+                'admin.newsletter-edit', id=self.draft_newsletter.id, slug=self.draft_newsletter.slug),
+            data={
+                'title': title,
+                'content': content
+            }, follow_redirects=False)
+
+        self.assertEqual(response.status_code, 302)
+
+        n = Newsletter.query.get(self.draft_newsletter.id)
+        self.assertNotEqual(n.title, title)
+        self.assertNotEqual(n.content, content)
+        self.assertEqual(n.slug, old_slug)
+
+    def test_edit_newsletter_published_ok(self):
+        title = 'this is a new title'
+        content = 'this is a new text'
+
+        old_slug = self.published_newsletter.slug
+
+        response = self.client.post(
+            flask.url_for(
+                'admin.newsletter-edit', id=self.published_newsletter.id, slug=self.published_newsletter.slug),
+            data={
+                'title': title,
+                'content': content
+            }, follow_redirects=False)
+
+        self.assertEqual(response.status_code, 302)
+
+        n = Newsletter.query.get(self.published_newsletter.id)
+        self.assertEqual(n.title, title)
+        self.assertEqual(n.content, content)
+        self.assertEqual(n.slug, old_slug)  # slug does not change, as it is published
+
+    def test_delete_newsletter_ok(self):
+        self.assertEqual(self.num_newsletter, Newsletter.query.count())
+
+        response = self.client.delete(flask.url_for('admin.newsletter-delete', id=self.draft_newsletter.id))
+        self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(self.num_newsletter - 1, Newsletter.query.count())
+        self.assertIsNone(Newsletter.query.get(self.draft_newsletter.id))
+
+    def test_delete_newsletter_not_admin_ko(self):
+        self.assertEqual(self.num_newsletter, Newsletter.query.count())
+        self.logout()
+
+        response = self.client.delete(flask.url_for('admin.newsletter-delete', id=self.draft_newsletter.id))
+        self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(self.num_newsletter, Newsletter.query.count())
+        self.assertIsNotNone(Newsletter.query.get(self.draft_newsletter.id))
