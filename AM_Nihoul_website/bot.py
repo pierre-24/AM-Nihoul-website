@@ -1,5 +1,6 @@
 from datetime import datetime
 import logging
+import os
 
 from AM_Nihoul_website import db, settings
 from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email
@@ -7,6 +8,21 @@ from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email
 logging.basicConfig(level=settings.LOGLEVEL, format='%(asctime)s (%(levelname)s) %(message)s')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+
+class FakeMailClient:
+
+    OUT = os.path.join(settings.DATA_DIRECTORY, 'fake_mail_out.txt')
+
+    def __init__(self):
+        pass
+
+    def send_message(self, to, sender, subject, msg_html, **kwargs):
+        with open(self.OUT, 'w') as f:
+            f.write('====\nSUBJECT: {}\nTO: {}\nON: {}\n====\n{}'.format(subject, to, datetime.now(), msg_html))
+
+
+client = FakeMailClient()
 
 
 def bot_iteration():
@@ -33,7 +49,16 @@ def bot_iteration():
 
     for e in emails:
         e.sent = True
-        # TODO: actually send something
+
+        data = {
+            'to': e.recipient.email,
+            'sender': settings.APP_CONFIG['NEWSLETTER_SENDER_EMAIL'],
+            'subject': e.title,
+            'msg_html': e.content
+        }
+
+        client.send_message(**data)
+
         logger.info('email:: sent `{}` to {} (id={}, recipient.id={})'.format(
             e.title, e.recipient.get_scrambled_email(), e.id, e.recipient.id))
         db.session.add(e)

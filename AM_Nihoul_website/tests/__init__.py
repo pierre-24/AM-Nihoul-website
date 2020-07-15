@@ -2,10 +2,11 @@ import tempfile
 from unittest import TestCase
 import shutil
 import os
+from flask_uploads import configure_uploads
 
 import flask
 
-from AM_Nihoul_website import create_app, settings, db
+from AM_Nihoul_website import create_app, settings, db, uploads_set, bot
 
 
 class TestFlask(TestCase):
@@ -17,9 +18,14 @@ class TestFlask(TestCase):
         self.app.config['WTF_CSRF_ENABLED'] = False
         self.app.config['SERVER_NAME'] = 'local.domain'
 
-        # use temp directory
+        # use temp directory for everything
         self.data_files_directory = tempfile.mkdtemp()
         settings.DATA_DIRECTORY = self.data_files_directory
+
+        self.app.config['UPLOADED_UPLOADS_DEST'] = os.path.join(self.data_files_directory, 'uploads/')
+        configure_uploads(self.app, (uploads_set,))
+
+        bot.FakeMailClient.OUT = os.path.join(self.data_files_directory, 'out.txt')
 
         # push context
         self.app_context = self.app.app_context()

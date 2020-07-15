@@ -21,7 +21,9 @@ APP_CONFIG = {
     'UPLOADED_UPLOADS_DEST': os.path.join(DATA_DIRECTORY, 'uploads/'),
 
     # newsletter
-    'REMOVE_RECIPIENTS_DELTA': timedelta(days=1)
+    'REMOVE_RECIPIENTS_DELTA': timedelta(days=1),
+    'NEWSLETTER_SENDER_EMAIL': 'xyz@test.com',
+    'USE_FAKE': True,
 }
 
 WEBPAGE_INFO = {
