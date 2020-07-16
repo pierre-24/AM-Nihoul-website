@@ -1,6 +1,9 @@
 install:
 	pip-sync && pip3 install -e .
 
+sync:
+	pip-sync
+
 init-back:
 	export FLASK_APP=AM_Nihoul_website; flask init
 
@@ -18,3 +21,6 @@ run:
 
 test:
 	python -m unittest discover -s AM_Nihoul_website.tests
+
+bot:
+	export FLASK_APP=AM_Nihoul_website; flask bot

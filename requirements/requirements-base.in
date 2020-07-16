@@ -7,4 +7,5 @@ Flask-WTF
 python-slugify
 email_validator
 Flask-Login
-APScheduler
+Flask-APScheduler
+simplegmail

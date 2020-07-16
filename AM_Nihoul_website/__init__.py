@@ -1,5 +1,6 @@
 import os
 import shutil
+import time
 
 import click
 from flask import Flask, current_app
@@ -8,19 +9,17 @@ from flask_sqlalchemy import SQLAlchemy
 import flask_uploads
 from flask_uploads import UploadSet, configure_uploads
 import flask_login
+from flask_apscheduler import APScheduler
 
 from AM_Nihoul_website import settings
 from AM_Nihoul_website.base_filters import filters
 
 
 # init modules
-db = SQLAlchemy()
-
+db = SQLAlchemy(session_options={'expire_on_commit': False})
 uploads_set = UploadSet('uploads', flask_uploads.DEFAULTS)
-
-
-# login manager
 login_manager = flask_login.LoginManager()
+scheduler = APScheduler()
 
 
 class User(flask_login.UserMixin):
@@ -72,16 +71,27 @@ def init_command():
     bootstrap()
 
 
+@click.command('bot')
+@with_appcontext
+def bot_command():
+    from AM_Nihoul_website import bot
+    while True:
+        bot.bot_iteration()
+        time.sleep(settings.APP_CONFIG['JOBS'][0]['seconds'])
+
+
 def create_app():
     app = Flask(__name__)
     app.config.update(settings.APP_CONFIG)
     db.init_app(app)
+    db.app = app
     configure_uploads(app, (uploads_set, ))
     login_manager.init_app(app)
     login_manager.login_view = 'admin.login'  # automatic redirection
 
     # add cli
     app.cli.add_command(init_command)
+    app.cli.add_command(bot_command)
 
     # add blueprint(s)
     from AM_Nihoul_website.visitor.views import visitor_blueprint
@@ -92,5 +102,10 @@ def create_app():
 
     # add filters
     app.jinja_env.filters.update(**filters)
+
+    # launch bot, if any
+    if settings.APP_CONFIG['LAUNCH_BOT']:
+        scheduler.init_app(app)
+        scheduler.start()
 
     return app

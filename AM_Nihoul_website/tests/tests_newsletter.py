@@ -1,9 +1,28 @@
 import flask
 import datetime
+import os
 
+from AM_Nihoul_website.tests import TestFlask
 from AM_Nihoul_website import db, settings, bot
 from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email, Newsletter
-from AM_Nihoul_website.tests import TestFlask
+
+
+class TestFakeMailClient(TestFlask):
+    def test_fake_ok(self):
+        f = bot.FakeMailClient()
+
+        subject = 'test'
+        content = 'test1325'
+        to = 'test@xyz.com'
+        sender = 'me@xyz.com'
+
+        f.send_message(to, sender, subject, content)
+
+        with open(os.path.join(self.data_files_directory, bot.FakeMailClient.OUT)) as f:
+            f_content = f.read()
+            self.assertIn(subject, f_content)
+            self.assertIn(to, f_content)
+            self.assertIn(content, f_content)
 
 
 class TestNewsletterRecipient(TestFlask):
@@ -128,7 +147,9 @@ class TestNewsletterRecipient(TestFlask):
         bot.bot_iteration()
 
         self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
-        self.assertIsNotNone(NewsletterRecipient.query.get(self.subscribed_first_step.id))
+        n = NewsletterRecipient.query.get(self.subscribed_first_step.id)
+        db.session.add(n)
+        self.assertIsNotNone(n)
 
     def test_not_removed_by_bot_confirmed_ok(self):
         self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())

@@ -1,28 +1,21 @@
 from datetime import datetime
 import logging
 import os
+import simplegmail
 
-from AM_Nihoul_website import db, settings
+from AM_Nihoul_website import settings, db
 from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email
 
 logging.basicConfig(level=settings.LOGLEVEL, format='%(asctime)s (%(levelname)s) %(message)s')
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 class FakeMailClient:
-
-    OUT = os.path.join(settings.DATA_DIRECTORY, 'fake_mail_out.txt')
-
-    def __init__(self):
-        pass
+    OUT = 'fake_mail_out.txt'
 
     def send_message(self, to, sender, subject, msg_html, **kwargs):
-        with open(self.OUT, 'w') as f:
+        with open(os.path.join(settings.DATA_DIRECTORY, self.OUT), 'w') as f:
             f.write('====\nSUBJECT: {}\nTO: {}\nON: {}\n====\n{}'.format(subject, to, datetime.now(), msg_html))
-
-
-client = FakeMailClient()
 
 
 def bot_iteration():
@@ -32,36 +25,48 @@ def bot_iteration():
     2. Send emails
     """
 
+    logger.debug('bot_iteration:: tick')
+
     # remove recipients
-    recipients = NewsletterRecipient.query\
-        .filter(NewsletterRecipient.confirmed.is_(False))\
-        .filter(NewsletterRecipient.date_created <= datetime.now() - settings.APP_CONFIG['REMOVE_RECIPIENTS_DELTA'])\
-        .all()
+    with db.app.app_context():
+        recipients = NewsletterRecipient.query\
+            .filter(NewsletterRecipient.confirmed.is_(False))\
+            .filter(
+                NewsletterRecipient.date_created <= datetime.now() - settings.APP_CONFIG['REMOVE_RECIPIENTS_DELTA'])\
+            .all()
 
-    for r in recipients:
-        logger.info('clean-recipients:: removed {} (id={})'.format(r.get_scrambled_email(), r.id))
-        db.session.delete(r)
+        for r in recipients:
+            logger.info('clean-recipients:: removed {} (id={})'.format(r.get_scrambled_email(), r.id))
+            db.session.delete(r)
 
-    # send emails
-    emails = Email.query\
-        .filter(Email.sent.is_(False))\
-        .all()
+        # send emails
+        emails = Email.query\
+            .filter(Email.sent.is_(False))\
+            .all()
 
-    for e in emails:
-        e.sent = True
+        if len(emails) > 0:
+            # get client
+            if settings.APP_CONFIG['USE_FAKE_MAIL_SENDER']:
+                client = FakeMailClient()
+            else:
+                client = simplegmail.Gmail()
 
-        data = {
-            'to': e.recipient.email,
-            'sender': settings.APP_CONFIG['NEWSLETTER_SENDER_EMAIL'],
-            'subject': e.title,
-            'msg_html': e.content
-        }
+            # go for it
+            for e in emails:
+                e.sent = True
 
-        client.send_message(**data)
+                data = {
+                    'to': e.recipient.email,
+                    'sender': settings.APP_CONFIG['NEWSLETTER_SENDER_EMAIL'],
+                    'subject': e.title,
+                    'msg_html': e.content
+                }
 
-        logger.info('email:: sent `{}` to {} (id={}, recipient.id={})'.format(
-            e.title, e.recipient.get_scrambled_email(), e.id, e.recipient.id))
-        db.session.add(e)
+                client.send_message(**data)
 
-    if len(recipients) > 0 or len(emails) > 0:
-        db.session.commit()
+                logger.info('email:: sent `{}` to {} (id={}, recipient.id={})'.format(
+                    e.title, e.recipient.get_scrambled_email(), e.id, e.recipient.id))
+                db.session.add(e)
+
+        if len(recipients) > 0 or len(emails) > 0:
+            db.session.commit()
