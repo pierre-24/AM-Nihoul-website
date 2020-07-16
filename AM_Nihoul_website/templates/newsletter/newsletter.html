@@ -3,7 +3,7 @@
 {% block content %}
     <p>
         Vous pouvez directement consulter ce contenu à l'adresse suivante:
-        <a href="{{ url_for('visitor.newsletter-view', id=nid, slug=nslug) }}">{{ url_for('visitor.newsletter-view', id=nid, slug=nslug) }}</a>.
+        <a href="{{ url_for('visitor.newsletter-view', id=newsletter.id, slug=newsletter.slug) }}">{{ url_for('visitor.newsletter-view', id=newsletter.id, slug=newsletter.slug) }}</a>.
     </p>
 
     {{ newsletter_content|safe }}

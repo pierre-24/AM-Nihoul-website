@@ -6,7 +6,7 @@
     <p>
         Vous avez été inscrit à notre newsletter. Si c'est une erreur, <b>vous ne devez rien faire</b>.
         Dans le cas contraire, vous avez 24 heures pour <b>confirmer votre inscription</b> en cliquant sur le lien suivant:
-        <a href="{{ url_for('visitor.newsletter-confirm', id=rid, hash=rhash) }}">{{ url_for('visitor.newsletter-confirm', id=rid, hash=rhash) }}</a>
+        <a href="{{ url_for('visitor.newsletter-confirm', id=recipient.id, hash=recipient.hash) }}">{{ url_for('visitor.newsletter-confirm', id=recipient.id, hash=recipient.hash) }}</a>
         (faites un copier-coller si le lien ne peut être cliqué).
     </p>
 {% endblock %}

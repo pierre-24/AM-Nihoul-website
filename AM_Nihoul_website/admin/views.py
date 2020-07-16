@@ -481,11 +481,9 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
                         'newsletter/newsletter.html',
                         **{
                             'site_name': settings.WEBPAGE_INFO['site_name'],
-                            'nid': self.object.id,
-                            'nslug': self.object.slug,
+                            'newsletter': self.object,
                             'newsletter_content': self.object.content,
-                            'rid': r.id,
-                            'rhash': r.hash
+                            'recipient': r,
                         }
                     ),
                     r.id)

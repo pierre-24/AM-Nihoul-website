@@ -95,8 +95,7 @@ class NewsletterRegisterView(BaseMixin, FormView):
                     **{
                         'name': form.name.data,
                         'site_name': settings.WEBPAGE_INFO['site_name'],
-                        'rid': r.id,
-                        'rhash': r.hash
+                        'recipient': r,
                     }
                 ),
                 r.id)
@@ -135,6 +134,11 @@ class BaseNewsletterMixin(BaseMixin, ObjectManagementMixin, views.View):
 
 
 class NewsletterSubscribeConfirmView(BaseNewsletterMixin):
+
+    def get_object_or_abort(self, error_code=404, *args, **kwargs):
+        super().get_object_or_abort(error_code, *args, **kwargs)
+        if self.object.confirmed:
+            flask.abort(error_code)
 
     def get(self, *args, **kwargs):
         self.get_object_or_abort(*args, **kwargs)

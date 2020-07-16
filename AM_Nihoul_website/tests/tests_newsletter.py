@@ -97,6 +97,17 @@ class TestNewsletterRecipient(TestFlask):
         r = NewsletterRecipient.query.get(self.subscribed_first_step.id)
         self.assertTrue(r.confirmed)
 
+    def test_subscribe_second_step_already_done_ko(self):
+        self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
+        self.assertTrue(self.subscribed.confirmed)
+
+        response = self.client.get(flask.url_for(
+            'visitor.newsletter-confirm',
+            id=self.subscribed.id,
+            hash=self.subscribed.hash))
+
+        self.assertEqual(response.status_code, 404)
+
     def test_unsubscribe_ok(self):
         self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
 
