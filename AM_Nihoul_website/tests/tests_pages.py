@@ -210,7 +210,7 @@ class TestPage(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         p = Page.query.get(self.page_with_cat.id)
-        self.assertEqual(cat, p.category)
+        self.assertEqual(cat.id, p.category_id)
 
     def test_delete_page_ok(self):
         self.assertEqual(Page.query.count(), self.num_pages)
