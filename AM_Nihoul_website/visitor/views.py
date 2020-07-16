@@ -198,3 +198,15 @@ class NewsletterView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
 
 visitor_blueprint.add_url_rule(
     '/newsletter/<int:id>-<string:slug>.html', view_func=NewsletterView.as_view(name='newsletter-view'))
+
+
+class NewslettersView(BaseMixin, RenderTemplateView):
+    template_name = 'newsletters.html'
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx['newsletters'] = Newsletter.query.order_by(Newsletter.id.desc()).all()
+        return ctx
+
+
+visitor_blueprint.add_url_rule('/newsletters.html', view_func=NewslettersView.as_view(name='newsletters'))

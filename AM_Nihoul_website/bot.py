@@ -14,7 +14,7 @@ class FakeMailClient:
     OUT = 'fake_mail_out.txt'
 
     def send_message(self, to, sender, subject, msg_html, **kwargs):
-        with open(os.path.join(settings.DATA_DIRECTORY, self.OUT), 'w') as f:
+        with open(os.path.join(settings.DATA_DIRECTORY, self.OUT), 'a') as f:
             f.write('====\nSUBJECT: {}\nTO: {}\nON: {}\n====\n{}'.format(subject, to, datetime.now(), msg_html))
 
 

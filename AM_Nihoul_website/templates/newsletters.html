@@ -1,0 +1,20 @@
+{% extends "base.ex.html" %}
+
+{% block page_title %}Newsletters{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Newsletters</h2>
+
+    <table class="admin-list">
+        {% for newsletter in newsletters %}
+            <tr>
+                <td class="left">
+                    <span class="title"><a href="{{ url_for('visitor.newsletter-view', id=newsletter.id, slug=newsletter.slug) }}">{{ newsletter.title }}</a></span>
+                    <span class="info">Publiée {{ newsletter.date_published|date_formatter }}</span>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    </section>
+{% endblock %}
