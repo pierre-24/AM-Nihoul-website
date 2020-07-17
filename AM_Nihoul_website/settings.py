@@ -1,6 +1,9 @@
 import os
+from datetime import timedelta
 
 DATA_DIRECTORY = 'data/'
+
+LOGLEVEL = 'INFO'
 
 APP_CONFIG = {
     # Flask secret key: generate a new one with
@@ -16,6 +19,26 @@ APP_CONFIG = {
 
     # upload
     'UPLOADED_UPLOADS_DEST': os.path.join(DATA_DIRECTORY, 'uploads/'),
+
+    # newsletter
+    'REMOVE_RECIPIENTS_DELTA': timedelta(days=1),
+    'NEWSLETTER_SENDER_EMAIL': 'xyz@test.com',
+    'USE_FAKE_MAIL_SENDER': True,
+    'LAUNCH_BOT': False,
+
+    'JOBS': [
+        {
+            'id': 'bot',
+            'func': 'AM_Nihoul_website:bot.bot_iteration',
+            'trigger': 'interval',
+            'seconds': 60
+        }
+    ],
+
+    'SCHEDULER_JOB_DEFAULTS': {
+        'coalesce': False,
+        'max_instances': 1
+    }
 }
 
 WEBPAGE_INFO = {

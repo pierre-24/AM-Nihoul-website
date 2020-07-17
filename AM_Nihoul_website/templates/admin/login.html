@@ -9,6 +9,7 @@
 
     <form method="post">
         {{ form.csrf_token }}
+        {{ form.next(value=next) }}
         <ul class="fields">
             {{ render_field(form.login) }}
             {{ render_field(form.password) }}

@@ -1,6 +1,8 @@
 import os
-
+import secrets
 import slugify
+import datetime
+
 from sqlalchemy import event
 
 from AM_Nihoul_website import db, uploads_set
@@ -8,6 +10,7 @@ from AM_Nihoul_website.base_models import BaseModel
 
 
 class Category(BaseModel):
+    """Category (of the pages)"""
     name = db.Column(db.VARCHAR(length=150), nullable=False)
     order = db.Column(db.Integer, nullable=False)
 
@@ -64,9 +67,11 @@ class Category(BaseModel):
         db.session.commit()
 
     def up(self):
+        """Increase current order"""
         self._move(1)
 
     def down(self):
+        """Decrease current order"""
         self._move(-1)
 
 
@@ -161,3 +166,83 @@ class UploadedFile(BaseModel):
         }
 
         return icons[self.possible_mime] if self.possible_mime in icons else 'fas fa-file'
+
+
+@event.listens_for(UploadedFile, 'before_delete')
+def after_delete_shop_category(mapper, connect, target):
+    """Remove file before deletion from BDD"""
+    if os.path.exists(target.path()):
+        os.remove(target.path())
+
+
+class NewsletterRecipient(BaseModel):
+    """Recipient of the newsletter"""
+
+    name = db.Column(db.VARCHAR(length=150), nullable=False)
+    email = db.Column(db.Text(), nullable=False)
+    hash = db.Column(db.VARCHAR(length=150), nullable=False)
+    confirmed = db.Column(db.Boolean, default=False, nullable=False)
+
+    @classmethod
+    def create(cls, name, email, confirmed=False):
+        o = cls()
+        o.name = name
+        o.email = email
+        o.hash = secrets.token_urlsafe(nbytes=16)
+        o.confirmed = confirmed
+
+        return o
+
+    def get_scrambled_email(self):
+        n = len(self.name) % 3
+        s = self.email.split('@')
+        return s[0][:1 + n] + '***' + (s[0][n - 3:] if len(s[0]) >= 4 else '') + '@***.' + s[1].split('.')[-1]
+
+
+class Newsletter(BaseModel):
+    """Newsletter
+    """
+
+    title = db.Column(db.VARCHAR(length=150), nullable=False)
+    slug = db.Column(db.VARCHAR(150), nullable=False)
+    content = db.Column(db.Text)
+    draft = db.Column(db.Boolean, default=True)
+    date_published = db.Column(db.DateTime)
+
+    @classmethod
+    def create(cls, title, content, draft=True):
+        o = cls()
+        o.draft = draft
+        o.title = title
+        o.content = content
+
+        if not draft:
+            o.slug = slugify.slugify(title)
+            o.date_published = datetime.datetime.now()
+
+        return o
+
+
+@event.listens_for(Newsletter.title, 'set', named=True)
+def receive_newsletter_title_set(target, value, oldvalue, initiator):
+    """Set the slug accordingly, but only if it is a draft"""
+    if target.draft:
+        target.slug = slugify.slugify(value)
+
+
+class Email(BaseModel):
+    title = db.Column(db.VARCHAR(length=150), nullable=False)
+    content = db.Column(db.Text(), nullable=False)
+    sent = db.Column(db.Boolean(), default=False, nullable=False)
+
+    recipient_id = db.Column(db.Integer, db.ForeignKey('newsletter_recipient.id'))
+    recipient = db.relationship('NewsletterRecipient')
+
+    @classmethod
+    def create(cls, title, content, recipient_id):
+        o = cls()
+        o.title = title
+        o.content = content
+        o.recipient_id = recipient_id
+
+        return o

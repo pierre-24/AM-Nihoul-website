@@ -46,10 +46,37 @@ form {
                 color: #555;
             }
 
+            &.booleanfield label {
+                display: inline;
+                font-weight: normal;
+                color: black;
+            }
+
             input[type=text], input[type=password] {
                 width: 100%;
                 border:1px solid #555;
                 padding: 7px;
+            }
+
+            &.with-error {
+                label {
+                    color: red;
+                }
+
+                input {
+                    border-color: red;
+                }
+            }
+
+            ul.errors {
+                margin: 0;
+                padding: 0;
+
+                li {
+                    display: block;
+                    color: #555;
+                    font-size: 90%;
+                }
             }
 
 
@@ -189,6 +216,13 @@ nav {
             h2 {
                 color: @main-color;
             }
+
+            p.newsletter-info {
+                color: #555;
+                font-size: 90%;
+                background: #fafafa;
+                padding: 8px 0;
+            }
         }
 
         &.admin  {
@@ -299,6 +333,10 @@ table.admin-list {
 
     tr {
         border-top: 1px solid #ddd;
+
+        &.newsletter-draft {
+            background: #fafafa;
+        }
 
         td {
             padding: 16px 0;

@@ -1,7 +1,12 @@
 {% macro render_field(field) %}
-  <li>
+  <li class="{% if field.errors %}with-error{% endif %} {% if field.type == 'BooleanField'  %} booleanfield{% endif %}">
+  {% if field.type == 'BooleanField'  %}
+    {{ field(**kwargs)|safe }}
+    {{ field.label }}
+  {% else %}
     {{ field.label }}
     {{ field(**kwargs)|safe }}
+  {% endif %}
     {% if field.errors %}
         <ul class=errors>
         {% for error in field.errors %}

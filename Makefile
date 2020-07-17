@@ -1,15 +1,15 @@
 install:
-	python setup.py develop
+	pip-sync && pip3 install -e .
+
+sync:
+	pip-sync
 
 init-back:
 	export FLASK_APP=AM_Nihoul_website; flask init
 
 front:
-	mkdir -p AM_Nihoul_website/static
-	lesscpy AM_Nihoul_website/assets/style.less AM_Nihoul_website/static/style.css
-	python -mrjsmin < AM_Nihoul_website/assets/main.js > AM_Nihoul_website/static/main.bundled.js
-	python -mrjsmin < AM_Nihoul_website/assets/editor.js > AM_Nihoul_website/static/editor.bundled.js
-	if [ ! -L "AM_Nihoul_website/static/images" ]; then ln -s ../assets/images AM_Nihoul_website/static; fi;
+	npm i
+	npm run gulp
 
 init: install init-back front
 
@@ -18,3 +18,9 @@ lint:
 
 run:
 	export FLASK_APP=AM_Nihoul_website; export FLASK_DEBUG=1; flask run -h 127.0.0.1 -p 5000
+
+test:
+	python -m unittest discover -s AM_Nihoul_website.tests
+
+bot:
+	export FLASK_APP=AM_Nihoul_website; flask bot

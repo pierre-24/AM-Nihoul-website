@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 
 
 # --- Date formatter:
-__FMT_SMALL = 'd/m/y à H\hi'     # Small format
-__FMT_NORMAL = 'l d F Y à H\hi'    # Normal format
+__FMT_SMALL = 'le %d/%m/%y à %Hh%M'     # Small format
+__FMT_NORMAL = '%A %d %B %Y à %Hh%M'    # Normal format
 
 
 def datetime_from_utc_to_local(utc_datetime):
