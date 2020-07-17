@@ -519,3 +519,16 @@ class NewsletterView(AdminBaseMixin, ObjectManagementMixin, RenderTemplateView):
 
 admin_blueprint.add_url_rule(
     '/newsletter-voir-<int:id>.html', view_func=NewsletterView.as_view(name='newsletter-view'))
+
+
+# --- Menu
+class MenuEditView(AdminBaseMixin, RenderTemplateView):
+    template_name = 'admin/menu.html'
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        return ctx
+
+
+admin_blueprint.add_url_rule('/menu.html', view_func=MenuEditView.as_view(name='menu'))

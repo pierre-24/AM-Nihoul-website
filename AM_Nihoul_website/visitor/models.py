@@ -246,3 +246,22 @@ class Email(BaseModel):
         o.recipient_id = recipient_id
 
         return o
+
+
+class Menu(BaseModel):
+
+    MENU_BIG = 0
+    MENU_SMALL = 1
+
+    text = db.Column(db.Text(), nullable=False)
+    url = db.Column(db.Text(), nullable=False)
+    menu = db.Column(db.Integer, default=MENU_BIG)
+
+    @classmethod
+    def create(cls, text, url, menu=MENU_BIG):
+        o = cls()
+        o.text = text
+        o.url = url
+        o.menu = menu
+
+        return o
