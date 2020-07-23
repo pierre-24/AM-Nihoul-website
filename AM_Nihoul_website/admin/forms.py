@@ -1,6 +1,8 @@
 from flask_wtf import FlaskForm, file as wtf_file
 import wtforms as f
 
+from AM_Nihoul_website.visitor.models import Menu
+
 
 class LoginForm(FlaskForm):
     login = f.StringField('Login', validators=[f.validators.InputRequired()])
@@ -56,3 +58,21 @@ class NewsletterPublishForm(FlaskForm):
     confirm = f.BooleanField(widget=f.widgets.HiddenInput(), default=False)
 
     submit_button = f.SubmitField('Publier')
+
+
+class MenuEditForm(FlaskForm):
+
+    url = f.StringField(
+        'URL', validators=[f.validators.InputRequired(), f.validators.Length(max=150), f.validators.URL()])
+    text = f.StringField('Texte', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
+    position = f.SelectField(
+        'Position',
+        coerce=int,
+        choices=[(Menu.MENU_BIG, 'Grand menu'), (Menu.MENU_SMALL, 'Petit menu')],
+        default=Menu.MENU_BIG)
+    highlight = f.BooleanField('Mise en évidence')
+
+    is_create = f.BooleanField(widget=f.widgets.HiddenInput(), default=False)
+    id_menu = f.IntegerField(widget=f.widgets.HiddenInput(), default=-1)
+
+    submit_button = f.SubmitField('Enregistrer')
