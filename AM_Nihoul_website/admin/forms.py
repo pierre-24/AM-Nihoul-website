@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm, file as wtf_file
 import wtforms as f
 
-from AM_Nihoul_website.visitor.models import Menu
+from AM_Nihoul_website.visitor.models import MenuEntry
 
 
 class LoginForm(FlaskForm):
@@ -68,8 +68,8 @@ class MenuEditForm(FlaskForm):
     position = f.SelectField(
         'Position',
         coerce=int,
-        choices=[(Menu.MENU_BIG, 'Grand menu'), (Menu.MENU_SMALL, 'Petit menu')],
-        default=Menu.MENU_BIG)
+        choices=[(MenuEntry.MENU_BIG, 'Grand menu'), (MenuEntry.MENU_SMALL, 'Petit menu')],
+        default=MenuEntry.MENU_BIG)
     highlight = f.BooleanField('Mise en évidence')
 
     is_create = f.BooleanField(widget=f.widgets.HiddenInput(), default=False)

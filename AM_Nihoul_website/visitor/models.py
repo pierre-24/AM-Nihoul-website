@@ -264,7 +264,7 @@ class Email(BaseModel):
         return o
 
 
-class Menu(OrderableMixin, BaseModel):
+class MenuEntry(OrderableMixin, BaseModel):
 
     MENU_BIG = 0
     MENU_SMALL = 1
@@ -279,7 +279,7 @@ class Menu(OrderableMixin, BaseModel):
         q = super().ordered_items(**kwargs)
 
         if 'position' in kwargs:
-            q = q.filter(Menu.position.is_(kwargs.get('position')))
+            q = q.filter(MenuEntry.position.is_(kwargs.get('position')))
 
         return q
 
@@ -292,7 +292,7 @@ class Menu(OrderableMixin, BaseModel):
         o.highlight = highlight
 
         # set order
-        last_m = Menu.ordered_items(desc=True, position=position).first()
+        last_m = MenuEntry.ordered_items(desc=True, position=position).first()
         o.order = last_m.order + 1 if last_m else 0
 
         return o

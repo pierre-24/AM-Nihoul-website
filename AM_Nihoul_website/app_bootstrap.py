@@ -1,5 +1,7 @@
+import flask
+
 from AM_Nihoul_website import db
-from AM_Nihoul_website.visitor.models import Page, Category
+from AM_Nihoul_website.visitor.models import Page, Category, MenuEntry
 
 
 def bootstrap():
@@ -18,6 +20,20 @@ def bootstrap():
     ]
 
     for o in pages:
+        db.session.add(o)
+
+    db.session.commit()
+
+    # menu entries
+    links = [
+        MenuEntry.create(pages[1].title, flask.url_for('visitor.page-view', id=pages[1].id, slug=pages[1].slug)),
+        MenuEntry.create(
+            pages[2].title, flask.url_for('visitor.page-view', id=pages[2].id, slug=pages[2].slug), highlight=True)
+    ]
+
+    links[0].order, links[1].order = 0, 1
+
+    for o in links:
         db.session.add(o)
 
     db.session.commit()

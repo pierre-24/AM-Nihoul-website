@@ -179,9 +179,14 @@ class BaseMixin:
         ctx = super().get_context_data(*args, **kwargs)
         ctx.update(**settings.WEBPAGE_INFO)
 
-        # bottom menu
-        from AM_Nihoul_website.visitor.models import Page, Category
+        from AM_Nihoul_website.visitor.models import Page, Category, MenuEntry
 
+        # top menus
+        menus = MenuEntry.query.order_by(MenuEntry.order).all()
+        ctx['top_menu_small'] = list(filter(lambda x: x.position == MenuEntry.MENU_SMALL, menus))
+        ctx['top_menu_big'] = list(filter(lambda x: x.position == MenuEntry.MENU_BIG, menus))
+
+        # bottom menu
         categories = Category.query.order_by(Category.order).all()
         pages = Page.query.filter(Page.category_id.isnot(None)).all()
 

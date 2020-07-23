@@ -9,6 +9,7 @@ APP_CONFIG = {
     # Flask secret key: generate a new one with
     # `python -c "import random; print(repr(''.join([chr(random.randrange(32, 126)) for _ in range(24)])))"`
     'SECRET_KEY': ';+b&#Yl] U$y7dzmW&IRh$GO',
+    'SERVER_NAME': '127.0.0.1:5000',
 
     'USERNAME': 'admin',
     'PASSWORD': 'admin',
@@ -47,6 +48,7 @@ WEBPAGE_INFO = {
     'repo_url': 'https://git.pierrebeaujean.net/pierre/AM-Nihoul-website',
     'site_name': 'Association Anne-Marie Nihoul',
     'site_description': 'aide aux malades',
+    'site_keywords': 'leucémie, aide au malades',
     'site_version': '0.1a0',
     'fa_kit': ''
 }
