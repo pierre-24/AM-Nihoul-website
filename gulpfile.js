@@ -40,10 +40,6 @@ gulp.task('js_editor', function () {
     return js_editor();
 });
 
-gulp.task('css', function () {
-    return css();
-});
-
 gulp.task('css2', function () {
     return css2();
 });
@@ -58,7 +54,7 @@ function watch() {
     gulp.watch([input_dir + 'images/*'], {}, gulp.series('images'));
 }
 
-gulp.task('build', gulp.parallel('css', 'images', 'js_editor'));
+gulp.task('build', gulp.parallel('css2', 'images', 'js_editor'));
 gulp.task('default', gulp.series('build'));
 
 exports.watch = gulp.series('build', watch);
