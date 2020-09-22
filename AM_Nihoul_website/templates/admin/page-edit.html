@@ -1,5 +1,5 @@
 {% extends "admin/base.ex.html" %}
-{% from "helpers.inc.html" import render_field %}
+{% from 'bootstrap/form.html' import render_field %}
 
 {% set admin_current = 'page' %}
 
@@ -10,12 +10,10 @@
     <h2>Modification d'une page</h2>
     <form method="post">
         {{ form.hidden_tag() }}
-        <ul class="fields">
-            <li>{{ render_field(form.title) }}</li>
-            <li>{{ render_field(form.content) }}</li>
-            <li>{{ render_field(form.category) }}</li>
-        </ul>
-        <p>{{ form.submit_button }}</p>
+        {{ render_field(form.title) }}
+        {{ render_field(form.content) }}
+        {{ render_field(form.category) }}
+        {{ render_field(form.submit_button) }}
     </form>
     </section>
 {% endblock %}

@@ -14,15 +14,14 @@
         <a class="button-like" href="#createCat" data-toggle="modal"><span class="fas fa-plus"></span> Ajouter une catégorie</a>
         {% set modal_create_content %}
             {{ form.hidden_tag() }}
-            <ul class="fields">
-                <li>{{ render_field(form.name) }}</li>
-            </ul>
+            {{ render_field(form.name) }}
         {% endset %}
         {{ create_modal(
             'createCat',
             'Créer une catégorie',
             modal_create_content,
-            form.submit_button) }}
+            render_field(form.submit_button)
+         ) }}
     </p>
 
     <table class="admin-list">
@@ -36,15 +35,18 @@
                             {{ form.csrf_token }}
                             {{ form.is_create(value=False) }}
                             {{ form.id_category(value=category.id) }}
-                            <ul class="fields">
-                                <li>{{ form.name.label }} {{ form.name(value=category.name) }}</li>
-                            </ul>
+
+                            <div class="form-group required">
+                            {{ form.name.label(class_='form-control-label') }} {{ form.name(value=category.name, class_='form-control') }}
+                            </div>
+
                         {% endset %}
                         {{ create_modal(
                             'editCat' + category.id|string,
                             'Éditer une catégorie',
                             modal_edit_content,
-                            form.submit_button) }}
+                            render_field(form.submit_button)
+                        ) }}
                         <a class="button-like" href="{{ url_for('admin.category-move', id=category.id, action='down') }}"><span class="fas fa-caret-square-up"></span></a>
                         <a class="button-like" href="{{ url_for('admin.category-move', id=category.id, action='up') }}"><span class="fas fa-caret-square-down"></span></a>
                         <a class="button-like" href="#delete-category-{{ category.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>

@@ -1,4 +1,5 @@
 {% from 'bootstrap/utils.html' import render_messages %}
+{% from 'bootstrap/form.html' import render_form_row %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -32,7 +33,7 @@
         </ul>
     </header>
 
-    <nav class="navbar navbar-light bg-light navbar-expand-lg">
+    <nav class="navbar navbar-light bg-light navbar-expand-md">
         <div class="container">
             <a href="/" class="navbar-brand" ><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="logo"></a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +54,7 @@
         {{ render_messages() }}
     </div>
 
-    <div id="page-content" class="container">
+    <div id="page-content" class="container mt-4">
 
         {% block page_content %}
         <div id="content">
@@ -63,18 +64,23 @@
     </div>
 
     {% if not no_newsletter %}
-    <div id="newsletter" class="jumbotron-fluid">
-        <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post" class="container">
-            <p>Pour ne rien rater, inscrivez vous à notre newsletter !</p>
+    <div id="newsletter" class="jumbotron-fluid mt-4">
+        <div class="container">
+        <p>Pour ne rien rater, inscrivez vous à notre newsletter !</p>
+        <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post">
             {{ newsletter_form.hidden_tag() }}
-            {{ newsletter_form.name(placeholder='Prénom et nom') }}
-            {{ newsletter_form.email(placeholder='Adresse email') }}
-            {{ newsletter_form.submit_button }}
+            <div class="form-row">
+                <div class="col-md-5">{{ newsletter_form.name(placeholder='Prénom et nom', class_='form-control mb-2') }}</div>
+                <div class="col-md-5">{{ newsletter_form.email(placeholder='Adresse email', class_='form-control mb-2') }}</div>
+                <div class="col-md-2">{{ newsletter_form.submit_button(class_='btn btn-primary mb-2') }}</div>
+            </div>
+
         </form>
+        </div>
     </div>
     {% endif %}
 
-    <footer class="container">
+    <footer class="container mt-4">
         <div id="bottom-nav">
             {% for k, pages in bottom_menu.items() %}
                 <div class="bottom-nav-block">
@@ -88,13 +94,14 @@
 
             {% endfor %}
         </div>
-        <div id="bottom-txt">
+
+        <div id="bottom-txt" class="mt-2">
             &copy; {{ site_name }}. Site web par <a href="{{ author_url }}">{{ author_name }}</a>  (version: <a href="{{ repo_url }}">{{ site_version }}</a>)
         </div>
     </footer>
 
     {% block scripts %}
-        {{ bootstrap.load_js() }}s
+        {{ bootstrap.load_js() }}
         {# add FontAwesome kit if available #}
         {% if fa_kit != '' %}
             <script src="https://kit.fontawesome.com/{{ fa_kit }}.js"></script>

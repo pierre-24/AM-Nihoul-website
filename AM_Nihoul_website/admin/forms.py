@@ -70,7 +70,6 @@ class MenuEditForm(FlaskForm):
         coerce=int,
         choices=[(MenuEntry.MENU_BIG, 'Menu principal'), (MenuEntry.MENU_SMALL, 'Menu secondaire')],
         default=MenuEntry.MENU_BIG)
-    highlight = f.BooleanField('Mise en évidence')
 
     is_create = f.BooleanField(widget=f.widgets.HiddenInput(), default=False)
     id_menu = f.IntegerField(widget=f.widgets.HiddenInput(), default=-1)

@@ -1,5 +1,6 @@
 {% extends "admin/base.ex.html" %}
 {% from "helpers.inc.html" import create_delete_modal, create_modal %}
+{% from 'bootstrap/form.html' import render_field%}
 
 {% set admin_current = 'newsletter' %}
 
@@ -37,7 +38,7 @@
                                 'publishNewsletter' + newsletter.id|string,
                                 'Publier cette newsletter',
                                 modal_publish_content,
-                                form.submit_button,
+                                render_field(form.submit_button),
                                 action=url_for('admin.newsletter-publish', id=newsletter.id)
                                 ) }}
                         {% else %}
