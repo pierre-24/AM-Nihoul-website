@@ -8,8 +8,9 @@ from AM_Nihoul_website import settings, db, User
 from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteObjectView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm, \
-    NewsletterPublishForm
-from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient, Newsletter, Email
+    NewsletterPublishForm, MenuEditForm
+from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient, Newsletter, Email, \
+    MenuEntry
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -122,7 +123,7 @@ class PageEditView(ObjectManagementMixin, BasePageEditView):
     def get_form_kwargs(self):
         return {
             'title': self.object.title,
-            'text': self.object.content,
+            'content': self.object.content,
             'category': -1 if self.object.category_id is None else self.object.category_id
         }
 
@@ -519,3 +520,77 @@ class NewsletterView(AdminBaseMixin, ObjectManagementMixin, RenderTemplateView):
 
 admin_blueprint.add_url_rule(
     '/newsletter-voir-<int:id>.html', view_func=NewsletterView.as_view(name='newsletter-view'))
+
+
+# --- Menu
+class MenuEditView(AdminBaseMixin, FormView, RenderTemplateView):
+    template_name = 'admin/menus.html'
+    form_class = MenuEditForm
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        return ctx
+
+    def form_valid(self, form):
+        if form.is_create.data:
+            c = MenuEntry.create(form.text.data, form.url.data, form.position.data, form.highlight.data)
+            flask.flash('Entrée "{}" créé.'.format(c.text))
+        else:
+            c = MenuEntry.query.get(form.id_menu.data)
+            if c is None:
+                flask.abort(403)
+
+            c.text = form.text.data
+            c.url = form.url.data
+            c.highlight = form.highlight.data
+            flask.flash('Entrée "{}" modifié.'.format(c.text))
+
+        db.session.add(c)
+        db.session.commit()
+
+        self.success_url = flask.url_for('admin.menus')
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule('/menus.html', view_func=MenuEditView.as_view(name='menus'))
+
+
+class MenuDeleteView(AdminBaseMixin, DeleteObjectView):
+    model = MenuEntry
+
+    def post_deletion(self, obj):
+        self.success_url = flask.url_for('admin.menus')
+        flask.flash('Entrée "{}" supprimée.'.format(obj.text))
+
+
+admin_blueprint.add_url_rule(
+    '/menu-suppression-<int:id>.html', view_func=MenuDeleteView.as_view('menu-delete'))
+
+
+class MenuMoveView(AdminBaseMixin, ObjectManagementMixin, View):
+    methods = ['GET']
+    model = MenuEntry
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        action = kwargs.get('action')
+
+        if action == 'up':
+            self.object.up()
+        elif action == 'down':
+            self.object.down()
+        else:
+            flask.abort(403)
+
+        return flask.redirect(flask.url_for('admin.menus'))
+
+    def dispatch_request(self, *args, **kwargs):
+        if flask.request.method == 'GET':
+            return self.get(*args, **kwargs)
+        else:
+            flask.abort(403)
+
+
+admin_blueprint.add_url_rule(
+    '/menu-mouvement-<string:action>-<int:id>.html', view_func=MenuMoveView.as_view('menu-move'))

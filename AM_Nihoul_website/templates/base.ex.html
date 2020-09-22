@@ -17,21 +17,21 @@
 
         <nav id="main-nav">
             <ul id="top-nav">
-                {% for i in range(4) %}
-                    <li><a href="#">petit #{{ i }}</a></li>
+                {% for i in top_menu_small %}
+                    <li><a href="{{ i.url }}">{{ i.text }}</a></li>
                 {% endfor %}
 
                 {# admin #}
                 {% if not current_user.is_authenticated %}
-                    <li><a href="{{ url_for('admin.login') }}">Sésame</a></li>
+                    <li><a href="{{ url_for('admin.login') }}" class="admin">Sésame</a></li>
                 {% else %}
                     <li><a href="{{ url_for('admin.index') }}" class="admin">Administration</a></li>
                     <li><a href="{{ url_for('admin.logout') }}" class="admin">Se déconnecter</a></li>
                 {% endif %}
             </ul>
             <ul id="main-nav">
-                {% for i in range(5) %}
-                <li><a href="#" {% if i == 4 %}class="highlight-link"{% endif %}>Principal #{{ i }}</a></li>
+                {% for i in top_menu_big %}
+                    <li><a href="{{ i.url }}" {% if i.highlight %}class="highlight-link"{% endif %}>{{ i.text }}</a></li>
                 {% endfor %}
             </ul>
         </nav>

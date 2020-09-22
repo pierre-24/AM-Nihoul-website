@@ -1,0 +1,75 @@
+{% extends "admin/base.ex.html" %}
+{% from "helpers.inc.html" import create_delete_modal, create_modal, render_field %}
+
+{% set admin_current = 'menus' %}
+{% block page_title %}Gestion des menus{% endblock %}
+
+{% macro render_m(menus) %}
+    <table class="admin-list">
+    {% for menu in menus %}
+        <tr>
+            <td class="left">
+                <span class="title">{{ menu.text }}</span>
+                <span class="info"><a href="{{ menu.url }}">{{ menu.url }}</a> ({% if menu.highlight %}en évidence{% else %}normal{% endif %})</span>
+            </td>
+            <td class="right">
+                <span class="buttons">
+                    <a class="button-like" href="#editMenu{{ menu.id }}" data-toggle="modal"><span class="fas fa-pen-square"></span></a>
+                    {% set modal_edit_content %}
+                        {{ form.csrf_token }}
+                        {{ form.is_create(value=False) }}
+                        {{ form.id_menu(value=menu.id) }}
+                        <ul class="fields">
+                            <li>{{ form.text.label }} {{ form.text(value=menu.text) }}</li>
+                            <li>{{ form.url.label }} {{ form.url(value=menu.url) }}</li>
+                            <li>{{ form.highlight.label }} <input id="highlight" name="highlight" type="checkbox" {% if menu.highlight %}checked{% endif %}></li>
+                        </ul>
+                    {% endset %}
+                    {{ create_modal(
+                        'editMenu' + menu.id|string,
+                        'Éditer un menu',
+                        modal_edit_content,
+                        form.submit_button) }}
+                    <a class="button-like" href="{{ url_for('admin.menu-move', id=menu.id, action='down') }}"><span class="fas fa-caret-square-up"></span></a>
+                    <a class="button-like" href="{{ url_for('admin.menu-move', id=menu.id, action='up') }}"><span class="fas fa-caret-square-down"></span></a>
+                    <a class="button-like" href="#delete-menu-{{ menu.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
+                    {{ create_delete_modal('menu', menu.id, 'le menu "' + menu.text + '"', 'admin.menu-delete') }}
+                </span>
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endmacro %}
+
+{% block content %}
+    <section>
+        <h2>Gestion des menus</h2>
+
+        <p>
+            <a class="button-like" href="#createMenu" data-toggle="modal"><span class="fas fa-plus"></span> Ajouter une entrée au menu</a>
+            {% set modal_create_content %}
+                {{ form.hidden_tag() }}
+                <ul class="fields">
+                    <li>{{ render_field(form.text) }}</li>
+                    <li>{{ render_field(form.url) }}</li>
+                    <li>{{ render_field(form.highlight) }}</li>
+                    <li>{{ render_field(form.position) }}</li>
+                </ul>
+            {% endset %}
+            {{ create_modal(
+                'createMenu',
+                'Créer une entrée de menu',
+                modal_create_content,
+                form.submit_button) }}
+        </p>
+
+        <h3>Menu principal</h3>
+
+        {{ render_m(top_menu_big) }}
+
+        <h3>Menu secondaire</h3>
+
+        {{ render_m(top_menu_small) }}
+
+    </section>
+{% endblock %}

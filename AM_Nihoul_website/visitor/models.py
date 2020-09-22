@@ -9,36 +9,32 @@ from AM_Nihoul_website import db, uploads_set
 from AM_Nihoul_website.base_models import BaseModel
 
 
-class Category(BaseModel):
-    """Category (of the pages)"""
-    name = db.Column(db.VARCHAR(length=150), nullable=False)
-    order = db.Column(db.Integer, nullable=False)
+class OrderableMixin:
+    """An object that can be ordered in any order"""
+
+    order = db.Column(db.Integer, nullable=False, default=0)
 
     @classmethod
-    def create(cls, name):
-        o = cls()
-        o.name = name
+    def ordered_items(cls, desc=False, **kwargs):
+        """Should return the list of objects, ordered by ``order``.
+        """
 
-        # set order
-        last_c = Category.query.order_by(Category.order.desc()).first()
-        o.order = last_c.order + 1 if last_c else 0
+        if desc:
+            return cls.query.order_by(cls.order.desc())
+        else:
+            return cls.query.order_by(cls.order)
 
-        return o
-
-    def __str__(self):
-        return 'Catégorie {} ({})'.format(self.id, self.name)
-
-    def _move(self, offset):
+    def _move(self, offset, **kwargs):
         if offset == 0:
             return
         if self.id is None:
             raise Exception('should get an id first')
 
-        categories = Category.query.order_by(Category.order).all()
+        ordered_items = self.ordered_items(desc=False, **kwargs).all()
 
         # find self
         _self = -1
-        for i, c in enumerate(categories):
+        for i, c in enumerate(ordered_items):
             if c.id == self.id:
                 _self = i
                 break
@@ -50,8 +46,8 @@ class Category(BaseModel):
         final_position = _self + offset
         if final_position < 0:
             final_position = 0
-        if final_position >= len(categories):
-            final_position = len(categories) - 1
+        if final_position >= len(ordered_items):
+            final_position = len(ordered_items) - 1
         if final_position == _self:
             return
 
@@ -61,18 +57,38 @@ class Category(BaseModel):
 
         minimum = (_self + 1) if _self < final_position else final_position
         for i in range(minimum, minimum + abs(offset)):
-            categories[i].order += 1 if offset < 0 else -1
-            db.session.add(categories[i])
+            ordered_items[i].order += 1 if offset < 0 else -1
+            db.session.add(ordered_items[i])
 
         db.session.commit()
 
-    def up(self):
+    def up(self, **kwargs):
         """Increase current order"""
-        self._move(1)
+        self._move(1, **kwargs)
 
-    def down(self):
+    def down(self, **kwargs):
         """Decrease current order"""
-        self._move(-1)
+        self._move(-1, **kwargs)
+
+
+class Category(OrderableMixin, BaseModel):
+    """Category (of the pages)"""
+
+    name = db.Column(db.VARCHAR(length=150), nullable=False)
+
+    @classmethod
+    def create(cls, name):
+        o = cls()
+        o.name = name
+
+        # set order
+        last_c = Category.ordered_items(desc=True).first()
+        o.order = last_c.order + 1 if last_c else 0
+
+        return o
+
+    def __str__(self):
+        return 'Catégorie {} ({})'.format(self.id, self.name)
 
 
 class Page(BaseModel):
@@ -246,3 +262,43 @@ class Email(BaseModel):
         o.recipient_id = recipient_id
 
         return o
+
+
+class MenuEntry(OrderableMixin, BaseModel):
+
+    MENU_BIG = 0
+    MENU_SMALL = 1
+
+    text = db.Column(db.Text(), nullable=False)
+    url = db.Column(db.Text(), nullable=False)
+    position = db.Column(db.Integer, default=MENU_BIG)
+    highlight = db.Column(db.Boolean, default=False, nullable=False)
+
+    @classmethod
+    def ordered_items(cls, **kwargs):
+        q = super().ordered_items(**kwargs)
+
+        if 'position' in kwargs:
+            q = q.filter(MenuEntry.position.is_(kwargs.get('position')))
+
+        return q
+
+    @classmethod
+    def create(cls, text, url, position=MENU_BIG, highlight=False):
+        o = cls()
+        o.text = text
+        o.url = url
+        o.position = position
+        o.highlight = highlight
+
+        # set order
+        last_m = MenuEntry.ordered_items(desc=True, position=position).first()
+        o.order = last_m.order + 1 if last_m else 0
+
+        return o
+
+    def up(self):
+        super().up(position=self.position)
+
+    def down(self):
+        super().down(position=self.position)
