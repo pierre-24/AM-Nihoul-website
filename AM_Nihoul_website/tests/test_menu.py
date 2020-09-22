@@ -37,7 +37,6 @@ class TestMenus(TestFlask):
             'url': url,
             'position': MenuEntry.MENU_BIG,
             'is_create': 1,
-            'highlight': True
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
@@ -48,7 +47,6 @@ class TestMenus(TestFlask):
         self.assertEqual(c.text, text)
         self.assertEqual(c.url, url)
         self.assertEqual(c.position, MenuEntry.MENU_BIG)
-        self.assertTrue(c.highlight)
 
     def test_menu_create_not_admin_ko(self):
         self.assertEqual(MenuEntry.query.count(), self.num_menus)
@@ -83,7 +81,6 @@ class TestMenus(TestFlask):
         self.assertEqual(c.text, text)
         self.assertEqual(c.url, url)
         self.assertEqual(c.position, MenuEntry.MENU_BIG)
-        self.assertTrue(c.highlight)
 
     def test_menu_edit_not_admin_ko(self):
         text = 'xyz'

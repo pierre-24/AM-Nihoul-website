@@ -1,5 +1,5 @@
 {% extends "base.ex.html" %}
-{% from "helpers.inc.html" import render_field %}
+{% from 'bootstrap/form.html' import render_field %}
 
 {% block page_title %}Connexion{% endblock %}
 
@@ -10,11 +10,9 @@
     <form method="post">
         {{ form.csrf_token }}
         {{ form.next(value=next) }}
-        <ul class="fields">
-            {{ render_field(form.login) }}
-            {{ render_field(form.password) }}
-        </ul>
-        <p>{{ form.login_button }}</p>
+        {{ render_field(form.login) }}
+        {{ render_field(form.password) }}
+        {{ render_field(form.login_button) }}
     </form>
     </section>
 {% endblock %}

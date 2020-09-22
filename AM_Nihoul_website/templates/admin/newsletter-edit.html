@@ -1,5 +1,5 @@
 {% extends "admin/base.ex.html" %}
-{% from "helpers.inc.html" import render_field %}
+{% from 'bootstrap/form.html' import render_field, render_form_row %}
 
 {% set admin_current = 'newsletter' %}
 
@@ -10,11 +10,9 @@
     <h2>Modification d'une newsletter</h2>
     <form method="post">
         {{ form.hidden_tag() }}
-        <ul class="fields">
-            <li>{{ render_field(form.title) }}</li>
-            <li>{{ render_field(form.content) }}</li>
-        </ul>
-        <p>{{ form.submit_button }} {{ form.submit_button_2 }}</p>
+        {{ render_field(form.title) }}
+        {{ render_field(form.content) }}
+        {{ render_form_row([form.submit_button, form.submit_button_2]) }}
     </form>
     </section>
 {% endblock %}
@@ -22,7 +20,6 @@
 {# add editor #}
 {% block scripts %}
     {{ super() }}
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.20.0/trumbowyg.min.js"></script>
     <script src="{{ url_for('static', filename='editor.bundled.js') }}"></script>
 

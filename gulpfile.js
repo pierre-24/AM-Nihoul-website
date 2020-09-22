@@ -16,14 +16,6 @@ if (fast) {
     console.log("no minification will be performed");
 }
 
-function js_main() {
-    return browserify(input_dir + 'main.js')
-        .bundle()
-        .pipe(gulp_if(!fast, minify()))
-        .pipe(source('main.bundled.js'))
-        .pipe(gulp.dest(output_dir))
-}
-
 function js_editor() {
     return browserify(input_dir + 'editor.js')
         .bundle()
@@ -32,15 +24,15 @@ function js_editor() {
         .pipe(gulp.dest(output_dir))
 }
 
-function lint() {
-    return gulp.src([input_dir + 'main.js'])
-        .pipe(js_lint())
-        .pipe(js_lint.reporter('jshint-stylish'))
-        .pipe(js_lint.reporter('fail'));
-}
-
 function css() {
     return gulp.src(input_dir + 'style.less')
+        .pipe(less())
+        .pipe(gulp_if(!fast, clean_css()))
+        .pipe(gulp.dest(output_dir))
+}
+
+function css2() {
+    return gulp.src(input_dir + 'style2.less')
         .pipe(less())
         .pipe(gulp_if(!fast, clean_css()))
         .pipe(gulp.dest(output_dir))
@@ -51,14 +43,6 @@ function images() {
         .pipe(gulp.dest(output_dir + 'images/'))
 }
 
-gulp.task('lint', function () {
-    return lint();
-});
-
-gulp.task('js_main', function () {
-    return js_main();
-});
-
 gulp.task('js_editor', function () {
     return js_editor();
 });
@@ -67,20 +51,21 @@ gulp.task('css', function () {
     return css();
 });
 
-
+gulp.task('css2', function () {
+    return css2();
+});
 
 gulp.task('images', function () {
     return images();
 });
 
 function watch() {
-    gulp.watch([input_dir + 'main.js'], {}, gulp.series('js_main'));
     gulp.watch([input_dir + 'editor.js'], {}, gulp.series('js_editor'));
     gulp.watch([input_dir + 'style.less'], {}, gulp.series('css'));
     gulp.watch([input_dir + 'images/*'], {}, gulp.series('images'));
 }
 
-gulp.task('build', gulp.parallel('css', 'images', gulp.series('lint', 'js_main', 'js_editor')));
+gulp.task('build', gulp.parallel('css', 'images', 'js_editor'));
 gulp.task('default', gulp.series('build'));
 
 exports.watch = gulp.series('build', watch);

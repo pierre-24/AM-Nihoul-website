@@ -10,6 +10,7 @@ import flask_uploads
 from flask_uploads import UploadSet, configure_uploads
 import flask_login
 from flask_apscheduler import APScheduler
+from flask_bootstrap import Bootstrap
 
 from AM_Nihoul_website import settings
 from AM_Nihoul_website.base_filters import filters
@@ -20,6 +21,7 @@ db = SQLAlchemy(session_options={'expire_on_commit': False})
 uploads_set = UploadSet('uploads', flask_uploads.DEFAULTS)
 login_manager = flask_login.LoginManager()
 scheduler = APScheduler()
+bootstrap = Bootstrap()
 
 
 class User(flask_login.UserMixin):
@@ -88,6 +90,7 @@ def create_app():
     configure_uploads(app, (uploads_set, ))
     login_manager.init_app(app)
     login_manager.login_view = 'admin.login'  # automatic redirection
+    bootstrap.init_app(app)
 
     # add cli
     app.cli.add_command(init_command)

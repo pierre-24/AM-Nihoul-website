@@ -393,7 +393,7 @@ class NewsletterEditView(ObjectManagementMixin, BaseNewsletterEditView):
     def get_form_kwargs(self):
         return {
             'title': self.object.title,
-            'text': self.object.content,
+            'content': self.object.content,
         }
 
     def form_valid(self, form):
@@ -534,7 +534,7 @@ class MenuEditView(AdminBaseMixin, FormView, RenderTemplateView):
 
     def form_valid(self, form):
         if form.is_create.data:
-            c = MenuEntry.create(form.text.data, form.url.data, form.position.data, form.highlight.data)
+            c = MenuEntry.create(form.text.data, form.url.data, form.position.data)
             flask.flash('Entrée "{}" créé.'.format(c.text))
         else:
             c = MenuEntry.query.get(form.id_menu.data)
@@ -543,7 +543,6 @@ class MenuEditView(AdminBaseMixin, FormView, RenderTemplateView):
 
             c.text = form.text.data
             c.url = form.url.data
-            c.highlight = form.highlight.data
             flask.flash('Entrée "{}" modifié.'.format(c.text))
 
         db.session.add(c)

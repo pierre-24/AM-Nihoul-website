@@ -1,5 +1,5 @@
 {% extends "base.ex.html" %}
-{% from "helpers.inc.html" import render_field %}
+{% from 'bootstrap/form.html' import render_field%}
 {% set no_newsletter = True %}
 
 {% block page_title %}Inscription à la newsletter{% endblock %}
@@ -8,13 +8,10 @@
     <section>
         <h2>Inscription à la newsletter</h2>
         <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post">
-            <ul class="fields">
-                {{ form.hidden_tag() }}
+            {{ form.hidden_tag() }}
             {{ render_field(form.name) }}
             {{ render_field(form.email) }}
-            {{ render_field(form.opt_in) }}
-            </ul>
-            <p>{{ newsletter_form.submit_button }}</p>
+            {{ render_field(newsletter_form.submit_button) }}
         </form>
     </section>
 {% endblock %}

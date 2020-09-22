@@ -1,5 +1,6 @@
 {% extends "admin/base.ex.html" %}
-{% from "helpers.inc.html" import create_modal, render_field, create_delete_modal %}
+{% from "helpers.inc.html" import create_modal, create_delete_modal %}
+{% from 'bootstrap/form.html' import render_field %}
 
 {% set admin_current = 'file' %}
 
@@ -15,16 +16,14 @@
         <a class="button-like" href="#uploadFile" data-toggle="modal"><span class="fas fa-plus"></span> <i>Uploader</i> un fichier</a>
         {% set modal_create_content %}
             {{ form.hidden_tag() }}
-            <ul class="fields">
-                <li>{{ render_field(form.file_uploaded) }}</li>
-                <li>{{ render_field(form.description) }}</li>
-            </ul>
+            {{ render_field(form.file_uploaded) }}
+            {{ render_field(form.description) }}
         {% endset %}
         {{ create_modal(
             'uploadFile',
             'Uploader un fichier',
             modal_create_content,
-            form.submit_button,
+            render_field(form.submit_button),
             multipart=True) }}
     </p>
 

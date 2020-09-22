@@ -18,17 +18,27 @@
 {% endmacro %}
 
 {% macro create_modal(id, title, content, bottom='', action='', multipart=False) %}
-  <div id="{{ id }}" class="modal" role="dialog">
+  <div id="{{ id }}" class="modal fade" role="dialog">
         <form class="modal-dialog" method="post" {% if action %}action="{{ action }}"{% endif %} {% if multipart %}enctype="multipart/form-data"{% endif %}>
-            <h3>{{ title|safe }}</h3>
-            <div class="modal-content">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>{{ title|safe }}</h5>
+
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
             {{ content|safe }}
             </div>
             {%  if bottom != '' %}
-            <p class="modal-bottom">
+            <p class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
                 {{ bottom|safe }}
             </p>
             {% endif %}
+        </div>
         </form>
     </div>
 {% endmacro %}
@@ -37,6 +47,6 @@
     {{ create_modal(
         'delete-' + model + '-' + id|string,
         'Suppression', '<p>Voulez vous vraiment supprimer ' + info + ' ?</p>',
-        '<input type="submit" value="Oui" class="modal-yes" /> <button type="button" class="modal-close">Non</button>',
+        '<input type="submit" value="Supprimer" class="btn btn-primary" />',
         url_for(link, id=id)) }}
 {% endmacro %}

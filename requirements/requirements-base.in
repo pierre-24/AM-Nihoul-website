@@ -9,3 +9,4 @@ email_validator
 Flask-Login
 Flask-APScheduler
 simplegmail
+bootstrap-flask
