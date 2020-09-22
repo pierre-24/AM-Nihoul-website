@@ -10,7 +10,7 @@
         <tr>
             <td class="left">
                 <span class="title">{{ menu.text }}</span>
-                <span class="info"><a href="{{ menu.url }}">{{ menu.url }}</a> ({{ menu.highlight }})</span>
+                <span class="info"><a href="{{ menu.url }}">{{ menu.url }}</a> ({% if menu.highlight %}en évidence{% else %}normal{% endif %})</span>
             </td>
             <td class="right">
                 <span class="buttons">

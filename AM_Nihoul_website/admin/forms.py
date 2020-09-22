@@ -68,7 +68,7 @@ class MenuEditForm(FlaskForm):
     position = f.SelectField(
         'Position',
         coerce=int,
-        choices=[(MenuEntry.MENU_BIG, 'Grand menu'), (MenuEntry.MENU_SMALL, 'Petit menu')],
+        choices=[(MenuEntry.MENU_BIG, 'Menu principal'), (MenuEntry.MENU_SMALL, 'Menu secondaire')],
         default=MenuEntry.MENU_BIG)
     highlight = f.BooleanField('Mise en évidence')
 

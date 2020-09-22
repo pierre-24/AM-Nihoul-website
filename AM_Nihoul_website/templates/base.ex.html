@@ -23,7 +23,7 @@
 
                 {# admin #}
                 {% if not current_user.is_authenticated %}
-                    <li><a href="{{ url_for('admin.login') }}">Sésame</a></li>
+                    <li><a href="{{ url_for('admin.login') }}" class="admin">Sésame</a></li>
                 {% else %}
                     <li><a href="{{ url_for('admin.index') }}" class="admin">Administration</a></li>
                     <li><a href="{{ url_for('admin.logout') }}" class="admin">Se déconnecter</a></li>
