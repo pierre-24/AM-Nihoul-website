@@ -24,13 +24,6 @@ function js_editor() {
         .pipe(gulp.dest(output_dir))
 }
 
-function css() {
-    return gulp.src(input_dir + 'style.less')
-        .pipe(less())
-        .pipe(gulp_if(!fast, clean_css()))
-        .pipe(gulp.dest(output_dir))
-}
-
 function css2() {
     return gulp.src(input_dir + 'style2.less')
         .pipe(less())
@@ -61,7 +54,7 @@ gulp.task('images', function () {
 
 function watch() {
     gulp.watch([input_dir + 'editor.js'], {}, gulp.series('js_editor'));
-    gulp.watch([input_dir + 'style.less'], {}, gulp.series('css'));
+    gulp.watch([input_dir + 'style2.less'], {}, gulp.series('css'));
     gulp.watch([input_dir + 'images/*'], {}, gulp.series('images'));
 }
 

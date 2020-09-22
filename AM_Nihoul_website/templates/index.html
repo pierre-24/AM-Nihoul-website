@@ -7,4 +7,26 @@
     <h2>{{ content.title }}</h2>
     {{ content.content|safe }}
     </section>
+
+    {% if latest_newsletters|length > 0 %}
+
+    <section>
+    {% with newsletter = latest_newsletters[0] %}
+    <h2>{{ newsletter.title }}</h2>
+    {{ newsletter.content|safe }}
+    {% endwith %}
+
+    {% if latest_newsletters|length > 1 %}
+        <h3>Newsletters plus anciennes</h3>
+        <ul>
+        {% for newsletter in latest_newsletters %}
+            {% if loop.index > 1 %}
+                <li><a href="{{ url_for('visitor.newsletter-view', id=newsletter.id, slug=newsletter.slug) }}">{{ newsletter.title }}</a> (publiée {{ newsletter.date_published|date_formatter }})</li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    {% endif %}
+    
+    </section>
+    {% endif %}
 {% endblock %}

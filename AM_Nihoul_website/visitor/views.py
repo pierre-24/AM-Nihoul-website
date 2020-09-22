@@ -17,6 +17,11 @@ class IndexView(BaseMixin, RenderTemplateView):
         ctx = super().get_context_data(*args, **kwargs)
 
         ctx['content'] = Page.query.get(1)
+        ctx['latest_newsletters'] = Newsletter.query\
+            .filter(Newsletter.draft.is_(False))\
+            .order_by(Newsletter.date_published.desc())\
+            .all()[:5]
+
         return ctx
 
 
