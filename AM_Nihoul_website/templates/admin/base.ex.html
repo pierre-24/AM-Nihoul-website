@@ -2,7 +2,7 @@
 {% set no_newsletter = True %}
 
 {% block page_content %}
-
+    <div class="container  mt-4 pb-4">
     <ul  id="admin-menu"class="nav nav-tabs">
         <li class="nav-item"><a href="{{ url_for('admin.newsletters') }}" class="nav-link {%  if admin_current == 'newsletter' %}active{% endif %}">Newsletters</a></li>
         <li class="nav-item"><a href="{{ url_for('admin.files') }}" class="nav-link {%  if admin_current == 'file' %}active{% endif %}">Fichiers</a></li>
@@ -11,8 +11,8 @@
         <li class="nav-item"><a href="{{ url_for('admin.newsletter-recipients') }}" class="nav-link {%  if admin_current == 'recipient' %}active{% endif %}">Inscrits à la newsletter</a></li>
         <li class="nav-item"><a href="{{ url_for('admin.menus') }}" class="nav-link {%  if admin_current == 'menus' %}active{% endif %}">Menus</a></li>
     </ul>
-
     <div id="content" class="admin-content">
         {% block content %}{% endblock %}
+    </div>
     </div>
 {% endblock %}
