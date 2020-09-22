@@ -1,3 +1,5 @@
+{% from 'bootstrap/utils.html' import render_messages %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,42 +8,52 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0">
     <meta name="description" content="{{ site_name }} : {{ site_description }}">
     <meta name="keywords" content="{{ site_keywords }}">
-    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+
+    {{ bootstrap.load_css() }}
+    <link href="{{ url_for('static', filename='style2.css') }}" rel="stylesheet">
     {% block other_head_stuffs %}{% endblock %}
     {# <link href="{{ url_for('static', filename='images/favicon.png') }}" rel="icon"> #}
 </head>
 
 <body>
     <header>
-        <div id="logo"><a href="/"><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="logo"></a></div>
+        <ul class="nav justify-content-end container">
+            {% for i in top_menu_small %}
+                <li><a href="{{ i.url }}" {% if i.highlight %}class="highlight-link"{% endif %}>{{ i.text }}</a></li>
+            {% endfor %}
 
-        <nav id="main-nav">
-            <ul id="top-nav">
-                {% for i in top_menu_small %}
-                    <li><a href="{{ i.url }}">{{ i.text }}</a></li>
-                {% endfor %}
-
-                {# admin #}
-                {% if not current_user.is_authenticated %}
-                    <li><a href="{{ url_for('admin.login') }}" class="admin">Sésame</a></li>
-                {% else %}
-                    <li><a href="{{ url_for('admin.index') }}" class="admin">Administration</a></li>
-                    <li><a href="{{ url_for('admin.logout') }}" class="admin">Se déconnecter</a></li>
-                {% endif %}
-            </ul>
-            <ul id="main-nav">
-                {% for i in top_menu_big %}
-                    <li><a href="{{ i.url }}" {% if i.highlight %}class="highlight-link"{% endif %}>{{ i.text }}</a></li>
-                {% endfor %}
-            </ul>
-        </nav>
+            {# admin #}
+            {% if not current_user.is_authenticated %}
+                <li class="nav-item"><a href="{{ url_for('admin.login') }}" class="nav-link">Sésame</a></li>
+            {% else %}
+                <li class="nav-item"><a href="{{ url_for('admin.index') }}" class="nav-link">Administration</a></li>
+                <li class="nav-item"><a href="{{ url_for('admin.logout') }}" class="nav-link">Se déconnecter</a></li>
+            {% endif %}
+        </ul>
     </header>
 
-    {% for category,message in get_flashed_messages(with_categories=True) %}
-        <div class="flash-message flash-message-{{ category }}"><a href="#" class="close">&cross;</a> <p>{{ message }}</p></div>
-    {% endfor %}
+    <nav class="navbar navbar-light bg-light navbar-expand-lg">
+        <div class="container">
+            <a href="/" class="navbar-brand" ><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="logo"></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
 
-    <div id="page-content">
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    {% for i in top_menu_big %}
+                        <li class="nav-item"><a class="nav-link" href="{{ i.url }}">{{ i.text }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" id="messages-zone">
+        {{ render_messages() }}
+    </div>
+
+    <div id="page-content" class="container">
 
         {% block page_content %}
         <div id="content">
@@ -51,8 +63,8 @@
     </div>
 
     {% if not no_newsletter %}
-    <div id="newsletter">
-        <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post">
+    <div id="newsletter" class="jumbotron-fluid">
+        <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post" class="container">
             <p>Pour ne rien rater, inscrivez vous à notre newsletter !</p>
             {{ newsletter_form.hidden_tag() }}
             {{ newsletter_form.name(placeholder='Prénom et nom') }}
@@ -62,7 +74,7 @@
     </div>
     {% endif %}
 
-    <footer>
+    <footer class="container">
         <div id="bottom-nav">
             {% for k, pages in bottom_menu.items() %}
                 <div class="bottom-nav-block">
@@ -82,8 +94,7 @@
     </footer>
 
     {% block scripts %}
-        <script src="{{ url_for('static', filename='main.bundled.js') }}"></script>
-
+        {{ bootstrap.load_js() }}s
         {# add FontAwesome kit if available #}
         {% if fa_kit != '' %}
             <script src="https://kit.fontawesome.com/{{ fa_kit }}.js"></script>
