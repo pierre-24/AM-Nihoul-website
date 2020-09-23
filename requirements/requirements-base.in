@@ -10,3 +10,4 @@ Flask-Login
 Flask-APScheduler
 simplegmail
 bootstrap-flask
+Flask-Migrate
