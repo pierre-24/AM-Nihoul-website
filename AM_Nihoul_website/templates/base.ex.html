@@ -11,7 +11,7 @@
     <meta name="keywords" content="{{ site_keywords }}">
 
     {{ bootstrap.load_css() }}
-    <link href="{{ url_for('static', filename='style2.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
     {% block other_head_stuffs %}{% endblock %}
     <link href="{{ url_for('static', filename='images/favicon.png') }}" rel="icon">
 </head>
@@ -35,7 +35,7 @@
 
     <nav class="navbar navbar-light bg-light navbar-expand-md">
         <div class="container">
-            <a href="/" class="navbar-brand" ><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="logo"> <span class="d-none d-lg-inline">Association Anne-Marie Nihoul</span></a>
+            <a href="/" class="navbar-brand" ><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="logo"> <span class="d-none d-lg-inline">{{ site_name }}</span></a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
             </button>

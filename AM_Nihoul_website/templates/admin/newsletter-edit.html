@@ -1,4 +1,5 @@
 {% extends "admin/base.ex.html" %}
+{% from 'helpers.inc.html' import include_editor %}
 {% from 'bootstrap/form.html' import render_field, render_form_row %}
 
 {% set admin_current = 'newsletter' %}
@@ -20,12 +21,10 @@
 {# add editor #}
 {% block scripts %}
     {{ super() }}
-    <script src="//cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.20.0/trumbowyg.min.js"></script>
-    <script src="{{ url_for('static', filename='editor.bundled.js') }}"></script>
-
+    {{ include_editor() }}
 {% endblock %}
 
 
 {% block other_head_stuffs %}
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.20.0/ui/trumbowyg.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.21.0/ui/trumbowyg.min.css">
 {% endblock %}
