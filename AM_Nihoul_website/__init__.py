@@ -12,6 +12,8 @@ import flask_login
 from flask_apscheduler import APScheduler
 from flask_bootstrap import Bootstrap
 from flask_migrate import Migrate
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from AM_Nihoul_website import settings
 from AM_Nihoul_website.base_filters import filters
@@ -24,6 +26,7 @@ login_manager = flask_login.LoginManager()
 scheduler = APScheduler()
 bootstrap = Bootstrap()
 migrate = Migrate()
+limiter = Limiter(key_func=get_remote_address)
 
 
 class User(flask_login.UserMixin):
@@ -90,10 +93,13 @@ def create_app():
     db.init_app(app)
     db.app = app
     configure_uploads(app, (uploads_set, ))
+
     login_manager.init_app(app)
     login_manager.login_view = 'admin.login'  # automatic redirection
+
     bootstrap.init_app(app)
     migrate.init_app(app, db)
+    limiter.init_app(app)
 
     # add cli
     app.cli.add_command(init_command)

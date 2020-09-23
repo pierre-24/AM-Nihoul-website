@@ -1,7 +1,7 @@
 import flask
 from flask import Blueprint, views
 
-from AM_Nihoul_website import db, settings
+from AM_Nihoul_website import db, settings, limiter
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
 from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email
 from AM_Nihoul_website.visitor.forms import NewsletterForm
@@ -90,6 +90,7 @@ visitor_blueprint.add_url_rule('/fichier/<int:id>/<string:filename>', view_func=
 class NewsletterRegisterView(BaseMixin, FormView):
     form_class = NewsletterForm
     template_name = 'newsletter-in.html'
+    decorators = [limiter.limit(settings.NEWSLETTER_LIMIT)]
 
     def form_valid(self, form):
 
