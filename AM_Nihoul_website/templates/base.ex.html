@@ -11,9 +11,9 @@
     <meta name="keywords" content="{{ site_keywords }}">
 
     {{ bootstrap.load_css() }}
-    <link href="{{ url_for('static', filename='style2.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
     {% block other_head_stuffs %}{% endblock %}
-    {# <link href="{{ url_for('static', filename='images/favicon.png') }}" rel="icon"> #}
+    <link href="{{ url_for('static', filename='images/favicon.png') }}" rel="icon">
 </head>
 
 <body>
@@ -35,7 +35,7 @@
 
     <nav class="navbar navbar-light bg-light navbar-expand-md">
         <div class="container">
-            <a href="/" class="navbar-brand" ><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="logo"></a>
+            <a href="/" class="navbar-brand" ><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="logo"> <span class="d-none d-lg-inline">{{ site_name }}</span></a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
             </button>
@@ -54,17 +54,17 @@
         {{ render_messages() }}
     </div>
 
-    <div id="page-content" class="container mt-4">
+    <div id="page-content">
 
         {% block page_content %}
-        <div id="content">
+        <div id="content" class="container mt-4 pb-4">
         {% block content %}{% endblock %}
         </div>
         {% endblock %}
     </div>
 
     {% if not no_newsletter %}
-    <div id="newsletter" class="jumbotron-fluid mt-4">
+    <div id="newsletter" class="jumbotron-fluid">
         <div class="container">
         <p>Pour ne rien rater, inscrivez vous à notre newsletter !</p>
         <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post">

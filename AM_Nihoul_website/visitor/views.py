@@ -1,7 +1,7 @@
 import flask
 from flask import Blueprint, views
 
-from AM_Nihoul_website import db, settings
+from AM_Nihoul_website import db, settings, limiter
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
 from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email
 from AM_Nihoul_website.visitor.forms import NewsletterForm
@@ -17,6 +17,11 @@ class IndexView(BaseMixin, RenderTemplateView):
         ctx = super().get_context_data(*args, **kwargs)
 
         ctx['content'] = Page.query.get(1)
+        ctx['latest_newsletters'] = Newsletter.query\
+            .filter(Newsletter.draft.is_(False))\
+            .order_by(Newsletter.date_published.desc())\
+            .all()[:5]
+
         return ctx
 
 
@@ -85,6 +90,7 @@ visitor_blueprint.add_url_rule('/fichier/<int:id>/<string:filename>', view_func=
 class NewsletterRegisterView(BaseMixin, FormView):
     form_class = NewsletterForm
     template_name = 'newsletter-in.html'
+    decorators = [limiter.limit(settings.NEWSLETTER_LIMIT)]
 
     def form_valid(self, form):
 

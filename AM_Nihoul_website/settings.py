@@ -53,6 +53,8 @@ WEBPAGE_INFO = {
     'fa_kit': ''
 }
 
+NEWSLETTER_LIMIT = '10/hour;1 per 5 second'
+
 # Load the production settings, overwrite the existing ones if needed
 try:
     from settings_prod import *  # noqa
