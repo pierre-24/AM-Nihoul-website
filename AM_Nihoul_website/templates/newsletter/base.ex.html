@@ -2,7 +2,7 @@
 <html lang="en">
 <body>
     <h1 style="margin-bottom: 32px; text-align: center;">
-        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="logo" /><br>
+        <img src="{{ url_for('static', filename='images/logo.svg', _external=True) }}" alt="logo" /><br>
         Newsletter
     </h1>
 
@@ -12,7 +12,7 @@
         &copy; {{ site_name }}. <br>
         {% if not no_unsubscribe %}
             Vous recevez ce courriel car vous êtes inscrit à la newsletter.
-            Si vous ne souhaitez plus recevoir ce type de communication, désinscrivez-vous <a href="{{ url_for('visitor.newsletter-unsubscribe', id=recipient.id, hash=recipient.hash) }}">ici</a>.
+            Si vous ne souhaitez plus recevoir ce type de communication, désinscrivez-vous <a href="{{ url_for('visitor.newsletter-unsubscribe', id=recipient.id, hash=recipient.hash, _external=True) }}">ici</a>.
         {% endif %}
     </p>
 </body>
