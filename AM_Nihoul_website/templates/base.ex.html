@@ -20,7 +20,7 @@
     <header>
         <ul class="nav justify-content-end container">
             {% for i in top_menu_small %}
-                <li><a href="{{ i.url }}" {% if i.highlight %}class="highlight-link"{% endif %}>{{ i.text }}</a></li>
+                <li class="nav-item"><a href="{{ i.url }}" class="nav-link">{{ i.text }}</a></li>
             {% endfor %}
 
             {# admin #}
