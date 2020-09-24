@@ -19,7 +19,8 @@ class TestFlask(TestCase):
         settings.APP_CONFIG['USE_FAKE_MAIL_SENDER'] = True
         settings.APP_CONFIG['LAUNCH_BOT'] = False
         settings.APP_CONFIG['WTF_CSRF_ENABLED'] = False
-        settings.APP_CONFIG['SERVER_NAME'] = 'local.domain'
+        # TODO: sort out this whole SERVER_NAME stuff
+        # settings.APP_CONFIG['SERVER_NAME'] = 'local.domain'
         settings.APP_CONFIG['UPLOADED_UPLOADS_DEST'] = os.path.join(self.data_files_directory, 'uploads/')
 
         self.app = create_app()

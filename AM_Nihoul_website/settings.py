@@ -9,8 +9,12 @@ APP_CONFIG = {
     # Flask secret key: generate a new one with
     # `python -c "import random; print(repr(''.join([chr(random.randrange(32, 126)) for _ in range(24)])))"`
     'SECRET_KEY': ';+b&#Yl] U$y7dzmW&IRh$GO',
-    'SERVER_NAME': '127.0.0.1:5000',
 
+    # change that in production
+    'SERVER_NAME': '127.0.0.1:5000',
+    'PREFERRED_URL_SCHEME': 'http',
+
+    # username/password to access admin (change that in production)
     'USERNAME': 'admin',
     'PASSWORD': 'admin',
 
@@ -27,6 +31,7 @@ APP_CONFIG = {
     'USE_FAKE_MAIL_SENDER': True,
     'LAUNCH_BOT': False,
 
+    # scheduler
     'JOBS': [
         {
             'id': 'bot',
