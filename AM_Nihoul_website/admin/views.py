@@ -483,7 +483,6 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
                         **{
                             'site_name': settings.WEBPAGE_INFO['site_name'],
                             'newsletter': self.object,
-                            'newsletter_content': self.object.content,
                             'recipient': r,
                         }
                     ),

@@ -1,11 +1,12 @@
 {% extends 'newsletter/base.ex.html' %}
 
 {% block content %}
-    <p>
+    <p style="border-bottom: 1px solid #ddd; padding-bottom: 16px; margin-bottom: 16px;">
         {% with link = url_for('visitor.newsletter-view', id=newsletter.id, slug=newsletter.slug, _external=True) %}
-        Vous pouvez directement consulter ce contenu à l'adresse suivante: <a href="{{ link }}">{{ link}}</a>.
+        Note : vous pouvez directement consulter ce contenu à l'adresse suivante: <a href="{{ link }}">{{ link}}</a>.
         {% endwith %}
     </p>
 
-    {{ newsletter_content|safe }}
+    <h2>{{ newsletter.title }}</h2>
+    {{ newsletter.content|safe }}
 {% endblock %}

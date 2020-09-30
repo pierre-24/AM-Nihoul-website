@@ -382,9 +382,13 @@ class TestNewsletter(TestFlask):
         n = Newsletter.query.get(self.draft_newsletter.id)
         self.assertFalse(n.draft)
 
+        # check email
         self.assertEqual(self.num_email + 1, Email.query.count())
         e = Email.query.order_by(Email.id.desc()).first()
         self.assertEqual(e.recipient, self.subscribed)
+
+        self.assertIn(n.title, e.content)
+        self.assertIn(n.content, e.content)
 
     def test_publish_newsletter_not_admin_ko(self):
         self.assertTrue(self.draft_newsletter.draft)
