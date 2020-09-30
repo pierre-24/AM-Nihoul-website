@@ -13,15 +13,15 @@ source venv/bin/activate
 make init
 ```
 
-Et dans `settings_prod.py`:
+Et dans `settings_prod.py` (serveur <https://amn.pierrebeaujean.net/>):
 
 ```python
 from AM_Nihoul_website import settings
 
 settings.WEBPAGE_INFO['fa_kit'] = '*****'
 
-settings.APP_CONFIG['LAUNCH_BOT'] = True
-# settings.APP_CONFIG['USE_FAKE_MAIL_SENDER'] = False
+settings.APP_CONFIG['LAUNCH_BOT'] = False
+settings.APP_CONFIG['USE_FAKE_MAIL_SENDER'] = False
 
 settings.APP_CONFIG['SECRET_KEY'] = '****'
 settings.APP_CONFIG['PASSWORD'] = '*****'
