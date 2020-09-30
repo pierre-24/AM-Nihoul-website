@@ -1,0 +1,84 @@
+{% macro create_modal(id, title, content, bottom='', action='', multipart=False) %}
+  <div id="{{ id }}" class="modal fade" role="dialog">
+        <form class="modal-dialog" method="post" {% if action %}action="{{ action }}"{% endif %} {% if multipart %}enctype="multipart/form-data"{% endif %}>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>{{ title|safe }}</h5>
+
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+            {{ content|safe }}
+            </div>
+            {%  if bottom != '' %}
+            <p class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                {{ bottom|safe }}
+            </p>
+            {% endif %}
+        </div>
+        </form>
+    </div>
+{% endmacro %}
+
+{% macro create_delete_modal(model, id, info, link) %}
+    {{ create_modal(
+        'delete-' + model + '-' + id|string,
+        'Suppression', '<p>Voulez vous vraiment supprimer ' + info + ' ?</p>',
+        '<input type="submit" value="Supprimer" class="btn btn-primary" />',
+        url_for(link, id=id)) }}
+{% endmacro %}
+
+
+{% macro include_editor() %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.21.0/trumbowyg.min.js" integrity="sha512-l6MMck8/SpFCgbJnIEfVsWQ8MaNK/n2ppTiELW3I2BFY5pAm/WjkNHSt+2OD7+CZtygs+jr+dAgzNdjNuCU7kw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.21.0/langs/fr.min.js" integrity="sha512-UcIsJdBCuvuHt4LR6FoShixLYQXvVPTFrHBI+cXa1VNBJ7E+dRLb42xyLzfR6mKiQ7Z/YdRMFjQSDzvYYCr3vw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.21.0/plugins/pasteimage/trumbowyg.pasteimage.js" integrity="sha512-GQOXKj+eQOL6yIlEkO6KNZ48B7zz3YXplnNJa8IzA8RUcUGhC2965PU7AWAyc9zwYfHwcLmvfsslPHDf6BQZnQ==" crossorigin="anonymous"></script>
+
+    <script>
+        // change editor options
+        $('.trumbowyg-textarea').trumbowyg({
+            resetCss: true,
+            lang: 'fr',
+            removeformatPasted: true,
+            minimalLinks: true,
+            btnsDef: {
+                shiftedh1: {
+                    fn: () => {
+                        document.execCommand('formatBlock', false, 'h3');
+                    },
+                    title: 'Titre 1',
+                    tag: 'h3',
+                    ico: 'h1'
+                },
+                shiftedh2: {
+                    fn: () => {
+                        document.execCommand('formatBlock', false, 'h4');
+                    },
+                    title: 'Titre 2',
+                    tag: 'h4',
+                    ico: 'h2'
+                },
+                customFormatting: {
+                    dropdown: ['p', 'blockquote', 'shiftedh1', 'shiftedh2'],
+                    ico: 'p'
+                }
+            },
+            btns: [
+                ['viewHTML'],
+                ['undo', 'redo'], // Only supported in Blink browsers
+                ['p', 'blockquote', 'shiftedh1', 'shiftedh2'],
+                ['strong', 'em', 'underline'],
+                ['link'],
+                ['insertImage'],
+                ['justifyLeft', 'justifyCenter'],
+                ['unorderedList', 'orderedList'],
+                ['removeformat'],
+                ['fullscreen']
+            ]
+        });
+    </script>
+{% endmacro %}

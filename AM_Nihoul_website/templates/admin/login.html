@@ -1,0 +1,18 @@
+{% extends "base.ex.html" %}
+{% from 'bootstrap/form.html' import render_field %}
+
+{% block page_title %}Connexion{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Connexion à l'interface d'administration</h2>
+
+    <form method="post">
+        {{ form.csrf_token }}
+        {{ form.next(value=next) }}
+        {{ render_field(form.login) }}
+        {{ render_field(form.password) }}
+        {{ render_field(form.login_button) }}
+    </form>
+    </section>
+{% endblock %}

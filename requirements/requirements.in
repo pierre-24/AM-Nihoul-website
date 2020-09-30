@@ -1,5 +1,4 @@
-flask
-Flask-SQLAlchemy
-Flask-Uploads
-sqlalchemy-utils
-python-slugify
+-r requirements-base.in
+flake8
+flake8-quotes
+autopep8

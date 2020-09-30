@@ -1,0 +1,111 @@
+{% from 'bootstrap/utils.html' import render_messages %}
+{% from 'bootstrap/form.html' import render_form_row %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block page_title %}{% endblock %} - {{ site_name }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0">
+    <meta name="description" content="{{ site_name }} : {{ site_description }}">
+    <meta name="keywords" content="{{ site_keywords }}">
+
+    {{ bootstrap.load_css() }}
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    {% block other_head_stuffs %}{% endblock %}
+    <link href="{{ url_for('static', filename='images/favicon.png') }}" rel="icon">
+</head>
+
+<body>
+    <header>
+        <ul class="nav justify-content-end container">
+            {% for i in top_menu_small %}
+                <li class="nav-item"><a href="{{ i.url }}" class="nav-link">{{ i.text }}</a></li>
+            {% endfor %}
+
+            {# admin #}
+            {% if not current_user.is_authenticated %}
+                <li class="nav-item"><a href="{{ url_for('admin.login') }}" class="nav-link">Sésame</a></li>
+            {% else %}
+                <li class="nav-item"><a href="{{ url_for('admin.index') }}" class="nav-link">Administration</a></li>
+                <li class="nav-item"><a href="{{ url_for('admin.logout') }}" class="nav-link">Se déconnecter</a></li>
+            {% endif %}
+        </ul>
+    </header>
+
+    <nav class="navbar navbar-light bg-light navbar-expand-md">
+        <div class="container">
+            <a href="/" class="navbar-brand" ><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="logo"> <span class="d-none d-lg-inline">{{ site_name }}</span></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    {% for i in top_menu_big %}
+                        <li class="nav-item"><a class="nav-link" href="{{ i.url }}">{{ i.text }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" id="messages-zone">
+        {{ render_messages() }}
+    </div>
+
+    <div id="page-content">
+
+        {% block page_content %}
+        <div id="content" class="container mt-4 pb-4">
+        {% block content %}{% endblock %}
+        </div>
+        {% endblock %}
+    </div>
+
+    {% if not no_newsletter %}
+    <div id="newsletter" class="jumbotron-fluid">
+        <div class="container">
+        <p>Pour ne rien rater, inscrivez vous à notre newsletter !</p>
+        <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post">
+            {{ newsletter_form.hidden_tag() }}
+            <div class="form-row">
+                <div class="col-md-5">{{ newsletter_form.name(placeholder='Prénom et nom', class_='form-control mb-2') }}</div>
+                <div class="col-md-5">{{ newsletter_form.email(placeholder='Adresse email', class_='form-control mb-2') }}</div>
+                <div class="col-md-2">{{ newsletter_form.submit_button(class_='btn btn-primary mb-2') }}</div>
+            </div>
+
+        </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <footer class="container mt-4">
+        <div id="bottom-nav">
+            {% for k, pages in bottom_menu.items() %}
+                <div class="bottom-nav-block">
+                <h3>{{ k }}</h3>
+                    <ul>
+                    {% for p in pages %}
+                        <li><a href="{{ url_for('visitor.page-view', id=p.id, slug=p.slug) }}">{{ p.title }}</a></li>
+                    {% endfor %}
+                    </ul>
+                </div>
+
+            {% endfor %}
+        </div>
+
+        <div id="bottom-txt" class="mt-2">
+            &copy; {{ site_name }}. Site web par <a href="{{ author_url }}">{{ author_name }}</a>  (version: <a href="{{ repo_url }}">{{ site_version }}</a>)
+        </div>
+    </footer>
+
+    {% block scripts %}
+        {{ bootstrap.load_js() }}
+        {# add FontAwesome kit if available #}
+        {% if fa_kit != '' %}
+            <script src="https://kit.fontawesome.com/{{ fa_kit }}.js"></script>
+        {% endif %}
+    {% endblock %}
+</body>
+</html>

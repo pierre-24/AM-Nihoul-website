@@ -1,0 +1,39 @@
+{% extends "admin/base.ex.html" %}
+{% from "helpers.inc.html" import create_delete_modal %}
+
+{% set admin_current = 'page' %}
+
+{% block page_title %}Gestion des pages{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Gestion des pages</h2>
+
+    <p>
+        <a class="button-like" href="{{ url_for('admin.page-create') }}"><span class="fas fa-plus"></span> Ajouter une page</a>
+    </p>
+
+    <table class="admin-list">
+        {% for page in pages %}
+            <tr>
+                <td class="left">
+                    <span class="title"><a href="{{ url_for('visitor.page-view', id=page.id, slug=page.slug) }}">{{ page.title }}</a></span>
+                    <span class="info">{% if page.category_id != None %}{{ categories[page.category_id].name }}{% else %}<i>pas de catégorie</i>{% endif %}</span>
+                </td>
+                <td class="right">
+                    <span class="buttons">
+                        <a class="button-like" href="{{ url_for('admin.page-edit', id=page.id, slug=page.slug) }}"><span class="fas fa-pen-square"></span></a>
+                        {% if not page.protected %}
+                            <a class="button-like" href="#delete-page-{{ page.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
+                            {{ create_delete_modal('page', page.id, 'la page "' + page.title + '"', 'admin.page-delete') }}
+                        {% else %}
+                            <a class="button-like"><span class="fas fa-lock"></span></a>
+                        {% endif %}
+                    </span>
+                    <span class="info">Dernière modification: {{ page.date_modified|date_formatter }}</span>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    </section>
+{% endblock %}

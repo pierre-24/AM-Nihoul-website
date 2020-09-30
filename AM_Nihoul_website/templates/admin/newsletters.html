@@ -1,0 +1,56 @@
+{% extends "admin/base.ex.html" %}
+{% from "helpers.inc.html" import create_delete_modal, create_modal %}
+{% from 'bootstrap/form.html' import render_field%}
+
+{% set admin_current = 'newsletter' %}
+
+{% block page_title %}Gestion des newsletters{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Gestion des newsletters</h2>
+
+    <p>
+        <a class="button-like" href="{{ url_for('admin.newsletter-create') }}"><span class="fas fa-plus"></span> Ajouter une newsletter</a>
+    </p>
+
+    <table class="admin-list">
+        {% for newsletter in newsletters %}
+            <tr class="{% if newsletter.draft %}newsletter-draft{% endif %}">
+                <td class="left">
+                    <span class="title"><a href="{% if newsletter.draft %}{{ url_for('admin.newsletter-view', id=newsletter.id) }}{% else %}{{ url_for('visitor.newsletter-view', id=newsletter.id, slug=newsletter.slug) }}{% endif %}">{{ newsletter.title }}</a></span>
+                    <span class="info">{% if newsletter.draft %}Brouillon{% else %}Publiée {{ newsletter.date_published|date_formatter }}{% endif %}</span>
+                </td>
+                <td class="right">
+                    <span class="buttons">
+                        <a class="button-like" href="{{ url_for('admin.newsletter-edit', id=newsletter.id, slug=newsletter.slug) }}"><span class="fas fa-pen-square"></span></a>
+                        {%  if newsletter.draft %}
+                            <a class="button-like" href="#publishNewsletter{{ newsletter.id }}" data-toggle="modal"><span class="fas fa-check-square"></span></a>
+                            {% set modal_publish_content %}
+                                {{ form.csrf_token }}
+                                {{ form.confirm(value=True) }}
+                                <p>
+                                    Voulez vous vraiment publier la newsletter "{{ newsletter.title }}" ?
+                                    Attention, ceci envera également un mail à toutes les personnes qui y sont inscrite.
+                                </p>
+                            {% endset %}
+                            {{ create_modal(
+                                'publishNewsletter' + newsletter.id|string,
+                                'Publier cette newsletter',
+                                modal_publish_content,
+                                render_field(form.submit_button),
+                                action=url_for('admin.newsletter-publish', id=newsletter.id)
+                                ) }}
+                        {% else %}
+                            <a class="button-like"><span class="fas fa-lock"></span></a>
+                        {% endif %}
+                        <a class="button-like" href="#delete-newsletter-{{ newsletter.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
+                        {{ create_delete_modal('newsletter', newsletter.id, 'la newsletter "' + newsletter.title + '"', 'admin.newsletter-delete') }}
+                    </span>
+                    <span class="info">Dernière modification: {{ newsletter.date_modified|date_formatter }}</span>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    </section>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.ex.html" %}
+
+{% block page_title %}{{ newsletter.title }}{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>{{ newsletter.title }}</h2>
+        <p class="newsletter-info">Newsletter publiée {{ newsletter.date_published|date_formatter }}.</p>
+    {{ newsletter.content|safe }}
+    </section>
+{% endblock %}
