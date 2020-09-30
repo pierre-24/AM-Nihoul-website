@@ -37,7 +37,7 @@
                 </td>
                 <td class="right">
                     <span class="buttons">
-                        <a class="button-like btn-copy" data-clipboard-text="{{ url_for('visitor.upload-view', id=f.id, filename=f.file_name) }}"><span class="fas fa-paperclip"></span></a>
+                        <a class="button-like btn-copy" data-clipboard-text="{{ url_for('visitor.upload-view', id=f.id, filename=f.file_name, _external=True) }}"><span class="fas fa-paperclip"></span></a>
                         <a class="button-like" href="#delete-file-{{ f.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
                         {{ create_delete_modal('file', f.id, 'le fichier "' + f.file_name + '"', 'admin.file-delete') }}
                     </span>

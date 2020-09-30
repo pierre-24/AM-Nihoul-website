@@ -28,8 +28,8 @@ APP_CONFIG = {
     # newsletter
     'REMOVE_RECIPIENTS_DELTA': timedelta(days=1),
     'NEWSLETTER_SENDER_EMAIL': 'xyz@test.com',
-    'USE_FAKE_MAIL_SENDER': True,
-    'LAUNCH_BOT': False,
+    'USE_FAKE_MAIL_SENDER': False,
+    'LAUNCH_BOT': True,
 
     # scheduler
     'JOBS': [

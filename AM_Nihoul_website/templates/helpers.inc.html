@@ -37,11 +37,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.21.0/trumbowyg.min.js" integrity="sha512-l6MMck8/SpFCgbJnIEfVsWQ8MaNK/n2ppTiELW3I2BFY5pAm/WjkNHSt+2OD7+CZtygs+jr+dAgzNdjNuCU7kw==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.21.0/langs/fr.min.js" integrity="sha512-UcIsJdBCuvuHt4LR6FoShixLYQXvVPTFrHBI+cXa1VNBJ7E+dRLb42xyLzfR6mKiQ7Z/YdRMFjQSDzvYYCr3vw==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.21.0/plugins/pasteimage/trumbowyg.pasteimage.js" integrity="sha512-GQOXKj+eQOL6yIlEkO6KNZ48B7zz3YXplnNJa8IzA8RUcUGhC2965PU7AWAyc9zwYfHwcLmvfsslPHDf6BQZnQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.21.0/plugins/fontsize/trumbowyg.fontsize.min.js"></script>
 
     <script>
         // change editor options
         $('.trumbowyg-textarea').trumbowyg({
-            resetCss: true,
             lang: 'fr',
             removeformatPasted: true,
             minimalLinks: true,
@@ -73,12 +73,23 @@
                 ['p', 'blockquote', 'shiftedh1', 'shiftedh2'],
                 ['strong', 'em', 'underline'],
                 ['link'],
-                ['insertImage'],
+                ['fontsize'],
                 ['justifyLeft', 'justifyCenter'],
                 ['unorderedList', 'orderedList'],
                 ['removeformat'],
                 ['fullscreen']
-            ]
-        });
+            ],
+            plugins: {
+                fontsize: {
+                    allowCustomSize: false,
+                    sizeList: [
+                        '110%',
+                        '120%',
+                        '130%'
+                    ]
+                }
+            }
+        },
+        );
     </script>
 {% endmacro %}
