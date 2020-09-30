@@ -31,9 +31,9 @@ google-api-python-client==1.10.0  # via simplegmail
 google-auth-httplib2==0.0.4  # via google-api-python-client
 google-auth==1.19.1       # via google-api-core, google-api-python-client, google-auth-httplib2
 googleapis-common-protos==1.52.0  # via google-api-core
+gunicorn==20.0.4          # via -r requirements/requirements.in
 httplib2==0.18.1          # via google-api-python-client, google-auth-httplib2, oauth2client
 idna==2.9                 # via email-validator, requests
-importlib-metadata==1.7.0  # via flake8
 itsdangerous==1.1.0       # via flask, flask-wtf
 jinja2==2.11.2            # via flask
 limits==1.5.1             # via flask-limiter
@@ -53,7 +53,7 @@ python-slugify==4.0.0     # via -r requirements/requirements-base.in
 pytz==2020.1              # via apscheduler, google-api-core, tzlocal
 requests==2.24.0          # via google-api-core
 rsa==4.6                  # via google-auth, oauth2client
-simplegmail==2.0.0        # via -r requirements/requirements-base.in
+simplegmail==3.0.0        # via -r requirements/requirements-base.in
 six==1.15.0               # via apscheduler, flask-limiter, google-api-core, google-api-python-client, google-auth, google-auth-httplib2, limits, oauth2client, protobuf, python-dateutil, sqlalchemy-utils
 soupsieve==2.0.1          # via beautifulsoup4
 sqlalchemy-utils==0.36.6  # via -r requirements/requirements-base.in
@@ -65,7 +65,6 @@ uritemplate==3.0.1        # via google-api-python-client
 urllib3==1.25.9           # via requests
 werkzeug==1.0.1           # via flask
 wtforms==2.3.1            # via flask-wtf
-zipp==3.1.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
