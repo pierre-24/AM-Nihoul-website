@@ -1,3 +1,5 @@
+![](./AM_Nihoul_website/assets/images/logo.svg)
+
 # Code source du site web de l'association Anne-Marie Nihoul
 
 Mise au gout du jour du site web [http://annemarienihoul.be/](http://annemarienihoul.be/).
@@ -13,7 +15,7 @@ source venv/bin/activate
 make init
 ```
 
-Et dans `settings_prod.py` (serveur <https://annemarienihoul.be/>):
+Et dans `settings_prod.py`,
 
 ```python
 from AM_Nihoul_website import settings
@@ -32,3 +34,5 @@ settings.APP_CONFIG['PASSWORD'] = '*****'
 
 del settings.APP_CONFIG['SERVER_NAME'] # messed up with stuffs
 ```
+
+N'oubliez pas d'utiliser un service type [gunicorn](https://gunicorn.org/).
