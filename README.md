@@ -20,6 +20,9 @@ from AM_Nihoul_website import settings
 
 settings.WEBPAGE_INFO['fa_kit'] = '*****'
 
+settings.WEBPAGE_INFO['gtag'] = '*****'
+settings.WEBPAGE_INFO['cookies_explain_page'] = 'cookies.html'  # mandatory if gtag is set
+
 settings.APP_CONFIG['LAUNCH_BOT'] = False
 settings.APP_CONFIG['USE_FAKE_MAIL_SENDER'] = False
 settings.APP_CONFIG['NEWSLETTER_SENDER_EMAIL'] = '*****'

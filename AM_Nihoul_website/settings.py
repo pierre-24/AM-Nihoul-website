@@ -55,7 +55,11 @@ WEBPAGE_INFO = {
     'site_description': 'aide aux malades',
     'site_keywords': 'leucémie, aide au malades',
     'site_version': '0.2',
-    'fa_kit': ''
+
+    # external services
+    'fa_kit': '',  # FontAwesome
+    'gtag': '',  # Google analytics
+    'cookies_explain_page': ''  # if `gtag` is set, you MUST have a page that explains the cookies
 }
 
 # limit over inscription at the newsletter
