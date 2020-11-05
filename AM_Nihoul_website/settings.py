@@ -50,14 +50,15 @@ APP_CONFIG = {
 WEBPAGE_INFO = {
     'author_url': 'https://pierrebeaujean.net/fr.html',
     'author_name': 'Pierre Beaujean',
-    'repo_url': 'https://git.pierrebeaujean.net/pierre/AM-Nihoul-website',
+    'repo_url': 'https://github.com/pierre-24/AM-Nihoul-website/',
     'site_name': 'Association Anne-Marie Nihoul',
     'site_description': 'aide aux malades',
     'site_keywords': 'leucémie, aide au malades',
-    'site_version': '0.1a0',
+    'site_version': '0.2',
     'fa_kit': ''
 }
 
+# limit over inscription at the newsletter
 NEWSLETTER_LIMIT = '10/hour;1 per 5 second'
 
 # Load the production settings, overwrite the existing ones if needed
