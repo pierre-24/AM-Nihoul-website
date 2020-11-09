@@ -301,7 +301,7 @@ class FilesView(AdminBaseMixin, FormView):
         try:
             u = UploadedFile.create(form.file_uploaded.data, description=form.description.data, filename=filename)
         except UploadNotAllowed:
-            flask.flash("Ce type de fichier n'est pas autorisé", category="error")
+            flask.flash("Ce type de fichier n'est pas autorisé", category='error')
             return super().form_invalid(form)
 
         db.session.add(u)
