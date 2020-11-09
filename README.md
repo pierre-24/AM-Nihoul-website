@@ -1,6 +1,8 @@
-# Code source du site web de l'association Anne-Marie Nihoul
+![](./AM_Nihoul_website/assets/images/logo.svg)
 
-Mise au gout du jour du site web [http://www.annemarienihoul.be/](http://www.annemarienihoul.be/).
+# Code source du site web de l'association Anne-Marie Nihoul ASBL
+
+Mise au gout du jour du site web [http://annemarienihoul.be/](http://annemarienihoul.be/).
 
 # Installation
 
@@ -13,18 +15,24 @@ source venv/bin/activate
 make init
 ```
 
-Et dans `settings_prod.py`:
+Et dans `settings_prod.py`,
 
 ```python
 from AM_Nihoul_website import settings
 
 settings.WEBPAGE_INFO['fa_kit'] = '*****'
 
-settings.APP_CONFIG['LAUNCH_BOT'] = True
-# settings.APP_CONFIG['USE_FAKE_MAIL_SENDER'] = False
+settings.WEBPAGE_INFO['gtag'] = '*****'
+settings.WEBPAGE_INFO['cookies_explain_page'] = 'cookies.html'  # mandatory if gtag is set
+
+settings.APP_CONFIG['LAUNCH_BOT'] = False
+settings.APP_CONFIG['USE_FAKE_MAIL_SENDER'] = False
+settings.APP_CONFIG['NEWSLETTER_SENDER_EMAIL'] = '*****'
 
 settings.APP_CONFIG['SECRET_KEY'] = '****'
 settings.APP_CONFIG['PASSWORD'] = '*****'
 
-del settings.APP_CONFIG['SERVER_NAME']
+del settings.APP_CONFIG['SERVER_NAME'] # messed up with stuffs
 ```
+
+N'oubliez pas d'utiliser un service type [gunicorn](https://gunicorn.org/).

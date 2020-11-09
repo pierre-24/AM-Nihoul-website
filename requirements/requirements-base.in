@@ -8,7 +8,7 @@ python-slugify
 email_validator
 Flask-Login
 Flask-APScheduler
-simplegmail
+simplegmail>=3.0
 bootstrap-flask
 Flask-Migrate
 Flask-Limiter
