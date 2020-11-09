@@ -123,13 +123,21 @@
             <script src="https://cdn.jsdelivr.net/npm/cookies-eu-banner@2.0.1/dist/cookies-eu-banner.min.js"></script>
             <script>
                 new CookiesEuBanner(function () {
-                    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-                    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-                    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-                    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-                    ga('create', '{{ gtag }}', 'auto');
-                    ga('send', 'pageview');
+                    (function (w,d,s,g,i) {
+                        /* add <script> */
+                        let a = d.createElement(s);
+                        a.async = true;
+                        a.src = g + '?id=' + i;
+                        let p = d.getElementsByTagName(s)[0];
+                        p.parentNode.insertBefore(a, p);
+                        /* create data layer*/
+                        w.dataLayer = w.dataLayer || [];
+                        /* configure */
+                        function gtag(){dataLayer.push(arguments);}
+                        gtag('js', new Date());
+                        gtag('config', i);
+                        console.log("done done done");
+                    })(window, document, 'script', 'https://www.googletagmanager.com/gtag/js', '{{ gtag }}');
                 }, true);
             </script>
         {% endif %}
