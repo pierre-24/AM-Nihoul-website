@@ -3,6 +3,7 @@ from flask import Blueprint
 from flask.views import View
 import flask_login
 from flask_login import login_required
+from flask_uploads import UploadNotAllowed
 
 from AM_Nihoul_website import settings, db, User
 from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView, ObjectManagementMixin, \
@@ -297,7 +298,12 @@ class FilesView(AdminBaseMixin, FormView):
             else:
                 filename += to_add
 
-        u = UploadedFile.create(form.file_uploaded.data, description=form.description.data, filename=filename)
+        try:
+            u = UploadedFile.create(form.file_uploaded.data, description=form.description.data, filename=filename)
+        except UploadNotAllowed:
+            flask.flash("Ce type de fichier n'est pas autorisé", category="error")
+            return super().form_invalid(form)
+
         db.session.add(u)
         db.session.commit()
 
