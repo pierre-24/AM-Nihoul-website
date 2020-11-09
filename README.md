@@ -1,6 +1,6 @@
 ![](./AM_Nihoul_website/assets/images/logo.svg)
 
-# Code source du site web de l'association Anne-Marie Nihoul
+# Code source du site web de l'association Anne-Marie Nihoul ASBL
 
 Mise au gout du jour du site web [http://annemarienihoul.be/](http://annemarienihoul.be/).
 

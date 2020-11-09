@@ -51,7 +51,7 @@ WEBPAGE_INFO = {
     'author_url': 'https://pierrebeaujean.net/fr.html',
     'author_name': 'Pierre Beaujean',
     'repo_url': 'https://github.com/pierre-24/AM-Nihoul-website/',
-    'site_name': 'Association Anne-Marie Nihoul',
+    'site_name': 'Association Anne-Marie Nihoul ASBL',
     'site_description': 'aide aux malades',
     'site_keywords': 'leucémie, aide au malades',
     'site_version': '0.2',
