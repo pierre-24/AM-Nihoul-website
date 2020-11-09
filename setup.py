@@ -8,6 +8,8 @@ AM-Nihoul-website, a small website for an association with not intent of being s
 from setuptools import setup, find_packages
 from os import path
 
+from AM_Nihoul_website.settings import WEBPAGE_INFO
+
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
@@ -23,7 +25,7 @@ with open(path.join(here, 'requirements/requirements.in')) as f:
 
 setup(
     name='AM-Nihoul-website',
-    version='0.1a0',
+    version=WEBPAGE_INFO['site_version'],
     
     # Description
     description=__doc__,
@@ -32,16 +34,15 @@ setup(
     keywords='website',
 
     project_urls={
-        'Bug Reports': 'https://git.pierrebeaujean.net/pierre/AM-Nihoul-website/issues',
-        'Source': 'https://git.pierrebeaujean.net/pierre/AM-Nihoul-website/',
+        'Bug Reports': 'https://github.com/pierre-24/AM-Nihoul-website/issues',
+        'Source': 'https://github.com/pierre-24/AM-Nihoul-website/',
     },
     
-    url='http://www.annemarienihoul.be/',
+    url='http://annemarienihoul.be/',
     author='Pierre Beaujean',
 
     # Classifiers
-    classifiers= [
-        'Development Status :: 3 - Alpha',
+    classifiers=[
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'License :: OSI Approved :: MIT License',
@@ -52,6 +53,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 
 
