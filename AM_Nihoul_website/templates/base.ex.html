@@ -130,13 +130,12 @@
                         a.src = g + '?id=' + i;
                         let p = d.getElementsByTagName(s)[0];
                         p.parentNode.insertBefore(a, p);
-                        /* create data layer*/
+                        /* create data layer */
                         w.dataLayer = w.dataLayer || [];
                         /* configure */
                         function gtag(){dataLayer.push(arguments);}
                         gtag('js', new Date());
                         gtag('config', i);
-                        console.log("done done done");
                     })(window, document, 'script', 'https://www.googletagmanager.com/gtag/js', '{{ gtag }}');
                 }, true);
             </script>

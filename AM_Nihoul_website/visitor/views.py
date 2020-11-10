@@ -28,6 +28,48 @@ class IndexView(BaseMixin, RenderTemplateView):
 visitor_blueprint.add_url_rule('/', view_func=IndexView.as_view(name='index'))
 
 
+# -- Sitemap
+class SitemapView(RenderTemplateView):
+    template_name = 'sitemap.xml'
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        urls = [
+            {'location': flask.url_for('visitor.index', _external=True), 'changefreq': 'weekly', 'priority': 1},
+            {'location': flask.url_for('visitor.newsletters', _external=True), 'changefreq': 'weekly', 'priority': 0.8}
+        ]
+
+        # add pages
+        for p in Page.query.all():
+            urls.append({
+                'location': flask.url_for('visitor.page-view', id=p.id, slug=p.slug, _external=True),
+                'changefreq': 'weekly',
+                'modified': p.date_modified,
+                'priority': 0.8
+            })
+
+        # add newsletter
+        for n in Newsletter.query.filter(Newsletter.draft.is_(False)).all():
+            urls.append({
+                'location': flask.url_for('visitor.newsletter-view', id=n.id, slug=n.slug, _external=True),
+                'changefreq': 'yearly',
+                'modified': n.date_modified
+            })
+
+        ctx['urls'] = urls
+        return ctx
+
+    def get(self, *args, **kwargs):
+        response = flask.make_response(super().get(*args, **kwargs))
+        response.headers['Content-type'] = 'application/xml'
+
+        return response
+
+
+visitor_blueprint.add_url_rule('/sitemap.xml', view_func=SitemapView.as_view(name='sitemap'))
+
+
 # -- Pages
 class PageView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
     template_name = 'page.html'
@@ -217,7 +259,7 @@ class NewslettersView(BaseMixin, RenderTemplateView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx['newsletters'] = Newsletter.query.order_by(Newsletter.id.desc()).all()
+        ctx['newsletters'] = Newsletter.query.filter(Newsletter.draft.is_(False)).order_by(Newsletter.id.desc()).all()
         return ctx
 
 
