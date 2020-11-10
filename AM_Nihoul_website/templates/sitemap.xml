@@ -4,7 +4,7 @@
   <url>
     <loc>{{ info.location }}</loc>
       {% if 'modified' in info %}
-        <lastmod>{{ info.modified.isoformat() }}</lastmod>
+        <lastmod>{{ info.modified.strftime("%Y-%m-%d") }}</lastmod>
       {% endif %}
     <changefreq>{{ info.changefreq }}</changefreq>
       {% if 'priority' in info %}
