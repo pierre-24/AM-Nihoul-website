@@ -70,6 +70,36 @@ class SitemapView(RenderTemplateView):
 visitor_blueprint.add_url_rule('/sitemap.xml', view_func=SitemapView.as_view(name='sitemap'))
 
 
+# -- Robots.txt
+ROBOTS_TXT = """
+# www.robotstxt.org
+Sitemap: {}
+
+User-agent: *
+Disallow: /admin/
+Disallow: /fichier/
+"""
+
+
+class RobotsView(views.View):
+    methods = ['GET']
+
+    def get(self, *args, **kwargs):
+        response = flask.make_response(ROBOTS_TXT.format(flask.url_for('visitor.sitemap', _external=True)))
+        response.headers['Content-type'] = 'text/plain'
+
+        return response
+
+    def dispatch_request(self, *args, **kwargs):
+        if flask.request.method == 'GET':
+            return self.get(*args, **kwargs)
+        else:
+            flask.abort(403)
+
+
+visitor_blueprint.add_url_rule('/robots.txt', view_func=RobotsView.as_view(name='robots'))
+
+
 # -- Pages
 class PageView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
     template_name = 'page.html'
