@@ -10,5 +10,5 @@ Flask-Login
 Flask-APScheduler
 simplegmail>=3.0
 bootstrap-flask
-Flask-Migrate
+Flask-Alembic
 Flask-Limiter
