@@ -112,7 +112,7 @@ def create_app():
     from AM_Nihoul_website.admin.views import admin_blueprint
     app.register_blueprint(admin_blueprint)
 
-    # add filters
+    # add filtersn
     app.jinja_env.filters.update(**filters)
 
     # launch bot, if any
