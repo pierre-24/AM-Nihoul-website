@@ -16,7 +16,7 @@ class IndexView(BaseMixin, RenderTemplateView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
 
-        ctx['content'] = Page.query.get(1)
+        ctx['content'] = Page.query.get(settings.APP_CONFIG['PAGES']['visitor_index'])
         ctx['latest_newsletters'] = Newsletter.query\
             .filter(Newsletter.draft.is_(False))\
             .order_by(Newsletter.date_published.desc())\
@@ -115,6 +115,9 @@ class PageView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
         if self.object.slug != kwargs.get('slug'):
             flask.abort(error_code)
 
+        if self.object.next_id:
+            self.object.next = Page.query.get(self.object.next_id)
+
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx['page'] = self.object
@@ -173,7 +176,7 @@ class NewsletterRegisterView(BaseMixin, FormView):
             db.session.commit()
 
             e = Email.create(
-                'Inscription à la newsletter',
+                'Inscription aux infolettres',
                 flask.render_template(
                     'newsletter/newsletter-in.html',
                     **{
@@ -188,14 +191,14 @@ class NewsletterRegisterView(BaseMixin, FormView):
 
         # done on purpose, so that nobody knows if a given address has subscribed or not:
         flask.flash(
-            'Nous vous avons envoyé un mail. Consultez-le pour confirmer votre inscription à notre newsletter.')
+            'Nous vous avons envoyé un mail. Consultez-le pour confirmer votre inscription à nos infolettres.')
         self.success_url = flask.url_for('visitor.index')
 
         return super().form_valid(form)
 
 
 visitor_blueprint.add_url_rule(
-    '/newsletter.html', view_func=NewsletterRegisterView.as_view(name='newsletter-subscribe'))
+    '/infolettres-inscription.html', view_func=NewsletterRegisterView.as_view(name='newsletter-subscribe'))
 
 
 class BaseNewsletterMixin(BaseMixin, ObjectManagementMixin, views.View):
@@ -231,12 +234,12 @@ class NewsletterSubscribeConfirmView(BaseNewsletterMixin):
         db.session.add(self.object)
         db.session.commit()
 
-        flask.flash('Votre inscription à la newsletter est bien confirmée, merci !')
+        flask.flash('Votre inscription aux infolettres est bien confirmée, merci !')
         return flask.redirect(flask.url_for('visitor.index'))
 
 
 visitor_blueprint.add_url_rule(
-    '/newsletter-confirmation-<int:id>-<string:hash>.html',
+    '/infolettres-confirmation-<int:id>-<string:hash>.html',
     view_func=NewsletterSubscribeConfirmView.as_view(name='newsletter-confirm'))
 
 
@@ -253,7 +256,7 @@ class NewsletterUnsubscribeView(BaseNewsletterMixin):
 
 
 visitor_blueprint.add_url_rule(
-    '/newsletter-out-<int:id>-<string:hash>.html',
+    '/infolettres-désinscription-<int:id>-<string:hash>.html',
     view_func=NewsletterUnsubscribeView.as_view(name='newsletter-unsubscribe'))
 
 
@@ -281,7 +284,7 @@ class NewsletterView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
 
 
 visitor_blueprint.add_url_rule(
-    '/newsletter/<int:id>-<string:slug>.html', view_func=NewsletterView.as_view(name='newsletter-view'))
+    '/infolettre/<int:id>-<string:slug>.html', view_func=NewsletterView.as_view(name='newsletter-view'))
 
 
 class NewslettersView(BaseMixin, RenderTemplateView):
@@ -293,4 +296,4 @@ class NewslettersView(BaseMixin, RenderTemplateView):
         return ctx
 
 
-visitor_blueprint.add_url_rule('/newsletters.html', view_func=NewslettersView.as_view(name='newsletters'))
+visitor_blueprint.add_url_rule('/infolettres.html', view_func=NewslettersView.as_view(name='newsletters'))

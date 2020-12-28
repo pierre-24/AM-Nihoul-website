@@ -15,6 +15,7 @@ def bootstrap():
     # pages
     pages = [
         Page.create('Accueil', "<i>Placez un petit message d'accueil</i>", protected=True),
+        Page.create("Accueil de l'administration", '<i>Vous savez quoi faire !</i>', protected=True),
         Page.create('À propos de', '<i>Indiquez ici des détails sur le site web</i>', protected=True, category_id=c.id),
         Page.create('Contact', '<i>Donnez vos informations de contact ici</i>', protected=True, category_id=c.id)
     ]
@@ -26,9 +27,9 @@ def bootstrap():
 
     # menu entries
     links = [
-        MenuEntry.create(pages[1].title, flask.url_for('visitor.page-view', id=pages[1].id, slug=pages[1].slug)),
-        MenuEntry.create(
-            pages[2].title, flask.url_for('visitor.page-view', id=pages[2].id, slug=pages[2].slug), highlight=True)
+        MenuEntry.create(pages[2].title, flask.url_for('visitor.page-view', id=pages[2].id, slug=pages[2].slug)),
+        MenuEntry.create(pages[3].title, flask.url_for('visitor.page-view', id=pages[3].id, slug=pages[3].slug),
+                         highlight=True)
     ]
 
     links[0].order, links[1].order = 0, 1

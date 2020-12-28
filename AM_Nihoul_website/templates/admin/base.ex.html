@@ -1,14 +1,16 @@
 {% extends "base.ex.html" %}
 {% set no_newsletter = True %}
+{% set no_gtag = True %}
 
 {% block page_content %}
     <div class="container  mt-4 pb-4">
     <ul  id="admin-menu"class="nav nav-tabs">
-        <li class="nav-item"><a href="{{ url_for('admin.newsletters') }}" class="nav-link {%  if admin_current == 'newsletter' %}active{% endif %}">Newsletters</a></li>
+        <li class="nav-item"><a href="{{ url_for('admin.index') }}" class="nav-link {%  if not admin_current %}active{% endif %}">Accueil</a></li>
+        <li class="nav-item"><a href="{{ url_for('admin.newsletters') }}" class="nav-link {%  if admin_current == 'newsletter' %}active{% endif %}">Infolettres</a></li>
         <li class="nav-item"><a href="{{ url_for('admin.files') }}" class="nav-link {%  if admin_current == 'file' %}active{% endif %}">Fichiers</a></li>
         <li class="nav-item"><a href="{{ url_for('admin.pages') }}" class="nav-link {%  if admin_current == 'page' %}active{% endif %}">Pages</a></li>
         <li class="nav-item"><a href="{{ url_for('admin.categories') }}" class="nav-link {%  if admin_current == 'category' %}active{% endif %}">Catégories</a></li>
-        <li class="nav-item"><a href="{{ url_for('admin.newsletter-recipients') }}" class="nav-link {%  if admin_current == 'recipient' %}active{% endif %}">Inscrits à la newsletter</a></li>
+        <li class="nav-item"><a href="{{ url_for('admin.newsletter-recipients') }}" class="nav-link {%  if admin_current == 'recipient' %}active{% endif %}">Inscrits aux infolettres</a></li>
         <li class="nav-item"><a href="{{ url_for('admin.menus') }}" class="nav-link {%  if admin_current == 'menus' %}active{% endif %}">Menus</a></li>
     </ul>
     <div id="content" class="admin-content">

@@ -66,6 +66,20 @@ class IndexView(AdminBaseMixin, RenderTemplateView):
     template_name = 'admin/index.html'
     decorators = [login_required]
 
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx['content'] = Page.query.get(settings.APP_CONFIG['PAGES']['admin_index'])
+
+        # few statistics
+        ctx['statistics'] = {
+            "Nombre d'inscrits à l'infolettre": NewsletterRecipient.query.count(),
+            "Nombre d'infolettres": '{} (dont {} publiées)'.format(
+                Newsletter.query.count(), Newsletter.query.filter(Newsletter.draft.is_(False)).count()),
+            'Nombre de pages': Page.query.count(),
+        }
+
+        return ctx
+
 
 admin_blueprint.add_url_rule('/index.html', view_func=IndexView.as_view(name='index'))
 
@@ -94,10 +108,20 @@ class BasePageEditView(AdminBaseMixin, FormView):
     def get_form(self):
         form = super().get_form()
 
-        # add choices
+        # add choices for categories
         choices = [(-1, '')]
         choices.extend((c.id, c.name) for c in Category.query.order_by(Category.name).all())
         form.category.choices = choices
+
+        # add choices for next
+        choices = [(-1, '')]
+        q = Page.query.order_by(Page.title)
+
+        if isinstance(self, PageEditView):  # avoid getting the page looping to itself
+            q = q.filter(Page.id.isnot(self.object.id))
+
+        choices.extend((c.id, c.title) for c in q.all())
+        form.next.choices = choices
 
         return form
 
@@ -125,13 +149,15 @@ class PageEditView(ObjectManagementMixin, BasePageEditView):
         return {
             'title': self.object.title,
             'content': self.object.content,
-            'category': -1 if self.object.category_id is None else self.object.category_id
+            'category': -1 if self.object.category_id is None else self.object.category_id,
+            'next': -1 if self.object.next_id is None else self.object.next_id
         }
 
     def form_valid(self, form):
         self.object.title = form.title.data
         self.object.content = form.content.data
         self.object.category_id = form.category.data if form.category.data >= 0 else None
+        self.object.next_id = form.next.data if form.next.data >= 0 else None
 
         db.session.add(self.object)
         db.session.commit()
@@ -153,6 +179,9 @@ class PageCreateView(BasePageEditView):
 
         if form.category.data >= 0:
             page.category_id = form.category.data
+
+        if form.next.data >= 0:
+            page.next_id = form.next.data
 
         db.session.add(page)
         db.session.commit()
@@ -215,7 +244,7 @@ class CategoriesView(AdminBaseMixin, FormView):
         return super().form_valid(form)
 
 
-admin_blueprint.add_url_rule('/categories.html', view_func=CategoriesView.as_view('categories'))
+admin_blueprint.add_url_rule('/catégories.html', view_func=CategoriesView.as_view('categories'))
 
 
 class CategoryDeleteView(AdminBaseMixin, DeleteObjectView):
@@ -338,7 +367,7 @@ class NewsletterRecipientsView(AdminBaseMixin, RenderTemplateView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletter-inscrits.html', view_func=NewsletterRecipientsView.as_view('newsletter-recipients'))
+    '/infolettres-inscrits.html', view_func=NewsletterRecipientsView.as_view('newsletter-recipients'))
 
 
 class NewsletterRecipientDelete(AdminBaseMixin, DeleteObjectView):
@@ -350,7 +379,7 @@ class NewsletterRecipientDelete(AdminBaseMixin, DeleteObjectView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletter-inscit-suppression-<int:id>.html',
+    '/infolettre-inscit-suppression-<int:id>.html',
     view_func=NewsletterRecipientDelete.as_view('newsletter-recipient-delete'))
 
 
@@ -369,7 +398,7 @@ class NewslettersView(AdminBaseMixin, FormView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletters.html', view_func=NewslettersView.as_view('newsletters'))
+    '/infolettres.html', view_func=NewslettersView.as_view('newsletters'))
 
 
 class BaseNewsletterEditView(AdminBaseMixin, FormView):
@@ -420,7 +449,7 @@ class NewsletterEditView(ObjectManagementMixin, BaseNewsletterEditView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletter-edition-<int:id>-<string:slug>.html', view_func=NewsletterEditView.as_view(name='newsletter-edit'))
+    '/infolettre-edition-<int:id>-<string:slug>.html', view_func=NewsletterEditView.as_view(name='newsletter-edit'))
 
 
 class NewsletterCreateView(BaseNewsletterEditView):
@@ -431,7 +460,7 @@ class NewsletterCreateView(BaseNewsletterEditView):
         db.session.add(newsletter)
         db.session.commit()
 
-        flask.flash('Newsletter "{}" créée.'.format(newsletter.title))
+        flask.flash('Infolettre "{}" créée.'.format(newsletter.title))
 
         if form.submit_button_2.data:
             self.success_url = flask.url_for('admin.newsletter-view', id=newsletter.id)
@@ -442,7 +471,7 @@ class NewsletterCreateView(BaseNewsletterEditView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletter-nouveau.html', view_func=NewsletterCreateView.as_view(name='newsletter-create'))
+    '/infolettre-nouvelle.html', view_func=NewsletterCreateView.as_view(name='newsletter-create'))
 
 
 class NewsletterDeleteView(AdminBaseMixin, DeleteObjectView):
@@ -454,7 +483,7 @@ class NewsletterDeleteView(AdminBaseMixin, DeleteObjectView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletter-suppression-<int:id>.html', view_func=NewsletterDeleteView.as_view('newsletter-delete'))
+    '/infolettre-suppression-<int:id>.html', view_func=NewsletterDeleteView.as_view('newsletter-delete'))
 
 
 class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
@@ -503,7 +532,7 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletter-publie-<int:id>.html', view_func=NewsletterPublishView.as_view('newsletter-publish'))
+    '/infolettre-publie-<int:id>.html', view_func=NewsletterPublishView.as_view('newsletter-publish'))
 
 
 class NewsletterView(AdminBaseMixin, ObjectManagementMixin, RenderTemplateView):
@@ -524,7 +553,7 @@ class NewsletterView(AdminBaseMixin, ObjectManagementMixin, RenderTemplateView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletter-voir-<int:id>.html', view_func=NewsletterView.as_view(name='newsletter-view'))
+    '/infolettre-voir-<int:id>.html', view_func=NewsletterView.as_view(name='newsletter-view'))
 
 
 # --- Menu
@@ -539,7 +568,7 @@ class MenuEditView(AdminBaseMixin, FormView, RenderTemplateView):
 
     def form_valid(self, form):
         if form.is_create.data:
-            c = MenuEntry.create(form.text.data, form.url.data, form.position.data)
+            c = MenuEntry.create(form.text.data, form.url.data)
             flask.flash('Entrée "{}" créé.'.format(c.text))
         else:
             c = MenuEntry.query.get(form.id_menu.data)

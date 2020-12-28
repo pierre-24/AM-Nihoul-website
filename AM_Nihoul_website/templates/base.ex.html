@@ -30,22 +30,6 @@
     </div>
     {% endif %}
 
-    <header>
-        <ul class="nav justify-content-end container">
-            {% for i in top_menu_small %}
-                <li class="nav-item"><a href="{{ i.url }}" class="nav-link">{{ i.text }}</a></li>
-            {% endfor %}
-
-            {# admin #}
-            {% if not current_user.is_authenticated %}
-                <li class="nav-item"><a href="{{ url_for('admin.login') }}" class="nav-link">Sésame</a></li>
-            {% else %}
-                <li class="nav-item"><a href="{{ url_for('admin.index') }}" class="nav-link">Administration</a></li>
-                <li class="nav-item"><a href="{{ url_for('admin.logout') }}" class="nav-link">Se déconnecter</a></li>
-            {% endif %}
-        </ul>
-    </header>
-
     <nav class="navbar navbar-light bg-light navbar-expand-md">
         <div class="container">
             <a href="/" class="navbar-brand" ><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="logo"> <!--<span class="d-none d-lg-inline">{{ site_name }}</span>--></a>
@@ -55,7 +39,7 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
-                    {% for i in top_menu_big %}
+                    {% for i in menus %}
                         <li class="nav-item"><a class="nav-link" href="{{ i.url }}">{{ i.text }}</a></li>
                     {% endfor %}
                 </ul>
@@ -79,7 +63,7 @@
     {% if not no_newsletter %}
     <div id="newsletter" class="jumbotron-fluid">
         <div class="container">
-        <p>Pour ne rien rater, inscrivez vous à notre newsletter !</p>
+        <p>Pour ne rien rater, inscrivez vous à nos infolettres !</p>
         <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post">
             {{ newsletter_form.hidden_tag() }}
             <div class="form-row">
@@ -109,7 +93,14 @@
         </div>
 
         <div id="bottom-txt" class="mt-2">
-            &copy; {{ site_name }}. Site web par <a href="{{ author_url }}">{{ author_name }}</a>  (version: <a href="{{ repo_url }}">{{ site_version }}</a>)
+            &copy; {{ site_name }}
+            &bull; Site web par <a href="{{ author_url }}">{{ author_name }}</a>  (version: <a href="{{ repo_url }}">{{ site_version }}</a>)
+            {# admin #}
+            {% if not current_user.is_authenticated %}
+                &bull; <a href="{{ url_for('admin.login') }}">Sésame</a>
+            {% else %}
+                &bull; <a href="{{ url_for('admin.index') }}">Administration</a> (<a href="{{ url_for('admin.logout') }}">Se déconnecter</a>)
+            {% endif %}
         </div>
     </footer>
 
@@ -119,7 +110,7 @@
         {% if fa_kit != '' %}
             <script src="https://kit.fontawesome.com/{{ fa_kit }}.js"></script>
         {% endif %}
-        {% if gtag != '' %}
+        {% if gtag != '' and not no_gtag %}
             <script src="https://cdn.jsdelivr.net/npm/cookies-eu-banner@2.0.1/dist/cookies-eu-banner.min.js"></script>
             <script>
                 new CookiesEuBanner(function () {

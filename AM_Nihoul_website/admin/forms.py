@@ -1,8 +1,6 @@
 from flask_wtf import FlaskForm, file as wtf_file
 import wtforms as f
 
-from AM_Nihoul_website.visitor.models import MenuEntry
-
 
 class LoginForm(FlaskForm):
     login = f.StringField('Login', validators=[f.validators.InputRequired()])
@@ -24,7 +22,9 @@ class PageEditForm(FlaskForm):
     title = f.StringField(
         'Titre', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
     content = f.TextAreaField('Texte', widget=TrumbowygTextarea())
+
     category = f.SelectField('Catégorie', coerce=int)
+    next = f.SelectField('Page suivante', coerce=int)
 
     submit_button = f.SubmitField('Enregistrer')
 
@@ -65,11 +65,6 @@ class MenuEditForm(FlaskForm):
     url = f.StringField(
         'URL', validators=[f.validators.InputRequired(), f.validators.Length(max=150), f.validators.URL()])
     text = f.StringField('Texte', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
-    position = f.SelectField(
-        'Position',
-        coerce=int,
-        choices=[(MenuEntry.MENU_BIG, 'Menu principal'), (MenuEntry.MENU_SMALL, 'Menu secondaire')],
-        default=MenuEntry.MENU_BIG)
 
     is_create = f.BooleanField(widget=f.widgets.HiddenInput(), default=False)
     id_menu = f.IntegerField(widget=f.widgets.HiddenInput(), default=-1)

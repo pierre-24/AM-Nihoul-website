@@ -26,6 +26,12 @@ class TestPage(TestFlask):
 
         db.session.commit()
 
+        # add a further page with next (needs the id, so after commit)
+        self.page_with_next = Page.create('test with next', 'test', next_id=self.page_with_cat.id)
+
+        db.session.add(self.page_with_next)
+        db.session.commit()
+
         self.num_pages = Page.query.count()
         self.login()  # logged in by default, as all stuffs require admin power anyway
 
@@ -38,7 +44,8 @@ class TestPage(TestFlask):
         response = self.client.post(flask.url_for('admin.page-create'), data={
             'title': title,
             'content': text,
-            'category': -1
+            'category': -1,
+            'next': -1
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
@@ -50,6 +57,7 @@ class TestPage(TestFlask):
         self.assertEqual(p.content, text)
         self.assertFalse(p.protected)
         self.assertIsNone(p.category)
+        self.assertIsNone(p.next)
 
     def test_create_page_not_admin_ko(self):
         self.assertEqual(Page.query.count(), self.num_pages)
@@ -76,7 +84,8 @@ class TestPage(TestFlask):
         response = self.client.post(flask.url_for('admin.page-create'), data={
             'title': title,
             'content': text,
-            'category': self.category.id
+            'category': self.category.id,
+            'next': -1
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
@@ -88,6 +97,31 @@ class TestPage(TestFlask):
         self.assertEqual(p.content, text)
         self.assertFalse(p.protected)
         self.assertEqual(self.category, p.category)
+        self.assertIsNone(p.next)
+
+    def test_create_page_with_next_ok(self):
+        self.assertEqual(Page.query.count(), self.num_pages)
+
+        title = 'test'
+        text = 'this is a test'
+
+        response = self.client.post(flask.url_for('admin.page-create'), data={
+            'title': title,
+            'content': text,
+            'category': -1,
+            'next': self.protected_page.id
+        }, follow_redirects=False)
+        self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(Page.query.count(), self.num_pages + 1)
+
+        p = Page.query.order_by(Page.id.desc()).first()
+        self.assertIsNotNone(p)
+        self.assertEqual(p.title, title)
+        self.assertEqual(p.content, text)
+        self.assertFalse(p.protected)
+        self.assertIsNone(p.category)
+        self.assertEqual(self.protected_page.id, p.next_id)
 
     def test_edit_page_ok(self):
         self.assertEqual(Page.query.count(), self.num_pages)
@@ -104,7 +138,8 @@ class TestPage(TestFlask):
             data={
                 'title': new_title,
                 'content': new_text,
-                'category': self.unprotected_page.category_id
+                'category': self.unprotected_page.category_id,
+                'next': self.unprotected_page.next_id
             }, follow_redirects=False)
 
         self.assertEqual(response.status_code, 302)
@@ -114,6 +149,7 @@ class TestPage(TestFlask):
         self.assertEqual(p.title, new_title)
         self.assertEqual(p.content, new_text)
         self.assertEqual(self.unprotected_page.category, p.category)
+        self.assertEqual(self.unprotected_page.next, p.next)
 
     def test_edit_page_not_admin_ko(self):
         self.assertEqual(Page.query.count(), self.num_pages)
@@ -190,6 +226,34 @@ class TestPage(TestFlask):
         self.assertEqual(p.content, new_text)
         self.assertEqual(self.category, p.category)
 
+    def test_edit_page_with_next_ok(self):
+        self.assertEqual(Page.query.count(), self.num_pages)
+
+        new_title = 'this is a new title'
+        new_text = 'whatever'
+
+        self.assertNotEqual(self.page_with_next.title, new_title)
+        self.assertNotEqual(self.page_with_next.content, new_text)
+        self.assertIsNotNone(self.page_with_next.next_id)
+
+        response = self.client.post(
+            flask.url_for('admin.page-edit', id=self.page_with_next.id, slug=self.page_with_next.slug),
+            data={
+                'title': new_title,
+                'content': new_text,
+                'category': self.category.id,
+                'next': self.page_with_next.next_id
+            }, follow_redirects=False)
+
+        self.assertEqual(response.status_code, 302)
+
+        p = Page.query.get(self.page_with_next.id)
+        self.assertIsNotNone(p)
+        self.assertEqual(p.title, new_title)
+        self.assertEqual(p.content, new_text)
+        self.assertEqual(self.category, p.category)
+        self.assertEqual(self.page_with_next.next_id, p.next_id)
+
     def test_edit_change_cat_ok(self):
         cat = Category.create('test')
         db.session.add(cat)
@@ -211,6 +275,25 @@ class TestPage(TestFlask):
 
         p = Page.query.get(self.page_with_cat.id)
         self.assertEqual(cat.id, p.category_id)
+
+    def test_edit_change_next_ok(self):
+
+        self.assertEqual(Page.query.count(), self.num_pages)
+
+        self.assertNotEqual(self.page_with_next.next_id, self.protected_page.id)
+
+        response = self.client.post(
+            flask.url_for('admin.page-edit', id=self.page_with_next.id, slug=self.page_with_next.slug),
+            data={
+                'title': self.page_with_next.title,
+                'content': self.page_with_next.content,
+                'next': self.protected_page.id
+            }, follow_redirects=False)
+
+        self.assertEqual(response.status_code, 302)
+
+        p = Page.query.get(self.page_with_next.id)
+        self.assertEqual(p.next_id, self.protected_page.id)
 
     def test_delete_page_ok(self):
         self.assertEqual(Page.query.count(), self.num_pages)
@@ -247,6 +330,34 @@ class TestPage(TestFlask):
         self.assertEqual(Page.query.count(), self.num_pages - 1)
         self.assertIsNone(Page.query.get(self.page_with_cat.id))
         self.assertIsNotNone(Category.query.get(self.category.id))
+
+    def test_delete_page_which_is_next_ok(self):
+        self.assertEqual(Page.query.count(), self.num_pages)
+
+        self.assertEqual(self.page_with_next.next_id, self.page_with_cat.id)
+
+        response = self.client.delete(
+            flask.url_for('admin.page-delete', id=self.page_with_cat.id, slug=self.page_with_cat.slug),
+            follow_redirects=False)
+        self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(Page.query.count(), self.num_pages - 1)
+        self.assertIsNone(Page.query.get(self.page_with_cat.id))
+        self.assertIsNone(Page.query.get(self.page_with_next.id).next_id)
+
+    def test_delete_page_which_has_next_ok(self):
+        self.assertEqual(Page.query.count(), self.num_pages)
+
+        self.assertEqual(self.page_with_next.next_id, self.page_with_cat.id)
+
+        response = self.client.delete(
+            flask.url_for('admin.page-delete', id=self.page_with_next.id, slug=self.page_with_next.slug),
+            follow_redirects=False)
+        self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(Page.query.count(), self.num_pages - 1)
+        self.assertIsNone(Page.query.get(self.page_with_next.id))
+        self.assertIsNotNone(Page.query.get(self.page_with_cat.id))
 
     def test_delete_protected_page_ko(self):
         self.assertEqual(Page.query.count(), self.num_pages)

@@ -4,14 +4,14 @@
 
 {% set admin_current = 'newsletter' %}
 
-{% block page_title %}Gestion des newsletters{% endblock %}
+{% block page_title %}Gestion des infolettres{% endblock %}
 
 {% block content %}
     <section>
-    <h2>Gestion des newsletters</h2>
+    <h2>Gestion des infolettres</h2>
 
     <p>
-        <a class="button-like" href="{{ url_for('admin.newsletter-create') }}"><span class="fas fa-plus"></span> Ajouter une newsletter</a>
+        <a class="button-like" href="{{ url_for('admin.newsletter-create') }}"><span class="fas fa-plus"></span> Nouvelle infolettre</a>
     </p>
 
     <table class="admin-list">
@@ -36,7 +36,7 @@
                             {% endset %}
                             {{ create_modal(
                                 'publishNewsletter' + newsletter.id|string,
-                                'Publier cette newsletter',
+                                'Publier cette infolettre',
                                 modal_publish_content,
                                 render_field(form.submit_button),
                                 action=url_for('admin.newsletter-publish', id=newsletter.id)
