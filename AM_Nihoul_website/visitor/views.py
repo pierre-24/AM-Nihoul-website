@@ -16,7 +16,7 @@ class IndexView(BaseMixin, RenderTemplateView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
 
-        ctx['content'] = Page.query.get(1)
+        ctx['content'] = Page.query.get(settings.APP_CONFIG['PAGES']['visitor_index'])
         ctx['latest_newsletters'] = Newsletter.query\
             .filter(Newsletter.draft.is_(False))\
             .order_by(Newsletter.date_published.desc())\

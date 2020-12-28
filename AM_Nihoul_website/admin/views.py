@@ -66,6 +66,20 @@ class IndexView(AdminBaseMixin, RenderTemplateView):
     template_name = 'admin/index.html'
     decorators = [login_required]
 
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx['content'] = Page.query.get(settings.APP_CONFIG['PAGES']['admin_index'])
+
+        # few statistics
+        ctx['statistics'] = {
+            "Nombre d'inscrits à la newsletter": NewsletterRecipient.query.count(),
+            'Nombre de newsletters': '{} (dont {} publiées)'.format(
+                Newsletter.query.count(), Newsletter.query.filter(Newsletter.draft.is_(False)).count()),
+            'Nombre de pages': Page.query.count(),
+        }
+
+        return ctx
+
 
 admin_blueprint.add_url_rule('/index.html', view_func=IndexView.as_view(name='index'))
 

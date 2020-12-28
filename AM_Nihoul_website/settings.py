@@ -50,7 +50,13 @@ APP_CONFIG = {
     'SCHEDULER_JOB_DEFAULTS': {
         'coalesce': False,
         'max_instances': 1
-    }
+    },
+
+    # important pages
+    'PAGES': {
+        'visitor_index': 1,
+        'admin_index': 2
+    },
 }
 
 WEBPAGE_INFO = {
