@@ -1,8 +1,6 @@
 from flask_wtf import FlaskForm, file as wtf_file
 import wtforms as f
 
-from AM_Nihoul_website.visitor.models import MenuEntry
-
 
 class LoginForm(FlaskForm):
     login = f.StringField('Login', validators=[f.validators.InputRequired()])

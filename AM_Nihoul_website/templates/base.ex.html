@@ -110,7 +110,7 @@
         {% if fa_kit != '' %}
             <script src="https://kit.fontawesome.com/{{ fa_kit }}.js"></script>
         {% endif %}
-        {% if gtag != '' %}
+        {% if gtag != '' and not no_gtag %}
             <script src="https://cdn.jsdelivr.net/npm/cookies-eu-banner@2.0.1/dist/cookies-eu-banner.min.js"></script>
             <script>
                 new CookiesEuBanner(function () {

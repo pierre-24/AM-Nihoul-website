@@ -1,7 +1,7 @@
 """remove position
 
 Revision ID: 2c4ecefdb853
-Revises: 
+Revises:
 Create Date: 2020-12-28 10:55:00.451324
 
 """
