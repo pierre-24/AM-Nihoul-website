@@ -17,8 +17,10 @@ depends_on = None
 
 
 def upgrade():
-    op.drop_column('menu_entry', 'position')
+    with op.batch_alter_table('menu_entry') as batch_op:
+        batch_op.drop_column('position')
 
 
 def downgrade():
-    op.add_column('menu_entry', sa.Column('position', sa.INTEGER(), nullable=True, default=0))
+    with op.batch_alter_table('menu_entry') as batch_op:
+        batch_op.add_column(sa.Column('position', sa.INTEGER(), nullable=True, default=0))
