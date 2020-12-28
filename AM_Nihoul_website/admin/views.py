@@ -539,7 +539,7 @@ class MenuEditView(AdminBaseMixin, FormView, RenderTemplateView):
 
     def form_valid(self, form):
         if form.is_create.data:
-            c = MenuEntry.create(form.text.data, form.url.data, form.position.data)
+            c = MenuEntry.create(form.text.data, form.url.data)
             flask.flash('Entrée "{}" créé.'.format(c.text))
         else:
             c = MenuEntry.query.get(form.id_menu.data)

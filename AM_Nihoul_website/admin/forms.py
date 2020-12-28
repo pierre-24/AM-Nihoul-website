@@ -65,11 +65,6 @@ class MenuEditForm(FlaskForm):
     url = f.StringField(
         'URL', validators=[f.validators.InputRequired(), f.validators.Length(max=150), f.validators.URL()])
     text = f.StringField('Texte', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
-    position = f.SelectField(
-        'Position',
-        coerce=int,
-        choices=[(MenuEntry.MENU_BIG, 'Menu principal'), (MenuEntry.MENU_SMALL, 'Menu secondaire')],
-        default=MenuEntry.MENU_BIG)
 
     is_create = f.BooleanField(widget=f.widgets.HiddenInput(), default=False)
     id_menu = f.IntegerField(widget=f.widgets.HiddenInput(), default=-1)

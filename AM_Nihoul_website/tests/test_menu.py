@@ -11,16 +11,16 @@ class TestMenus(TestFlask):
         super().setUp()
 
         # NOTE: for the order to be set, each one should be added individually
-        self.menu_small = MenuEntry.create('test1', 'http://x.com/a1.html', MenuEntry.MENU_SMALL)
-        db.session.add(self.menu_small)
+        self.menu_1 = MenuEntry.create('test1', 'http://x.com/a1.html')
+        db.session.add(self.menu_1)
         db.session.commit()
 
-        self.menu_small_2 = MenuEntry.create('test2', 'http://x.com/a2.html', MenuEntry.MENU_SMALL)
-        db.session.add(self.menu_small_2)
+        self.menu_2 = MenuEntry.create('test2', 'http://x.com/a2.html')
+        db.session.add(self.menu_2)
         db.session.commit()
 
-        self.menu_big = MenuEntry.create('test1', 'http://x.com/b.html', MenuEntry.MENU_BIG)
-        db.session.add(self.menu_big)
+        self.menu_3 = MenuEntry.create('test1', 'http://x.com/b.html')
+        db.session.add(self.menu_3)
         db.session.commit()
 
         self.num_menus = MenuEntry.query.count()
@@ -35,7 +35,6 @@ class TestMenus(TestFlask):
         response = self.client.post(flask.url_for('admin.menus'), data={
             'text': text,
             'url': url,
-            'position': MenuEntry.MENU_BIG,
             'is_create': 1,
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
@@ -46,7 +45,6 @@ class TestMenus(TestFlask):
         self.assertIsNotNone(c)
         self.assertEqual(c.text, text)
         self.assertEqual(c.url, url)
-        self.assertEqual(c.position, MenuEntry.MENU_BIG)
 
     def test_menu_create_not_admin_ko(self):
         self.assertEqual(MenuEntry.query.count(), self.num_menus)
@@ -58,7 +56,6 @@ class TestMenus(TestFlask):
         response = self.client.post(flask.url_for('admin.menus'), data={
             'text': text,
             'url': url,
-            'position': MenuEntry.MENU_BIG,
             'is_create': 1,
             'highlight': True
         }, follow_redirects=False)
@@ -72,15 +69,14 @@ class TestMenus(TestFlask):
         response = self.client.post(flask.url_for('admin.menus'), data={
             'text': text,
             'url': url,
-            'id_menu': self.menu_big.id,
+            'id_menu': self.menu_3.id,
             'highlight': True
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
-        c = MenuEntry.query.get(self.menu_big.id)
+        c = MenuEntry.query.get(self.menu_3.id)
         self.assertEqual(c.text, text)
         self.assertEqual(c.url, url)
-        self.assertEqual(c.position, MenuEntry.MENU_BIG)
 
     def test_menu_edit_not_admin_ko(self):
         text = 'xyz'
@@ -90,12 +86,12 @@ class TestMenus(TestFlask):
         response = self.client.post(flask.url_for('admin.menus'), data={
             'text': text,
             'url': url,
-            'id_menu': self.menu_big.id,
+            'id_menu': self.menu_3.id,
             'highlight': True
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
-        c = MenuEntry.query.get(self.menu_big.id)
+        c = MenuEntry.query.get(self.menu_3.id)
         self.assertNotEqual(c.text, text)
         self.assertNotEqual(c.url, url)
         self.assertFalse(c.highlight)
@@ -103,45 +99,45 @@ class TestMenus(TestFlask):
     def test_menu_delete_ok(self):
         self.assertEqual(MenuEntry.query.count(), self.num_menus)
 
-        response = self.client.delete(flask.url_for('admin.menu-delete', id=self.menu_big.id))
+        response = self.client.delete(flask.url_for('admin.menu-delete', id=self.menu_3.id))
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(MenuEntry.query.count(), self.num_menus - 1)
-        self.assertIsNone(MenuEntry.query.get(self.menu_big.id))
+        self.assertIsNone(MenuEntry.query.get(self.menu_3.id))
 
     def test_menu_delete_not_admin_ko(self):
         self.assertEqual(MenuEntry.query.count(), self.num_menus)
         self.logout()
 
-        response = self.client.delete(flask.url_for('admin.menu-delete', id=self.menu_big.id))
+        response = self.client.delete(flask.url_for('admin.menu-delete', id=self.menu_3.id))
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(MenuEntry.query.count(), self.num_menus)
-        self.assertIsNotNone(MenuEntry.query.get(self.menu_big.id))
+        self.assertIsNotNone(MenuEntry.query.get(self.menu_3.id))
 
     def test_menu_move_ok(self):
         self.assertEqual(
-            MenuEntry.ordered_items(position=MenuEntry.MENU_SMALL).all(), [self.menu_small, self.menu_small_2])
+            MenuEntry.ordered_items().all(), [self.menu_1, self.menu_2, self.menu_3])
 
-        self.client.get(flask.url_for('admin.menu-move', id=self.menu_small.id, action='up'))
+        self.client.get(flask.url_for('admin.menu-move', id=self.menu_1.id, action='up'))
         self.assertEqual(
-            MenuEntry.ordered_items(position=MenuEntry.MENU_SMALL).all(), [self.menu_small_2, self.menu_small])
+            MenuEntry.ordered_items().all(), [self.menu_2, self.menu_1, self.menu_3])
 
-        self.client.get(flask.url_for('admin.menu-move', id=self.menu_small.id, action='down'))
+        self.client.get(flask.url_for('admin.menu-move', id=self.menu_1.id, action='down'))
         self.assertEqual(
-            MenuEntry.ordered_items(position=MenuEntry.MENU_SMALL).all(), [self.menu_small, self.menu_small_2])
+            MenuEntry.ordered_items().all(), [self.menu_1, self.menu_2, self.menu_3])
 
     def test_menu_move_not_admin_ko(self):
         self.assertEqual(
-            MenuEntry.ordered_items(position=MenuEntry.MENU_SMALL).all(), [self.menu_small, self.menu_small_2])
+            MenuEntry.ordered_items().all(), [self.menu_1, self.menu_2, self.menu_3])
         self.logout()
 
-        r = self.client.get(flask.url_for('admin.menu-move', id=self.menu_small.id, action='up'))
+        r = self.client.get(flask.url_for('admin.menu-move', id=self.menu_1.id, action='up'))
         self.assertEqual(r.status_code, 302)
         self.assertEqual(
-            MenuEntry.ordered_items(position=MenuEntry.MENU_SMALL).all(), [self.menu_small, self.menu_small_2])
+            MenuEntry.ordered_items().all(), [self.menu_1, self.menu_2, self.menu_3])
 
-        self.client.get(flask.url_for('admin.menu-move', id=self.menu_small_2.id, action='down'))
+        self.client.get(flask.url_for('admin.menu-move', id=self.menu_2.id, action='down'))
         self.assertEqual(r.status_code, 302)
         self.assertEqual(
-            MenuEntry.ordered_items(position=MenuEntry.MENU_SMALL).all(), [self.menu_small, self.menu_small_2])
+            MenuEntry.ordered_items().all(), [self.menu_1, self.menu_2, self.menu_3])

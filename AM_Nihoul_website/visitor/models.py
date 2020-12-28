@@ -266,39 +266,25 @@ class Email(BaseModel):
 
 class MenuEntry(OrderableMixin, BaseModel):
 
-    MENU_BIG = 0
-    MENU_SMALL = 1
-
     text = db.Column(db.Text(), nullable=False)
     url = db.Column(db.Text(), nullable=False)
-    position = db.Column(db.Integer, default=MENU_BIG)
     highlight = db.Column(db.Boolean, default=False, nullable=False)
 
     @classmethod
-    def ordered_items(cls, **kwargs):
-        q = super().ordered_items(**kwargs)
-
-        if 'position' in kwargs:
-            q = q.filter(MenuEntry.position.is_(kwargs.get('position')))
-
-        return q
-
-    @classmethod
-    def create(cls, text, url, position=MENU_BIG, highlight=False):
+    def create(cls, text, url, highlight=False):
         o = cls()
         o.text = text
         o.url = url
-        o.position = position
         o.highlight = highlight
 
         # set order
-        last_m = MenuEntry.ordered_items(desc=True, position=position).first()
+        last_m = MenuEntry.ordered_items(desc=True).first()
         o.order = last_m.order + 1 if last_m else 0
 
         return o
 
     def up(self):
-        super().up(position=self.position)
+        super().up()
 
     def down(self):
-        super().down(position=self.position)
+        super().down()
