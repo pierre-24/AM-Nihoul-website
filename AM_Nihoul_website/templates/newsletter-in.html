@@ -2,11 +2,11 @@
 {% from 'bootstrap/form.html' import render_field%}
 {% set no_newsletter = True %}
 
-{% block page_title %}Inscription à la newsletter{% endblock %}
+{% block page_title %}Inscription à nos infolettres{% endblock %}
 
 {% block content %}
     <section>
-        <h2>Inscription à la newsletter</h2>
+        <h2>Inscription à nos infolettres</h2>
         <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post">
             {{ form.hidden_tag() }}
             {{ render_field(form.name) }}

@@ -8,7 +8,7 @@
     <section>
     <h2>{{ newsletter.title }}</h2>
         <p class="newsletter-info">
-            Ceci est une prévisualisation de votre newsletter{% if newsletter.draft %}, <b>qui n'est actuellement pas publique</b>{% endif %}.
+            Ceci est une prévisualisation de votre infolettre{% if newsletter.draft %}, <b>qui n'est actuellement pas publique</b>{% endif %}.
             <a href="{{ url_for('admin.newsletter-edit', id=newsletter.id, slug=newsletter.slug) }}">Éditer cette newsletter</a> ou
             <a href="{{ url_for('admin.newsletters') }}">revenir à la liste</a>.
         </p>

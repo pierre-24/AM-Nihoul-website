@@ -72,8 +72,8 @@ class IndexView(AdminBaseMixin, RenderTemplateView):
 
         # few statistics
         ctx['statistics'] = {
-            "Nombre d'inscrits à la newsletter": NewsletterRecipient.query.count(),
-            'Nombre de newsletters': '{} (dont {} publiées)'.format(
+            "Nombre d'inscrits à l'infolettre": NewsletterRecipient.query.count(),
+            "Nombre d'infolettres": '{} (dont {} publiées)'.format(
                 Newsletter.query.count(), Newsletter.query.filter(Newsletter.draft.is_(False)).count()),
             'Nombre de pages': Page.query.count(),
         }
@@ -244,7 +244,7 @@ class CategoriesView(AdminBaseMixin, FormView):
         return super().form_valid(form)
 
 
-admin_blueprint.add_url_rule('/categories.html', view_func=CategoriesView.as_view('categories'))
+admin_blueprint.add_url_rule('/catégories.html', view_func=CategoriesView.as_view('categories'))
 
 
 class CategoryDeleteView(AdminBaseMixin, DeleteObjectView):
@@ -367,7 +367,7 @@ class NewsletterRecipientsView(AdminBaseMixin, RenderTemplateView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletter-inscrits.html', view_func=NewsletterRecipientsView.as_view('newsletter-recipients'))
+    '/infolettres-inscrits.html', view_func=NewsletterRecipientsView.as_view('newsletter-recipients'))
 
 
 class NewsletterRecipientDelete(AdminBaseMixin, DeleteObjectView):
@@ -379,7 +379,7 @@ class NewsletterRecipientDelete(AdminBaseMixin, DeleteObjectView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletter-inscit-suppression-<int:id>.html',
+    '/infolettre-inscit-suppression-<int:id>.html',
     view_func=NewsletterRecipientDelete.as_view('newsletter-recipient-delete'))
 
 
@@ -398,7 +398,7 @@ class NewslettersView(AdminBaseMixin, FormView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletters.html', view_func=NewslettersView.as_view('newsletters'))
+    '/infolettres.html', view_func=NewslettersView.as_view('newsletters'))
 
 
 class BaseNewsletterEditView(AdminBaseMixin, FormView):
@@ -449,7 +449,7 @@ class NewsletterEditView(ObjectManagementMixin, BaseNewsletterEditView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletter-edition-<int:id>-<string:slug>.html', view_func=NewsletterEditView.as_view(name='newsletter-edit'))
+    '/infolettre-edition-<int:id>-<string:slug>.html', view_func=NewsletterEditView.as_view(name='newsletter-edit'))
 
 
 class NewsletterCreateView(BaseNewsletterEditView):
@@ -460,7 +460,7 @@ class NewsletterCreateView(BaseNewsletterEditView):
         db.session.add(newsletter)
         db.session.commit()
 
-        flask.flash('Newsletter "{}" créée.'.format(newsletter.title))
+        flask.flash('Infolettre "{}" créée.'.format(newsletter.title))
 
         if form.submit_button_2.data:
             self.success_url = flask.url_for('admin.newsletter-view', id=newsletter.id)
@@ -471,7 +471,7 @@ class NewsletterCreateView(BaseNewsletterEditView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletter-nouveau.html', view_func=NewsletterCreateView.as_view(name='newsletter-create'))
+    '/infolettre-nouvelle.html', view_func=NewsletterCreateView.as_view(name='newsletter-create'))
 
 
 class NewsletterDeleteView(AdminBaseMixin, DeleteObjectView):
@@ -483,7 +483,7 @@ class NewsletterDeleteView(AdminBaseMixin, DeleteObjectView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletter-suppression-<int:id>.html', view_func=NewsletterDeleteView.as_view('newsletter-delete'))
+    '/infolettre-suppression-<int:id>.html', view_func=NewsletterDeleteView.as_view('newsletter-delete'))
 
 
 class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
@@ -532,7 +532,7 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletter-publie-<int:id>.html', view_func=NewsletterPublishView.as_view('newsletter-publish'))
+    '/infolettre-publie-<int:id>.html', view_func=NewsletterPublishView.as_view('newsletter-publish'))
 
 
 class NewsletterView(AdminBaseMixin, ObjectManagementMixin, RenderTemplateView):
@@ -553,7 +553,7 @@ class NewsletterView(AdminBaseMixin, ObjectManagementMixin, RenderTemplateView):
 
 
 admin_blueprint.add_url_rule(
-    '/newsletter-voir-<int:id>.html', view_func=NewsletterView.as_view(name='newsletter-view'))
+    '/infolettre-voir-<int:id>.html', view_func=NewsletterView.as_view(name='newsletter-view'))
 
 
 # --- Menu

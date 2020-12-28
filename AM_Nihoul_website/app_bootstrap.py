@@ -27,8 +27,8 @@ def bootstrap():
 
     # menu entries
     links = [
-        MenuEntry.create(pages[1].title, flask.url_for('visitor.page-view', id=pages[1].id, slug=pages[1].slug)),
-        MenuEntry.create(pages[2].title, flask.url_for('visitor.page-view', id=pages[2].id, slug=pages[2].slug),
+        MenuEntry.create(pages[2].title, flask.url_for('visitor.page-view', id=pages[2].id, slug=pages[2].slug)),
+        MenuEntry.create(pages[3].title, flask.url_for('visitor.page-view', id=pages[3].id, slug=pages[3].slug),
                          highlight=True)
     ]
 
