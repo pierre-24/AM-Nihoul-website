@@ -6,5 +6,18 @@
     <section>
     <h2>{{ page.title }}</h2>
     {{ page.content|safe }}
+
+
+
     </section>
+
+    {% if page.next_id %}
+        <section class="page-next">
+        <p>
+            <span class="fas fa-arrow-right"></span>
+            Partie suivante :
+            <a href="{{ url_for('visitor.page-view', id=page.next_id, slug=page.next.slug) }}">{{ page.next.title }}</a>
+        </p>
+        </section>
+    {% endif %}
 {% endblock %}
