@@ -115,6 +115,9 @@ class PageView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
         if self.object.slug != kwargs.get('slug'):
             flask.abort(error_code)
 
+        if self.object.next_id:
+            self.object.next = Page.query.get(self.object.next_id)
+
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx['page'] = self.object

@@ -101,15 +101,19 @@ class Page(BaseModel):
     protected = db.Column(db.Boolean, default=False, nullable=False)
 
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
-    category = db.relationship('Category')
+    category = db.relationship('Category', uselist=False)
+
+    next_id = db.Column(db.Integer, db.ForeignKey('page.id', ondelete='SET NULL', name='fk_next_id'))
+    next = db.relationship('Page', uselist=False)
 
     @classmethod
-    def create(cls, title, content, protected=False, category_id=None):
+    def create(cls, title, content, protected=False, category_id=None, next_id=None):
         o = cls()
         o.title = title
         o.content = content
         o.protected = protected
         o.category_id = category_id
+        o.next_id = next_id
 
         return o
 

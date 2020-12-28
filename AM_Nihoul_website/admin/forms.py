@@ -22,7 +22,9 @@ class PageEditForm(FlaskForm):
     title = f.StringField(
         'Titre', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
     content = f.TextAreaField('Texte', widget=TrumbowygTextarea())
+
     category = f.SelectField('Catégorie', coerce=int)
+    next = f.SelectField('Page suivante', coerce=int)
 
     submit_button = f.SubmitField('Enregistrer')
 

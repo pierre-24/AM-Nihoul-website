@@ -181,7 +181,7 @@ class BaseMixin:
 
         from AM_Nihoul_website.visitor.models import Page, Category, MenuEntry
 
-        # top menus
+        # top menu
         ctx['menus'] = MenuEntry.query.order_by(MenuEntry.order).all()
 
         # bottom menu

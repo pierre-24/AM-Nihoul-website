@@ -77,6 +77,8 @@ def init_command():
     from AM_Nihoul_website.app_bootstrap import bootstrap
     bootstrap()
 
+    alembic.stamp()  # stamp the version of the database as being the latest version (with all the migrations)
+
 
 @click.command('bot')
 @with_appcontext

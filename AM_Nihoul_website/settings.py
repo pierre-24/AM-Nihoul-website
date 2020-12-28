@@ -22,6 +22,12 @@ APP_CONFIG = {
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     'SQLALCHEMY_DATABASE_URI': 'sqlite:///' + os.path.join(os.path.abspath(DATA_DIRECTORY), 'database.db'),
 
+    # alembic
+    'ALEMBIC_CONTEXT': {
+        # useful since the database is sqlite (https://alembic.sqlalchemy.org/en/latest/batch.html)!
+        'render_as_batch': True
+    },
+
     # upload
     'UPLOADED_UPLOADS_DEST': os.path.join(DATA_DIRECTORY, 'uploads/'),
 

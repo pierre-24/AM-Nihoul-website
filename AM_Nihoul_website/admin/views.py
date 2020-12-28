@@ -94,10 +94,20 @@ class BasePageEditView(AdminBaseMixin, FormView):
     def get_form(self):
         form = super().get_form()
 
-        # add choices
+        # add choices for categories
         choices = [(-1, '')]
         choices.extend((c.id, c.name) for c in Category.query.order_by(Category.name).all())
         form.category.choices = choices
+
+        # add choices for next
+        choices = [(-1, '')]
+        q = Page.query.order_by(Page.title)
+
+        if isinstance(self, PageEditView):  # avoid getting the page looping to itself
+            q = q.filter(Page.id.isnot(self.object.id))
+
+        choices.extend((c.id, c.title) for c in q.all())
+        form.next.choices = choices
 
         return form
 
@@ -125,13 +135,15 @@ class PageEditView(ObjectManagementMixin, BasePageEditView):
         return {
             'title': self.object.title,
             'content': self.object.content,
-            'category': -1 if self.object.category_id is None else self.object.category_id
+            'category': -1 if self.object.category_id is None else self.object.category_id,
+            'next': -1 if self.object.next_id is None else self.object.next_id
         }
 
     def form_valid(self, form):
         self.object.title = form.title.data
         self.object.content = form.content.data
         self.object.category_id = form.category.data if form.category.data >= 0 else None
+        self.object.next_id = form.next.data if form.next.data >= 0 else None
 
         db.session.add(self.object)
         db.session.commit()
@@ -153,6 +165,9 @@ class PageCreateView(BasePageEditView):
 
         if form.category.data >= 0:
             page.category_id = form.category.data
+
+        if form.next.data >= 0:
+            page.next_id = form.next.data
 
         db.session.add(page)
         db.session.commit()
