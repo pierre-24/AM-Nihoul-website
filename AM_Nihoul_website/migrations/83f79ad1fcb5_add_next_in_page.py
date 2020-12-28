@@ -6,6 +6,7 @@ Create Date: 2020-12-28 12:05:31.173189
 
 """
 from alembic import op
+import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
@@ -17,9 +18,11 @@ depends_on = None
 
 def upgrade():
     with op.batch_alter_table('page', schema=None) as batch_op:
+        batch_op.add_column(sa.Column('next_id', sa.INTEGER(), nullable=True))
         batch_op.create_foreign_key('fk_next_id', 'page', ['next_id'], ['id'], ondelete='SET NULL')
 
 
 def downgrade():
     with op.batch_alter_table('page', schema=None) as batch_op:
         batch_op.drop_constraint('fk_next_id', type_='foreignkey')
+        batch_op.drop_column('next_id')
