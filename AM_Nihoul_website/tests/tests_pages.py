@@ -388,3 +388,21 @@ class TestPage(TestFlask):
         response = self.client.get(flask.url_for('visitor.page-view', id=p.id, slug=p.slug))
         self.assertIn(title, response.get_data(as_text=True))
         self.assertIn(content, response.get_data(as_text=True))
+
+    def test_visitor_hidden_page_ko(self):
+        title = 'a special title'
+        content = 'test with a very special content: "pôtichat"!'
+
+        p = Page.create(title, content, visible=False)
+        db.session.add(p)
+        db.session.commit()
+
+        # view as admin
+        response = self.client.get(flask.url_for('visitor.page-view', id=p.id, slug=p.slug))
+        self.assertIn(title, response.get_data(as_text=True))
+        self.assertIn(content, response.get_data(as_text=True))  # ok :)
+
+        # view as visitor
+        self.logout()
+        response = self.client.get(flask.url_for('visitor.page-view', id=p.id, slug=p.slug))
+        self.assertEqual(response.status_code, 404)  # cannot view

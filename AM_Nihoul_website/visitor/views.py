@@ -1,5 +1,6 @@
 import flask
 from flask import Blueprint, views
+from flask_login import current_user
 
 from AM_Nihoul_website import db, settings, limiter
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
@@ -41,7 +42,7 @@ class SitemapView(RenderTemplateView):
         ]
 
         # add pages
-        for p in Page.query.all():
+        for p in Page.query.filter(Page.visible.is_(True)).all():
             urls.append({
                 'location': flask.url_for('visitor.page-view', id=p.id, slug=p.slug, _external=True),
                 'changefreq': 'weekly',
@@ -115,8 +116,11 @@ class PageView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
         if self.object.slug != kwargs.get('slug'):
             flask.abort(error_code)
 
+        if not self.object.visible and not current_user.is_authenticated:
+            flask.abort(error_code)  # cannot access directly a non-visible page if not connected
+
         if self.object.next_id:
-            self.object.next = Page.query.get(self.object.next_id)
+            self.object.next = Page.query.get(self.object.next_id)  # load object
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)

@@ -99,6 +99,7 @@ class Page(BaseModel):
     slug = db.Column(db.VARCHAR(150), nullable=False)
     content = db.Column(db.Text)
     protected = db.Column(db.Boolean, default=False, nullable=False)
+    visible = db.Column(db.Boolean, default=True, nullable=False)
 
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     category = db.relationship('Category', uselist=False)
@@ -107,13 +108,14 @@ class Page(BaseModel):
     next = db.relationship('Page', uselist=False)
 
     @classmethod
-    def create(cls, title, content, protected=False, category_id=None, next_id=None):
+    def create(cls, title, content, protected=False, category_id=None, next_id=None, visible=True):
         o = cls()
         o.title = title
         o.content = content
         o.protected = protected
         o.category_id = category_id
         o.next_id = next_id
+        o.visible = visible
 
         return o
 
