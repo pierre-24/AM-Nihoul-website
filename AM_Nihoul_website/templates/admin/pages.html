@@ -23,11 +23,12 @@
                 <td class="right">
                     <span class="buttons">
                         <a class="button-like" href="{{ url_for('admin.page-edit', id=page.id, slug=page.slug) }}"><span class="fas fa-pen-square"></span></a>
+                        <a class="button-like" href="{{ url_for('admin.page-toggle-visibility', id=page.id) }}"><span class="fas fa-eye{% if not page.visible %}-slash{% endif %}"></span></a>
                         {% if not page.protected %}
                             <a class="button-like" href="#delete-page-{{ page.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
                             {{ create_delete_modal('page', page.id, 'la page "' + page.title + '"', 'admin.page-delete') }}
                         {% else %}
-                            <a class="button-like"><span class="fas fa-lock"></span></a>
+                            <a class="button-like" href="#"><span class="fas fa-lock"></span></a>
                         {% endif %}
                     </span>
                     <span class="info">Dernière modification: {{ page.date_modified|date_formatter }}</span>
