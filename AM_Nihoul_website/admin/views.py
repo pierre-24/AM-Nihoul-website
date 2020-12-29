@@ -212,6 +212,30 @@ class PageDeleteView(AdminBaseMixin, DeleteObjectView):
 admin_blueprint.add_url_rule('/page-suppression-<int:id>.html', view_func=PageDeleteView.as_view('page-delete'))
 
 
+class PageToggleVisibility(AdminBaseMixin, ObjectManagementMixin, View):
+    methods = ['GET']
+    model = Page
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        self.object.visible = not self.object.visible
+
+        db.session.add(self.object)
+        db.session.commit()
+
+        return flask.redirect(flask.url_for('admin.pages'))
+
+    def dispatch_request(self, *args, **kwargs):
+        if flask.request.method == 'GET':
+            return self.get(*args, **kwargs)
+        else:
+            flask.abort(403)
+
+
+admin_blueprint.add_url_rule(
+    '/page-visible-<int:id>.html', view_func=PageToggleVisibility.as_view('page-toggle-visibility'))
+
+
 # -- Categories
 class CategoriesView(AdminBaseMixin, FormView):
     template_name = 'admin/categories.html'
