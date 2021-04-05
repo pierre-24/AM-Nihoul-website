@@ -42,8 +42,6 @@ class UploadForm(FlaskForm):
     file_uploaded = wtf_file.FileField('Fichier', validators=[wtf_file.FileRequired()])
     description = f.StringField('Description')
 
-    wants_json = f.HiddenField('API call', default=False)
-
     submit_button = f.SubmitField('Envoyer')
 
 
