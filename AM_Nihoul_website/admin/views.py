@@ -1,5 +1,5 @@
 import flask
-from flask import Blueprint
+from flask import Blueprint, jsonify
 from flask.views import View
 import flask_login
 from flask_login import login_required
@@ -338,10 +338,12 @@ class FilesView(AdminBaseMixin, FormView):
 
         return ctx
 
-    def form_valid(self, form):
-        filename = form.file_uploaded.data.filename
-
+    @staticmethod
+    def upload_file(data, description=''):
+        filename = data.filename
         f = UploadedFile.query.filter(UploadedFile.base_file_name == filename).all()
+
+        # if this name already exists, adds its size
         if len(f) > 0:
             to_add = '_{}'.format(len(f))
             if filename.find('.') >= 0:
@@ -351,17 +353,34 @@ class FilesView(AdminBaseMixin, FormView):
             else:
                 filename += to_add
 
-        try:
-            u = UploadedFile.create(form.file_uploaded.data, description=form.description.data, filename=filename)
-        except UploadNotAllowed:
-            flask.flash("Ce type de fichier n'est pas autorisé", category='error')
-            return super().form_invalid(form)
+        u = UploadedFile.create(data, description=description, filename=filename)
+        return u
 
-        db.session.add(u)
-        db.session.commit()
+    def form_valid(self, form):
+        as_json = form.wants_json.data
 
-        self.success_url = flask.url_for('admin.files')
-        return super().form_valid(form)
+        if not as_json:
+            try:
+                u = FilesView.upload_file(form.file_uploaded.data, form.description.data)
+            except UploadNotAllowed:
+                flask.flash("Ce type de fichier n'est pas autorisé", category='error')
+                return super().form_invalid(form)
+
+            db.session.add(u)
+            db.session.commit()
+
+            self.success_url = flask.url_for('admin.files')
+            return super().form_valid(form)
+        else:
+            try:
+                u = FilesView.upload_file(form.file_uploaded.data, form.description.data)
+            except UploadNotAllowed:
+                return jsonify(success=False, reason='not allowed')
+
+            db.session.add(u)
+            db.session.commit()
+
+            return jsonify(success=True, url=flask.url_for('visitor.upload-view', id=u.id, filename=u.file_name))
 
 
 admin_blueprint.add_url_rule('/fichiers.html', view_func=FilesView.as_view('files'))

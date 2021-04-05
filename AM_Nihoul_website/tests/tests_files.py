@@ -45,6 +45,34 @@ class TestFiles(TestFlask):
         self.assertIsNone(UploadedFile.query.get(u.id))
         self.assertFalse(os.path.exists(u.path()))
 
+    def test_upload_api_ok(self):
+        """Test upload with a JSON answer"""
+        self.assertEqual(UploadedFile.query.count(), self.num_uploads)
+
+        desc = 'a description'
+        fname = 'tmp.jpg'
+
+        response = self.client.post(
+            flask.url_for('admin.files'), data={
+                'description': desc,
+                'file_uploaded': (open(self.file, 'rb'), fname),
+                'wants_json': True
+            })
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(UploadedFile.query.count(), self.num_uploads + 1)
+
+        u = UploadedFile.query.order_by(UploadedFile.id.desc()).first()
+
+        self.assertIsNotNone(u)
+        self.assertTrue(response.json['success'])
+
+        self.assertEqual(u.description, desc)
+        self.assertEqual(u.base_file_name, fname)
+        self.assertTrue(os.path.exists(u.path()))
+        self.assertEqual(u.possible_mime, 'image/jpeg')
+        self.assertIn(response.json['url'], flask.url_for('visitor.upload-view', id=u.id, filename=u.file_name))
+
     def test_visitor_view_ok(self):
         # upload file first (as admin)
         desc = 'a description'
