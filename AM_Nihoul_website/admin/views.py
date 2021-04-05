@@ -1,9 +1,17 @@
 import flask
-from flask import Blueprint
+from flask import Blueprint, jsonify
 from flask.views import View
 import flask_login
 from flask_login import login_required
 from flask_uploads import UploadNotAllowed
+
+from sqlalchemy import func
+
+from werkzeug.datastructures import FileStorage
+
+import base64
+import io
+from datetime import datetime
 
 from AM_Nihoul_website import settings, db, User
 from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView, ObjectManagementMixin, \
@@ -71,11 +79,16 @@ class IndexView(AdminBaseMixin, RenderTemplateView):
         ctx['content'] = Page.query.get(settings.APP_CONFIG['PAGES']['admin_index'])
 
         # few statistics
+        sz = UploadedFile.query\
+            .with_entities(func.sum(UploadedFile.file_size).label('total'))\
+            .first()
         ctx['statistics'] = {
             "Nombre d'inscrits à l'infolettre": NewsletterRecipient.query.count(),
             "Nombre d'infolettres": '{} (dont {} publiées)'.format(
                 Newsletter.query.count(), Newsletter.query.filter(Newsletter.draft.is_(False)).count()),
             'Nombre de pages': Page.query.count(),
+            'Taille des fichiers': '{:.2f} Mio'.format(
+                sz[0] / 1024 / 1024 if sz[0] is not None else 0)
         }
 
         return ctx
@@ -338,10 +351,12 @@ class FilesView(AdminBaseMixin, FormView):
 
         return ctx
 
-    def form_valid(self, form):
-        filename = form.file_uploaded.data.filename
-
+    @staticmethod
+    def upload_file(data, description=''):
+        filename = data.filename
         f = UploadedFile.query.filter(UploadedFile.base_file_name == filename).all()
+
+        # if this name already exists, adds its size
         if len(f) > 0:
             to_add = '_{}'.format(len(f))
             if filename.find('.') >= 0:
@@ -351,8 +366,12 @@ class FilesView(AdminBaseMixin, FormView):
             else:
                 filename += to_add
 
+        u = UploadedFile.create(data, description=description, filename=filename)
+        return u
+
+    def form_valid(self, form):
         try:
-            u = UploadedFile.create(form.file_uploaded.data, description=form.description.data, filename=filename)
+            u = FilesView.upload_file(form.file_uploaded.data, form.description.data)
         except UploadNotAllowed:
             flask.flash("Ce type de fichier n'est pas autorisé", category='error')
             return super().form_invalid(form)
@@ -365,6 +384,63 @@ class FilesView(AdminBaseMixin, FormView):
 
 
 admin_blueprint.add_url_rule('/fichiers.html', view_func=FilesView.as_view('files'))
+
+
+class UploadBase64(AdminBaseMixin, View):
+    """Upload an image as base64 encoded string"""
+
+    methods = ['POST']
+
+    def post(self, *args, **kwargs):
+
+        context = flask.request.args.get('context', 'textarea')
+
+        if 'image' not in flask.request.form:
+            return jsonify(success=False, reason='missing `image` field'), 400
+
+        content = flask.request.form['image']
+
+        if content[0:5] == 'data:':
+            pos = content.find(',')
+            info = content[5:pos].split(';')
+
+            if info[1] != 'base64':
+                return jsonify(success=False, reason='not base64'), 400
+            if 'image/' not in info[0]:
+                return jsonify(success=False, reason='mime does not starts with `image/'), 400
+            mime = info[0]
+            ext = mime[mime.find('/') + 1:]
+            content = content[pos + 1:]
+        else:
+            return jsonify(success=False, reason='no data information'), 400
+
+        im = base64.b64decode(content)
+        data = FileStorage(
+            stream=io.BytesIO(im),
+            content_type=mime,
+            name='image',
+            filename='{}_{}.{}'.format(context, datetime.now().strftime('%Y_%m_%d-%H-%M-%S'), ext)
+        )
+
+        try:
+            u = FilesView.upload_file(data, 'Uploadé pour une infolettre')
+        except UploadNotAllowed:
+            return jsonify(success=False, reason='invalid file'), 400
+
+        db.session.add(u)
+        db.session.commit()
+
+        return jsonify(
+            success=True, url=flask.url_for('visitor.upload-view', id=u.id, filename=u.file_name, _external=True))
+
+    def dispatch_request(self, *args, **kwargs):
+        if flask.request.method == 'POST':
+            return self.post(*args, **kwargs)
+        else:
+            flask.abort(403)
+
+
+admin_blueprint.add_url_rule('/api/image-base64', view_func=UploadBase64.as_view('image-base64'))
 
 
 class FileDeleteView(AdminBaseMixin, DeleteObjectView):
