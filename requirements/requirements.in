@@ -1,4 +1,5 @@
 -r requirements-base.in
+-r requirements-bump.in
 flake8
 flake8-quotes
 autopep8

@@ -37,3 +37,10 @@ del settings.APP_CONFIG['SERVER_NAME'] # messed up with stuffs
 ```
 
 N'oubliez pas d'utiliser un service type [gunicorn](https://gunicorn.org/).
+
+# Mise a jour
+
+```bash
+make sync # mettre à jour les dépendances du back
+make front # mettre à jour et reconstruire le front
+```

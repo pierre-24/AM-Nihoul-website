@@ -1,6 +1,8 @@
 import flask
-from flask import Blueprint, views
+from flask import Blueprint, views, request
 from flask_login import current_user
+
+import requests
 
 from AM_Nihoul_website import db, settings, limiter
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
@@ -172,6 +174,25 @@ class NewsletterRegisterView(BaseMixin, FormView):
     decorators = [limiter.limit(settings.NEWSLETTER_LIMIT)]
 
     def form_valid(self, form):
+
+        # check captcha, if any
+        if settings.WEBPAGE_INFO['recaptcha_public_key'] != '':
+            if 'g-recaptcha-response' not in request.form:
+                return self.form_invalid(form)
+
+            payload = {
+                'response': request.form['g-recaptcha-response'],
+                'secret': settings.APP_CONFIG['RECAPTCHA_SECRET_KEY']
+            }
+            response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=payload).json()
+
+            if not response['success']:
+                msg = 'Google reCAPTCHA ne vous a pas accepté'
+                if 'error-codes' in response:
+                    msg += ' (raisons données: {})'.format(', '.join(response['error-codes']))
+                flask.flash(msg, 'error')
+
+                return self.form_invalid(form)
 
         if NewsletterRecipient.query.filter(NewsletterRecipient.email == form.email.data).count() == 0:
             r = NewsletterRecipient.create(form.name.data, form.email.data)

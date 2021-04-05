@@ -20,7 +20,7 @@ with open(path.join(here, 'requirements/requirements-base.in')) as f:
     requirements = f.readlines()
 
 with open(path.join(here, 'requirements/requirements.in')) as f:
-    requirements_dev = f.readlines()[1:]
+    requirements_dev = f.readlines()[2:]
 
 
 setup(
