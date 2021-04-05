@@ -393,6 +393,8 @@ class UploadBase64(AdminBaseMixin, View):
 
     def post(self, *args, **kwargs):
 
+        context = flask.request.args.get('context', 'textarea')
+
         if 'image' not in flask.request.form:
             return jsonify(success=False, reason='missing `image` field'), 400
 
@@ -417,7 +419,7 @@ class UploadBase64(AdminBaseMixin, View):
             stream=io.BytesIO(im),
             content_type=mime,
             name='image',
-            filename='newsletter_{}.{}'.format(datetime.now().strftime('%Y_%m_%d-%H-%M-%S'), ext)
+            filename='{}_{}.{}'.format(context, datetime.now().strftime('%Y_%m_%d-%H-%M-%S'), ext)
         )
 
         try:

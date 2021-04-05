@@ -50,11 +50,13 @@ class TestFiles(TestFlask):
         """Test upload with a JSON answer"""
         self.assertEqual(UploadedFile.query.count(), self.num_uploads)
 
+        context = 'life'  # context is found in filename
+
         with open(self.file, 'rb') as f:
             b64str = base64.b64encode(f.read())
 
         response = self.client.post(
-            flask.url_for('admin.image-base64'), data={
+            flask.url_for('admin.image-base64') + '?context={}'.format(context), data={
                 'image': 'data:image/jpeg;base64,' + b64str.decode('utf-8'),
             })
         self.assertEqual(response.status_code, 200)
@@ -66,6 +68,7 @@ class TestFiles(TestFlask):
         self.assertIsNotNone(u)
         self.assertTrue(response.json['success'])
         self.assertTrue(os.path.exists(u.path()))
+        self.assertIn(context, u.file_name)
         self.assertEqual(u.possible_mime, 'image/jpeg')
         self.assertEqual(
             response.json['url'], flask.url_for('visitor.upload-view', id=u.id, filename=u.file_name, _external=True))

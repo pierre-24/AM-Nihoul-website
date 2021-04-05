@@ -33,7 +33,7 @@
 {% endmacro %}
 
 
-{% macro include_editor() %}
+{% macro include_editor(context='textarea') %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.23.0/trumbowyg.min.js" integrity="sha512-sffB9/tXFFTwradcJHhojkhmrCj0hWeaz8M05Aaap5/vlYBfLx5Y7woKi6y0NrqVNgben6OIANTGGlojPTQGEw==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.23.0/langs/fr.min.js" integrity="sha512-UcIsJdBCuvuHt4LR6FoShixLYQXvVPTFrHBI+cXa1VNBJ7E+dRLb42xyLzfR6mKiQ7Z/YdRMFjQSDzvYYCr3vw==" crossorigin="anonymous"></script>
 
@@ -90,7 +90,7 @@
                     ]
                 },
                 pasteUpload: {
-                    url: "{{ url_for('admin.image-base64') }}",
+                    url: "{{ url_for('admin.image-base64') }}?context={{ context }}",
                 },
                 allowTagsFromPaste: {
                     allowedTags: ['br', 'p']
