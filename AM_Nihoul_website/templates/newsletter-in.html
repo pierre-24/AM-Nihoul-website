@@ -7,11 +7,19 @@
 {% block content %}
     <section>
         <h2>Inscription à nos infolettres</h2>
-        <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post">
+        <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post" id="newsletter-form">
             {{ form.hidden_tag() }}
             {{ render_field(form.name) }}
             {{ render_field(form.email) }}
-            {{ render_field(newsletter_form.submit_button) }}
+            {% if recaptcha_public_key != '' and not no_tracking %}
+                    <button id="submit_button" name="submit_button" class="btn btn-primary mb-2 g-recaptcha"
+                            data-sitekey="{{ recaptcha_public_key }}"
+                            data-action="submit"
+                            data-callback="recaptcha_submit">
+                        S'inscrire</button>
+            {% else %}
+                <div class="col-md-2">{{ newsletter_form.submit_button(class_='btn btn-primary mb-2') }}</div>
+            {% endif %}
         </form>
     </section>
 {% endblock %}

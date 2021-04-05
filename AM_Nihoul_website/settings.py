@@ -57,6 +57,9 @@ APP_CONFIG = {
         'visitor_index': 1,
         'admin_index': 2
     },
+
+    # recaptcha secret key
+    'RECAPTCHA_SECRET_KEY': ''
 }
 
 WEBPAGE_INFO = {
@@ -71,7 +74,8 @@ WEBPAGE_INFO = {
     # external services
     'fa_kit': '',  # FontAwesome
     'gtag': '',  # Google analytics
-    'cookies_explain_page': ''  # if `gtag` is set, you MUST have a page that explains the cookies
+    'cookies_explain_page': '',  # if `gtag` is set, you MUST have a page that explains the cookies
+    'recaptcha_public_key': ''
 }
 
 # limit over inscription at the newsletter
