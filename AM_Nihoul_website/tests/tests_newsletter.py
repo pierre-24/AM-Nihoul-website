@@ -40,6 +40,9 @@ class TestNewsletterRecipient(TestFlask):
         self.num_recipients = NewsletterRecipient.query.count()
         self.login()
 
+        # mute recaptcha
+        settings.WEBPAGE_INFO['recaptcha_public_key'] = ''
+
     def test_subscribe_first_step_ok(self):
         name = 'test3'
         email = 'x3@yz.com'

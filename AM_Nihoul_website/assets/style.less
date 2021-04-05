@@ -126,10 +126,11 @@ blockquote {
         border: 2px solid white;
     }
 
-    input[type=submit] {
+    input[type=submit], button {
         background: @main-color;
         color: white;
         cursor: pointer;
+        border-color: white;
 
         &:hover {
             background: white;
@@ -143,9 +144,15 @@ blockquote {
 footer {
     #bottom-nav {
         display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
 
         .bottom-nav-block {
             flex-grow: 1;
+            margin-right: 8px;
+            &:last-child {
+              margin-right: 0;
+            }
 
             a {
                 text-decoration: none;

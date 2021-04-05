@@ -1,5 +1,6 @@
 import flask
 import os
+import base64
 
 from AM_Nihoul_website.visitor.models import UploadedFile
 from AM_Nihoul_website.tests import TestFlask
@@ -44,6 +45,33 @@ class TestFiles(TestFlask):
         self.assertEqual(UploadedFile.query.count(), self.num_uploads)
         self.assertIsNone(UploadedFile.query.get(u.id))
         self.assertFalse(os.path.exists(u.path()))
+
+    def test_upload_api_ok(self):
+        """Test upload with a JSON answer"""
+        self.assertEqual(UploadedFile.query.count(), self.num_uploads)
+
+        context = 'life'  # context is found in filename
+
+        with open(self.file, 'rb') as f:
+            b64str = base64.b64encode(f.read())
+
+        response = self.client.post(
+            flask.url_for('admin.image-base64') + '?context={}'.format(context), data={
+                'image': 'data:image/jpeg;base64,' + b64str.decode('utf-8'),
+            })
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(UploadedFile.query.count(), self.num_uploads + 1)
+
+        u = UploadedFile.query.order_by(UploadedFile.id.desc()).first()
+
+        self.assertIsNotNone(u)
+        self.assertTrue(response.json['success'])
+        self.assertTrue(os.path.exists(u.path()))
+        self.assertIn(context, u.file_name)
+        self.assertEqual(u.possible_mime, 'image/jpeg')
+        self.assertEqual(
+            response.json['url'], flask.url_for('visitor.upload-view', id=u.id, filename=u.file_name, _external=True))
 
     def test_visitor_view_ok(self):
         # upload file first (as admin)

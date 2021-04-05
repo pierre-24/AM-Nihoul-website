@@ -33,17 +33,20 @@
 {% endmacro %}
 
 
-{% macro include_editor() %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.21.0/trumbowyg.min.js" integrity="sha512-l6MMck8/SpFCgbJnIEfVsWQ8MaNK/n2ppTiELW3I2BFY5pAm/WjkNHSt+2OD7+CZtygs+jr+dAgzNdjNuCU7kw==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.21.0/langs/fr.min.js" integrity="sha512-UcIsJdBCuvuHt4LR6FoShixLYQXvVPTFrHBI+cXa1VNBJ7E+dRLb42xyLzfR6mKiQ7Z/YdRMFjQSDzvYYCr3vw==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.21.0/plugins/pasteimage/trumbowyg.pasteimage.js" integrity="sha512-GQOXKj+eQOL6yIlEkO6KNZ48B7zz3YXplnNJa8IzA8RUcUGhC2965PU7AWAyc9zwYfHwcLmvfsslPHDf6BQZnQ==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.21.0/plugins/fontsize/trumbowyg.fontsize.min.js"></script>
+{% macro include_editor(context='textarea') %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.23.0/trumbowyg.min.js" integrity="sha512-sffB9/tXFFTwradcJHhojkhmrCj0hWeaz8M05Aaap5/vlYBfLx5Y7woKi6y0NrqVNgben6OIANTGGlojPTQGEw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.23.0/langs/fr.min.js" integrity="sha512-UcIsJdBCuvuHt4LR6FoShixLYQXvVPTFrHBI+cXa1VNBJ7E+dRLb42xyLzfR6mKiQ7Z/YdRMFjQSDzvYYCr3vw==" crossorigin="anonymous"></script>
 
+    <script src="{{ url_for('static', filename='editor.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.23.0/plugins/fontsize/trumbowyg.fontsize.min.js" integrity="sha512-DOJaq3OCe5hLSr73aQBMiJY4kc+L5UwessOl6g2oxyy7VDnZVWt+TgWVy2nh2ypf7bwoaxZmPnIMiRC5PNZecA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.23.0/plugins/cleanpaste/trumbowyg.cleanpaste.min.js" integrity="sha512-y7o2DGiZAj5/HOX10rSG1zuIq86mFfnqbus0AASAG1oU2WaF2OGwmkt2XsgJ3oYxJ69luyG7iKlQQ6wlZeV3KQ==" crossorigin="anonymous"></script>
+<!--
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.23.0/plugins/allowtagsfrompaste/trumbowyg.allowtagsfrompaste.min.js" integrity="sha512-Zuq+wA/YLqIGzMTTwdEx7amSDq7QKEcygLO4S8w1MeUytDQAGGZza/kZxCfwp0QiPdGHQHxl/bYGxmoy1MwdDA==" crossorigin="anonymous"></script>
+ -->
     <script>
         // change editor options
         $('.trumbowyg-textarea').trumbowyg({
             lang: 'fr',
-            removeformatPasted: true,
             minimalLinks: true,
             btnsDef: {
                 shiftedh1: {
@@ -72,7 +75,7 @@
                 ['undo', 'redo'], // Only supported in Blink browsers
                 ['p', 'blockquote', 'shiftedh1', 'shiftedh2'],
                 ['strong', 'em', 'underline'],
-                ['link'],
+                ['link', 'insertImage'],
                 ['fontsize'],
                 ['justifyLeft', 'justifyCenter'],
                 ['unorderedList', 'orderedList'],
@@ -87,7 +90,16 @@
                         '120%',
                         '130%'
                     ]
+                },
+                pasteUpload: {
+                    url: "{{ url_for('admin.image-base64') }}?context={{ context }}",
+                },
+
+                /*
+                allowTagsFromPaste: {
+                    allowedTags: ['br', 'p']
                 }
+                */
             }
         },
         );

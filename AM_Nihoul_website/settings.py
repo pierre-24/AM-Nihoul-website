@@ -57,6 +57,9 @@ APP_CONFIG = {
         'visitor_index': 1,
         'admin_index': 2
     },
+
+    # recaptcha secret key
+    'RECAPTCHA_SECRET_KEY': ''
 }
 
 WEBPAGE_INFO = {
@@ -66,12 +69,13 @@ WEBPAGE_INFO = {
     'site_name': 'Association Anne-Marie Nihoul ASBL',
     'site_description': 'aide aux malades',
     'site_keywords': 'leucémie, aide au malades',
-    'site_version': '0.3',
+    'site_version': '0.4',
 
     # external services
     'fa_kit': '',  # FontAwesome
     'gtag': '',  # Google analytics
-    'cookies_explain_page': ''  # if `gtag` is set, you MUST have a page that explains the cookies
+    'cookies_explain_page': '',  # if `gtag` is set, you MUST have a page that explains the cookies
+    'recaptcha_public_key': ''
 }
 
 # limit over inscription at the newsletter

@@ -1,5 +1,8 @@
 import flask
-from flask import Blueprint, views
+from flask import Blueprint, views, request
+from flask_login import current_user
+
+import requests
 
 from AM_Nihoul_website import db, settings, limiter
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
@@ -41,7 +44,7 @@ class SitemapView(RenderTemplateView):
         ]
 
         # add pages
-        for p in Page.query.all():
+        for p in Page.query.filter(Page.visible.is_(True)).all():
             urls.append({
                 'location': flask.url_for('visitor.page-view', id=p.id, slug=p.slug, _external=True),
                 'changefreq': 'weekly',
@@ -115,8 +118,11 @@ class PageView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
         if self.object.slug != kwargs.get('slug'):
             flask.abort(error_code)
 
+        if not self.object.visible and not current_user.is_authenticated:
+            flask.abort(error_code)  # cannot access directly a non-visible page if not connected
+
         if self.object.next_id:
-            self.object.next = Page.query.get(self.object.next_id)
+            self.object.next = Page.query.get(self.object.next_id)  # load object
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
@@ -168,6 +174,25 @@ class NewsletterRegisterView(BaseMixin, FormView):
     decorators = [limiter.limit(settings.NEWSLETTER_LIMIT)]
 
     def form_valid(self, form):
+
+        # check captcha, if any
+        if settings.WEBPAGE_INFO['recaptcha_public_key'] != '':
+            if 'g-recaptcha-response' not in request.form:
+                return self.form_invalid(form)
+
+            payload = {
+                'response': request.form['g-recaptcha-response'],
+                'secret': settings.APP_CONFIG['RECAPTCHA_SECRET_KEY']
+            }
+            response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=payload).json()
+
+            if not response['success']:
+                msg = 'Google reCAPTCHA ne vous a pas accepté'
+                if 'error-codes' in response:
+                    msg += ' (raisons données: {})'.format(', '.join(response['error-codes']))
+                flask.flash(msg, 'error')
+
+                return self.form_invalid(form)
 
         if NewsletterRecipient.query.filter(NewsletterRecipient.email == form.email.data).count() == 0:
             r = NewsletterRecipient.create(form.name.data, form.email.data)

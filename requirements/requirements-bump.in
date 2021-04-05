@@ -1,0 +1,4 @@
+# "ahead-of-package" upgrade to dependencies, as per dependabot
+httplib2>=0.19.0
+jinja2>=2.11.3
+lxml>=4.6.3
