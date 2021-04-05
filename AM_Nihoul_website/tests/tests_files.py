@@ -67,7 +67,8 @@ class TestFiles(TestFlask):
         self.assertTrue(response.json['success'])
         self.assertTrue(os.path.exists(u.path()))
         self.assertEqual(u.possible_mime, 'image/jpeg')
-        self.assertIn(response.json['url'], flask.url_for('visitor.upload-view', id=u.id, filename=u.file_name))
+        self.assertEqual(
+            response.json['url'], flask.url_for('visitor.upload-view', id=u.id, filename=u.file_name, _external=True))
 
     def test_visitor_view_ok(self):
         # upload file first (as admin)

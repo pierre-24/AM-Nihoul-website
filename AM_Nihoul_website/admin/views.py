@@ -428,7 +428,8 @@ class UploadBase64(AdminBaseMixin, View):
         db.session.add(u)
         db.session.commit()
 
-        return jsonify(success=True, url=flask.url_for('visitor.upload-view', id=u.id, filename=u.file_name))
+        return jsonify(
+            success=True, url=flask.url_for('visitor.upload-view', id=u.id, filename=u.file_name, _external=True))
 
     def dispatch_request(self, *args, **kwargs):
         if flask.request.method == 'POST':
