@@ -5,6 +5,8 @@ import flask_login
 from flask_login import login_required
 from flask_uploads import UploadNotAllowed
 
+from sqlalchemy import func
+
 from werkzeug.datastructures import FileStorage
 
 import base64
@@ -77,11 +79,16 @@ class IndexView(AdminBaseMixin, RenderTemplateView):
         ctx['content'] = Page.query.get(settings.APP_CONFIG['PAGES']['admin_index'])
 
         # few statistics
+        sz = UploadedFile.query\
+            .with_entities(func.sum(UploadedFile.file_size).label('total'))\
+            .first()
         ctx['statistics'] = {
             "Nombre d'inscrits à l'infolettre": NewsletterRecipient.query.count(),
             "Nombre d'infolettres": '{} (dont {} publiées)'.format(
                 Newsletter.query.count(), Newsletter.query.filter(Newsletter.draft.is_(False)).count()),
             'Nombre de pages': Page.query.count(),
+            'Taille des fichiers': '{:.2f} Mio'.format(
+                sz[0] / 1024 / 1024 if sz[0] is not None else 0)
         }
 
         return ctx
