@@ -20,23 +20,42 @@ Et dans `settings_prod.py`,
 ```python
 from AM_Nihoul_website import settings
 
-settings.WEBPAGE_INFO['fa_kit'] = '*****'
+# config interne
+settings.APP_CONFIG.update({
+    # Pour utiliser le bot (ici comme un service externe):
+    'LAUNCH_BOT': False,  # `True` pour l'utiliser en même temps 
+    'USE_FAKE_MAIL_SENDER': False,
+    
+    # Personne indiquée comme envoyant le mail
+    'NEWSLETTER_SENDER_EMAIL': '****',
+    
+    # Clé secrète pour Flask
+    'SECRET_KEY': '****',
+    
+    # Mot de passe d'administration
+    'PASSWORD': '****',
+    
+    # Clé secrète reCAPTCHA (si utilisé)
+    'RECAPTCHA_SECRET_KEY': '***'
+})
 
-settings.WEBPAGE_INFO['gtag'] = '*****'
-settings.WEBPAGE_INFO['cookies_explain_page'] = 'cookies.html'  # mandatory if gtag is set
-# ... And other stuffs in WEBPAGE_INFO, if any
+settings.WEBPAGE_INFO.update({
+    'site_keywords': 'leucémie, leucemie, nihoul, anne-marie, fondation, cancer, moelle osseuse, hla, malades, aide, aides',
+    'fa_kit': '***',
+    'gtag': '****',
+    'cookies_explain_page': '****',
+    
+    # clé publique recaptcha
+    'recaptcha_public_key': '****'
+})
 
-settings.APP_CONFIG['LAUNCH_BOT'] = False
-settings.APP_CONFIG['USE_FAKE_MAIL_SENDER'] = False
-settings.APP_CONFIG['NEWSLETTER_SENDER_EMAIL'] = '*****'
-
-settings.APP_CONFIG['SECRET_KEY'] = '****'
-settings.APP_CONFIG['PASSWORD'] = '*****'
-
-del settings.APP_CONFIG['SERVER_NAME'] # messed up with stuffs
+# ça peut poser des problèmes:
+del settings.APP_CONFIG['SERVER_NAME']
 ```
 
 N'oubliez pas d'utiliser un service type [gunicorn](https://gunicorn.org/).
+
+Pour l'envoi des emails, le code utilise [`simplegmail`](https://github.com/jeremyephron/simplegmail), il faut donc un fichier `client_secret.json` dans le dossier principal (voir les instructions dans le [README](https://github.com/jeremyephron/simplegmail#getting-started)).
 
 # Mise a jour
 
