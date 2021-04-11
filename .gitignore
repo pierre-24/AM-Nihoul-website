@@ -256,3 +256,4 @@ settings_prod.py
 client_secret.json
 tmp.py
 gmail_token.json
+node_modules

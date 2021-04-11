@@ -13,7 +13,7 @@ import base64
 import io
 from datetime import datetime
 
-from AM_Nihoul_website import settings, db, User
+from AM_Nihoul_website import settings, db, User, limiter
 from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteObjectView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm, \
@@ -27,6 +27,7 @@ admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 class LoginView(BaseMixin, FormView):
     form_class = LoginForm
     template_name = 'admin/login.html'
+    decorators = [limiter.limit(settings.LOGIN_LIMIT)]
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
