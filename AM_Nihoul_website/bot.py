@@ -59,7 +59,8 @@ def bot_iteration():
                     'to': e.recipient.email,
                     'sender': settings.APP_CONFIG['NEWSLETTER_SENDER_EMAIL'],
                     'subject': e.title,
-                    'msg_html': e.content
+                    'msg_html': e.content,
+                    'attachments': ['AM_Nihoul_website/assets/images/logo.svg'],
                 }
 
                 client.send_message(**data)
