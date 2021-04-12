@@ -2,8 +2,9 @@
 
 {% block content %}
     <p style="border-bottom: 1px solid #ddd; padding-bottom: 16px; margin-bottom: 16px;">
+        Bonjour {{ recipient.name }}, voici notre nouvelle infolettre !
         {% with link = url_for('visitor.newsletter-view', id=newsletter.id, slug=newsletter.slug, _external=True) %}
-        Note : vous pouvez directement consulter ce contenu à l'adresse suivante: <a href="{{ link }}">{{ link}}</a>.
+        Notez que vous pouvez directement consulter ce contenu à l'adresse suivante: <a href="{{ link }}">{{ link}}</a> s'il ne s'affiche pas correctement ici.
         {% endwith %}
     </p>
 

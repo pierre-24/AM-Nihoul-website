@@ -77,9 +77,9 @@ def bot_iteration():
                     BASE / settings.APP_CONFIG['NEWSLETTER_LOGO'], cid='newsletter-logo')
 
                 # attach others, if any
-                for image in e.images():
-                    f = image.image
-                    message.add_html_attachment(pathlib.Path(f.path()), cid=f.base_file_name)
+                for attachment in e.attachments():
+                    f = attachment.image
+                    message.add_html_attachment(pathlib.Path(f.path()), cid=f.file_name)
 
                 # send
                 client.send(message)

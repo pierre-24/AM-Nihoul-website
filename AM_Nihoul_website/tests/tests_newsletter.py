@@ -223,6 +223,16 @@ class TestNewsletter(TestFlask):
     def setUp(self):
         super().setUp()
 
+        # add image
+        with (BASE / './assets/images/favicon.png').open('rb') as f:
+            storage = FileStorage(stream=f, filename='favicon.png', content_type='image/png')
+            self.image = UploadedFile.create(storage, storage.filename)
+            db.session.add(self.image)
+
+        db.session.add(self.image)
+        db.session.commit()
+
+        # add others
         self.subscribed_first_step = NewsletterRecipient.create('test1', 'x1@yz.com')
         self.subscribed = NewsletterRecipient.create('test2', 'x2@yz.com', confirmed=True)
 
@@ -231,8 +241,13 @@ class TestNewsletter(TestFlask):
 
         self.draft_newsletter = Newsletter.create('test1', 'content of test1')
         self.published_newsletter = Newsletter.create('test2', 'content of test2', draft=False)
+        self.draft_newsletter_with_image = Newsletter.create(
+            'test3',
+            'content: <img src="{p}" alt="test" /> <img src="{p}" alt="test2" />'.format(p=flask.url_for(
+                'visitor.upload-view', id=self.image.id, filename=self.image.file_name, _external=True)))
 
         db.session.add(self.draft_newsletter)
+        db.session.add(self.draft_newsletter_with_image)
         db.session.add(self.published_newsletter)
 
         db.session.commit()
@@ -422,6 +437,30 @@ class TestNewsletter(TestFlask):
 
         self.assertIn(n.title, e.content)
         self.assertIn(n.content, e.content)
+
+    def test_publish_newsletter_with_image_ok(self):
+        self.assertTrue(self.draft_newsletter_with_image.draft)
+
+        response = self.client.post(
+            flask.url_for('admin.newsletter-publish', id=self.draft_newsletter_with_image.id), data={'confirm': True})
+
+        self.assertEqual(response.status_code, 302)
+
+        n = Newsletter.query.get(self.draft_newsletter_with_image.id)
+        self.assertFalse(n.draft)
+
+        # check email
+        self.assertEqual(self.num_email + 1, Email.query.count())
+        e = Email.query.order_by(Email.id.desc()).first()
+        self.assertEqual(e.recipient, self.subscribed)
+
+        # check attachment
+        attachments = e.attachments()
+        self.assertEqual(len(attachments), 1)
+        self.assertEqual(attachments[0].image.id, self.image.id)
+
+        # check cid is actually used
+        self.assertIn('cid:{}'.format(self.image.file_name), e.content)
 
     def test_publish_newsletter_not_admin_ko(self):
         self.assertTrue(self.draft_newsletter.draft)
