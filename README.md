@@ -55,11 +55,12 @@ del settings.APP_CONFIG['SERVER_NAME']
 
 N'oubliez pas d'utiliser un service type [gunicorn](https://gunicorn.org/).
 
-Pour l'envoi des emails, le code utilise [`simplegmail`](https://github.com/jeremyephron/simplegmail), il faut donc un fichier `client_secret.json` dans le dossier principal (voir les instructions dans le [README](https://github.com/jeremyephron/simplegmail#getting-started)).
+Pour l'envoi des emails, le code utilise [`simplegmail`](https://github.com/jeremyephron/simplegmail), il faut donc le configurer (voir les instructions dans le [README](https://github.com/jeremyephron/simplegmail#getting-started)).
 
 # Mise a jour
 
 ```bash
 make sync # mettre à jour les dépendances du back
+flask db upgrade  # mettre à jour la BDD
 make front # mettre à jour et reconstruire le front
 ```

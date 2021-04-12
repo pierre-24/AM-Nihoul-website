@@ -36,6 +36,7 @@ APP_CONFIG = {
     'NEWSLETTER_SENDER_EMAIL': 'xyz@test.com',
     'USE_FAKE_MAIL_SENDER': False,
     'LAUNCH_BOT': True,
+    'NEWSLETTER_LOGO': 'AM_Nihoul_website/assets/images/newsletter_logo.png',
 
     # scheduler
     'JOBS': [
@@ -80,6 +81,7 @@ WEBPAGE_INFO = {
 
 # limit over inscription at the newsletter
 NEWSLETTER_LIMIT = '10/hour;1 per 5 second'
+LOGIN_LIMIT = '10/hour;1 per 5 second'
 
 # Load the production settings, overwrite the existing ones if needed
 try:

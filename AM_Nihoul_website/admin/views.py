@@ -12,14 +12,15 @@ from werkzeug.datastructures import FileStorage
 import base64
 import io
 from datetime import datetime
+import re
 
-from AM_Nihoul_website import settings, db, User
+from AM_Nihoul_website import settings, db, User, limiter
 from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteObjectView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm, \
     NewsletterPublishForm, MenuEditForm
 from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient, Newsletter, Email, \
-    MenuEntry
+    MenuEntry, EmailImageAttachment
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -27,6 +28,7 @@ admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 class LoginView(BaseMixin, FormView):
     form_class = LoginForm
     template_name = 'admin/login.html'
+    decorators = [limiter.limit(settings.LOGIN_LIMIT)]
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
@@ -597,6 +599,15 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
         self.get_object_or_abort(*args, **kwargs)
         return super().post(*args, **kwargs)
 
+    @staticmethod
+    def replace_image(g, possible, actual):
+        path = g.group('path')
+        if path in possible:
+            actual.add(possible[path])
+            return g.group('begin') + 'src="cid:{}"'.format(possible[path].file_name) + g.group('end')
+        else:
+            return g.group('begin') + 'src="{}"'.format(g.group('path')) + g.group('end')
+
     def form_valid(self, form):
         self.success_url = flask.url_for('admin.newsletters')
         if not self.object.draft:
@@ -605,11 +616,30 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
         else:
             self.object.draft = False
             self.object.date_published = db.func.current_timestamp()
+
+            # get attachments
+            possible_attachments = dict(
+                (flask.url_for(
+                    'visitor.upload-view',
+                    id=u.id,
+                    filename=u.file_name,
+                    _external=True),
+                 u) for u in UploadedFile.query.all()
+            )
+
+            image_regex = re.compile('(?P<begin><img .*?)src="(?P<path>.*?)"(?P<end>.*?>)')
+            content = self.object.content
+
+            actual_attachments = set()
+            content = image_regex.sub(
+                lambda g: NewsletterPublishView.replace_image(g, possible_attachments, actual_attachments), content)
+
             db.session.add(self.object)
             db.session.commit()
 
             # schedule emailing
             recipients = NewsletterRecipient.query.filter(NewsletterRecipient.confirmed.is_(True)).all()
+            emails = []
             for r in recipients:
                 e = Email.create(
                     'Newsletter: {}'.format(self.object.title),
@@ -618,13 +648,23 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
                         **{
                             'site_name': settings.WEBPAGE_INFO['site_name'],
                             'newsletter': self.object,
+                            'transformed_content': content,
                             'recipient': r,
                         }
                     ),
                     r.id)
+                emails.append(e)
                 db.session.add(e)
 
             db.session.commit()
+
+            # add attachments
+            if len(actual_attachments) > 0:
+                for e in emails:
+                    for a in actual_attachments:
+                        db.session.add(EmailImageAttachment.create(e.id, a.id))
+
+                db.session.commit()
 
             flask.flash('Newsletter "{}" publiée.'.format(self.object.title))
 
