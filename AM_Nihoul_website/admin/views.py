@@ -634,7 +634,6 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
             content = image_regex.sub(
                 lambda g: NewsletterPublishView.replace_image(g, possible_attachments, actual_attachments), content)
 
-            self.object.content = content
             db.session.add(self.object)
             db.session.commit()
 
@@ -649,6 +648,7 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
                         **{
                             'site_name': settings.WEBPAGE_INFO['site_name'],
                             'newsletter': self.object,
+                            'transformed_content': content,
                             'recipient': r,
                         }
                     ),
