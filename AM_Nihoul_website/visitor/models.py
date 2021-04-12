@@ -269,6 +269,24 @@ class Email(BaseModel):
 
         return o
 
+    def images(self):
+        return EmailImageAttachment.query.filter(EmailImageAttachment.image_id.is_(self.id)).all()
+
+
+class EmailImageAttachment(BaseModel):
+    email_id = db.Column(db.Integer, db.ForeignKey('email.id'))
+    email = db.relationship('Email', uselist=False)
+    image_id = db.Column(db.Integer, db.ForeignKey('uploaded_file.id'))
+    image = db.relationship('UploadedFile', uselist=False)
+
+    @classmethod
+    def create(cls, email, image):
+        o = cls()
+        o.email_id = email
+        o.image_id = image
+
+        return o
+
 
 class MenuEntry(OrderableMixin, BaseModel):
 

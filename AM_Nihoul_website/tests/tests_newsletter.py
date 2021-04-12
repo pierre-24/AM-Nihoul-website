@@ -1,28 +1,37 @@
 import flask
 import datetime
 import os
+import pathlib
+
+from werkzeug.datastructures import FileStorage
 
 from AM_Nihoul_website.tests import TestFlask
 from AM_Nihoul_website import db, settings, bot
-from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email, Newsletter
+from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email, Newsletter, UploadedFile, EmailImageAttachment
+from AM_Nihoul_website.admin.utils import Message
+
+
+BASE = pathlib.Path(__file__).parent.parent
 
 
 class TestFakeMailClient(TestFlask):
     def test_fake_ok(self):
         f = bot.FakeMailClient()
 
-        subject = 'test'
-        content = 'test1325'
-        to = 'test@xyz.com'
-        sender = 'me@xyz.com'
+        message = Message(
+            recipient='test@xyz.com',
+            sender='me@xyz.com',
+            subject='test',
+            msg_html='test1325'
+        )
 
-        f.send_message(to, sender, subject, content)
+        f.send(message)
 
         with open(os.path.join(self.data_files_directory, bot.FakeMailClient.OUT)) as f:
             f_content = f.read()
-            self.assertIn(subject, f_content)
-            self.assertIn(to, f_content)
-            self.assertIn(content, f_content)
+            self.assertIn(message.subject, f_content)
+            self.assertIn(message.recipient, f_content)
+            self.assertIn(message.msg_plain, f_content)
 
 
 class TestNewsletterRecipient(TestFlask):
@@ -35,13 +44,21 @@ class TestNewsletterRecipient(TestFlask):
 
         db.session.add(self.subscribed_first_step)
         db.session.add(self.subscribed)
-        db.session.commit()
 
         self.num_recipients = NewsletterRecipient.query.count()
         self.login()
 
         # mute recaptcha
         settings.WEBPAGE_INFO['recaptcha_public_key'] = ''
+
+        # add image
+        with (BASE / './assets/images/favicon.png').open('rb') as f:
+            storage = FileStorage(stream=f, filename='favicon.png', content_type='image/png')
+            self.image = UploadedFile.create(storage, storage.filename)
+            db.session.add(self.image)
+
+        # commit everything
+        db.session.commit()
 
     def test_subscribe_first_step_ok(self):
         name = 'test3'
@@ -183,9 +200,22 @@ class TestNewsletterRecipient(TestFlask):
         db.session.add(e)
         db.session.commit()
 
+        # add attachment
+        attachment = EmailImageAttachment.create(e.id, self.image.id)
+        db.session.add(attachment)
+        db.session.commit()
+
+        # send it
         bot.bot_iteration()
 
+        # check
         self.assertTrue(Email.query.get(e.id).sent)
+
+        with open(os.path.join(self.data_files_directory, bot.FakeMailClient.OUT)) as f:
+            content = f.read()
+
+            self.assertIn(self.subscribed_first_step.email, content)
+            self.assertIn(self.image.base_file_name, content)
 
 
 class TestNewsletter(TestFlask):

@@ -36,7 +36,7 @@ APP_CONFIG = {
     'NEWSLETTER_SENDER_EMAIL': 'xyz@test.com',
     'USE_FAKE_MAIL_SENDER': False,
     'LAUNCH_BOT': True,
-    'NEWSLETTER_LOGO': './AM_Nihoul_website/assets/images/logo-newsletter.png',
+    'NEWSLETTER_LOGO': 'AM_Nihoul_website/assets/images/newsletter_logo.png',
 
     # scheduler
     'JOBS': [

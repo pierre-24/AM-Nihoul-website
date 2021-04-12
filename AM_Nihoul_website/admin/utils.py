@@ -69,7 +69,7 @@ class Message:
     def create_attachment_from_file(path: pathlib.Path, disposition: str = 'attachment', cid: str = None) -> MIMEBase:
         """Create an attachment from a file"""
 
-        content_type, encoding = mimetypes.guess_type(path)
+        content_type, encoding = mimetypes.guess_type(str(path))
         name = path.name
 
         # backup to octet-stream if any

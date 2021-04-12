@@ -1,21 +1,30 @@
 from datetime import datetime
 import logging
 import os
-import simplegmail
+import pathlib
 
 from AM_Nihoul_website import settings, db
 from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email
+from AM_Nihoul_website.admin.utils import Gmail, Message
 
 logging.basicConfig(level=settings.LOGLEVEL, format='%(asctime)s (%(levelname)s) %(message)s')
 logger = logging.getLogger(__name__)
 
 
+BASE = pathlib.Path(__file__).parent.parent
+
+
 class FakeMailClient:
     OUT = 'fake_mail_out.txt'
 
-    def send_message(self, to, sender, subject, msg_html, **kwargs):
+    def send(self, message, **kwargs):
         with open(os.path.join(settings.DATA_DIRECTORY, self.OUT), 'a') as f:
-            f.write('====\nSUBJECT: {}\nTO: {}\nON: {}\n====\n{}'.format(subject, to, datetime.now(), msg_html))
+            f.write('====\nSUBJECT: {}\nTO: {}\nON: {}\n====\n{}\n'.format(
+                message.subject, message.recipient, datetime.now(), message.msg_html))
+
+            if message.html_attachments:
+                f.write('\n'.join('+ Attachment: {}, {}'.format(
+                    a.get_content_type(), a['Content-ID']) for a in message.html_attachments))
 
 
 def bot_iteration():
@@ -49,23 +58,35 @@ def bot_iteration():
             if settings.APP_CONFIG['USE_FAKE_MAIL_SENDER']:
                 client = FakeMailClient()
             else:
-                client = simplegmail.Gmail()
+                client = Gmail()
 
             # go for it
             for e in emails:
-                e.sent = True
 
                 data = {
-                    'to': e.recipient.email,
                     'sender': settings.APP_CONFIG['NEWSLETTER_SENDER_EMAIL'],
+                    'recipient': e.recipient.email,
                     'subject': e.title,
                     'msg_html': e.content,
                 }
 
-                client.send_message(**data)
+                message = Message(**data)
 
+                # attach logo
+                message.add_html_attachment(
+                    BASE / settings.APP_CONFIG['NEWSLETTER_LOGO'], cid='newsletter-logo')
+
+                # attach others, if any
+                for image in e.images():
+                    f = image.image
+                    message.add_html_attachment(pathlib.Path(f.path()), cid=f.base_file_name)
+
+                # send
+                client.send(message)
                 logger.info('email:: sent `{}` to {} (id={}, recipient.id={})'.format(
                     e.title, e.recipient.get_scrambled_email(), e.id, e.recipient.id))
+
+                e.sent = True
                 db.session.add(e)
 
         if len(recipients) > 0 or len(emails) > 0:
