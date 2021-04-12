@@ -270,7 +270,7 @@ class Email(BaseModel):
         return o
 
     def attachments(self):
-        return EmailImageAttachment.query.filter(EmailImageAttachment.image_id.is_(self.id)).all()
+        return EmailImageAttachment.query.filter(EmailImageAttachment.email_id.is_(self.id)).all()
 
 
 class EmailImageAttachment(BaseModel):
