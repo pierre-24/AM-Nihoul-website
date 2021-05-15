@@ -464,7 +464,7 @@ class NewsletterRecipientsView(AdminBaseMixin, RenderTemplateView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
 
-        ctx['recipients'] = NewsletterRecipient.query.order_by(NewsletterRecipient.name).all()
+        ctx['recipients'] = NewsletterRecipient.query.order_by(NewsletterRecipient.date_created.desc()).all()
         return ctx
 
 

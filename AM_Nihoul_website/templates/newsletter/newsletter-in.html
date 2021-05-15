@@ -5,10 +5,16 @@
     <p>Bonjour {{ name }},</p>
     <p>
         {% with link = url_for('visitor.newsletter-confirm', id=recipient.id, hash=recipient.hash, _external=True) %}
-        Vous avez été inscrit à nos infolettres. Si c'est une erreur, <b>vous ne devez rien faire</b>.
-        Dans le cas contraire, vous avez 24 heures pour <b>confirmer votre inscription</b> en cliquant sur le lien suivant:
-        <a href="{{ link }}">{{ link }}</a>
-        (faites un copier-coller si le lien ne peut être cliqué).
+            Nous vous remercions d'avoir entrepris de vous inscrire à notre infolettre.
+            pour terminer de le faire, il nous est indispensable de nous confirmer qu'il s'agit bien de votre demande (non celle d'un robot) en cliquant aussitôt réception de ce message sur le lien suivant:
+            <a href="{{ link }}">{{ link }}</a>.
         {% endwith %}
+    </p>
+    <p>Faites un copier-coller si le lien ne peut être cliqué.</p>
+    <p>
+        Au cas où vous recevez ce message par erreur.
+        Veuillez nous excuser de ce désagrément.
+        Vous ne devez rien faire.
+        La demande d'inscription sera annulée d'elle-même dans les 24 heures.
     </p>
 {% endblock %}
