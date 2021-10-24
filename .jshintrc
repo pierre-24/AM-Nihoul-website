@@ -1,19 +1,5 @@
 {
-  "boss": true,
-  "browser": true,
   "camelcase": false,
-  "eqeqeq": true,
-  "indent": 4,
-  "esnext": true,
-  "globals": {},
-  "smarttabs": true,
-  "trailing": true,
-  "undef": true,
-  "unused": true,
-  "newcap": true,
-  "quotmark": "single",
-  "notypeof": true,
-  "devel": true,
-  "loopfunc": true,
-  "node": true
+  "node": true,
+  "esversion": 6
 }

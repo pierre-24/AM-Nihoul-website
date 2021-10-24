@@ -8,20 +8,12 @@
     "gulp": "node ./node_modules/gulp/bin/gulp.js"
   },
   "dependencies": {
-    "browserify": ">=16.5.1",
-    "glob-parent": ">=5.1.2",
-    "gulp": ">=4.0",
-    "gulp-clean-css": ">=4.3.0",
-    "gulp-if": ">=3.0.0",
-    "gulp-jshint": ">=2.1.0",
-    "gulp-less": ">=4.0.1",
-    "gulp-options": ">=1.1.1",
-    "hosted-git-info": ">=2.8.9",
-    "jshint": ">=2.11.0",
-    "jshint-stylish": ">=2.2.1",
-    "minify-stream": ">=1.2.1",
-    "set-value": ">=4.0.1",
-    "vinyl-source-stream": ">=2.0.0",
-    "yargs-parser": ">=5.0.1"
+    "grunt": "^1.4.1",
+    "grunt-cli": "^1.4.3",
+    "grunt-contrib-jshint": "^3.1.1",
+    "grunt-contrib-less": "^3.0.0",
+    "grunt-contrib-uglify": "^5.0.1",
+    "grunt-contrib-watch": "^1.1.0",
+    "grunt-image": "^6.4.0"
   }
 }
