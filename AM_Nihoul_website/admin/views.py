@@ -642,7 +642,7 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
             emails = []
             for r in recipients:
                 e = Email.create(
-                    'Newsletter: {}'.format(self.object.title),
+                    'Infolettre: {}'.format(self.object.title),
                     flask.render_template(
                         'newsletter/newsletter.html',
                         **{
@@ -666,7 +666,7 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
 
                 db.session.commit()
 
-            flask.flash('Newsletter "{}" publiée.'.format(self.object.title))
+            flask.flash('Infolettre "{}" publiée.'.format(self.object.title))
 
         return super().form_valid(form)
 
