@@ -30,6 +30,7 @@ APP_CONFIG = {
 
     # upload
     'UPLOADED_UPLOADS_DEST': os.path.join(DATA_DIRECTORY, 'uploads/'),
+    'UPLOAD_CONVERT_TO_JPG': 250 * 1024,
 
     # newsletter
     'REMOVE_RECIPIENTS_DELTA': timedelta(days=1),

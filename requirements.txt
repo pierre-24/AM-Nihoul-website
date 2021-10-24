@@ -113,6 +113,8 @@ mccabe==0.6.1
     # via flake8
 oauth2client==4.1.3
     # via simplegmail
+pillow==8.4.0
+    # via -r requirements/requirements-base.in
 protobuf==3.19.0
     # via
     #   google-api-core

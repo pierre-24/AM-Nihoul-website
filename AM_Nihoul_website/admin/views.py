@@ -4,6 +4,7 @@ from flask.views import View
 import flask_login
 from flask_login import login_required
 from flask_uploads import UploadNotAllowed
+from PIL import Image
 
 from sqlalchemy import func
 
@@ -417,8 +418,18 @@ class UploadBase64(AdminBaseMixin, View):
             return jsonify(success=False, reason='no data information'), 400
 
         im = base64.b64decode(content)
+        source_fp = io.BytesIO(im)
+
+        # if image is larger than a given size, use jpg instead
+        if len(im) > settings.APP_CONFIG['UPLOAD_CONVERT_TO_JPG']:
+            image = Image.open(io.BytesIO(im))
+            source_fp = io.BytesIO()
+            image.save(source_fp, format='jpeg')
+            ext = 'jpg'
+            source_fp.seek(0)  # rewind
+
         data = FileStorage(
-            stream=io.BytesIO(im),
+            stream=source_fp,
             content_type=mime,
             name='image',
             filename='{}_{}.{}'.format(context, datetime.now().strftime('%Y_%m_%d-%H-%M-%S'), ext)
