@@ -12,3 +12,4 @@ simplegmail>=3.0
 bootstrap-flask
 Flask-Alembic
 Flask-Limiter
+Pillow
