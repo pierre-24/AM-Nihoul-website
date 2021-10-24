@@ -15,7 +15,7 @@
         successField: 'success',
         reasonField: 'reason',
         urlField: 'url'
-    }
+    };
 
     $.extend(true, $.trumbowyg, {
         plugins: {
@@ -29,17 +29,15 @@
                     );
 
                     trumbowyg.pasteHandlers.push(function (pasteEvent) {
-                        let options = trumbowyg.o.plugins.pasteUpload;
                         try {
-                            var items = (pasteEvent.originalEvent || pasteEvent).clipboardData.items,
-                                mustPreventDefault = false,
-                                reader;
-
-                            for (var i = items.length - 1; i >= 0; i -= 1) {
+                            let items = (pasteEvent.originalEvent || pasteEvent).clipboardData.items,
+                                mustPreventDefault = false;
+                            for (let i = items.length - 1; i >= 0; i -= 1) {
                                 if (items[i].type.match(/^image\//)) {
-                                    reader = new FileReader();
+                                    let reader = new FileReader();
                                     /* jshint -W098 */
-                                    reader.onloadend = function (event) {
+                                    reader.onloadend = (event) => {// jshint ignore:line
+                                        let options = trumbowyg.o.plugins.pasteUpload;
                                         let data = {};
                                         data[options.inputField] = event.target.result;
 
