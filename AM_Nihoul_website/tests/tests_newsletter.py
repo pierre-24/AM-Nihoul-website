@@ -2,6 +2,7 @@ import flask
 import datetime
 import os
 import pathlib
+from bs4 import BeautifulSoup
 
 from werkzeug.datastructures import FileStorage
 
@@ -9,6 +10,7 @@ from AM_Nihoul_website.tests import TestFlask
 from AM_Nihoul_website import db, settings, bot
 from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email, Newsletter, UploadedFile, EmailImageAttachment
 from AM_Nihoul_website.admin.utils import Message
+from AM_Nihoul_website.visitor.utils import make_summary
 
 
 BASE = pathlib.Path(__file__).parent.parent
@@ -323,6 +325,20 @@ class TestNewsletter(TestFlask):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.published_newsletter.content, response.get_data(as_text=True))
+
+    def test_make_summary_ok(self):
+        titles = ['a first', 'a second']
+        input_text = '<summary></summary> <h1>{}</h1><h1>{}</h1>'.format(*titles)
+
+        output_text = make_summary(input_text)
+        soup = BeautifulSoup(output_text, 'lxml')
+
+        summary_list = soup.find('ul', class_='summary')
+        self.assertIsNotNone(summary_list)
+
+        a_tags = list(summary_list.find_all('a'))
+        self.assertEqual(len(a_tags), len(titles))
+        self.assertEqual([a.string for a in a_tags], titles)
 
     def test_visit_draft_newsletter_ko(self):
         # admin

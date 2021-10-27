@@ -15,7 +15,9 @@ beautifulsoup4==4.10.0
 bootstrap-flask==1.8.0
     # via -r requirements/requirements-base.in
 bs4==0.0.1
-    # via simplegmail
+    # via
+    #   -r requirements/requirements-base.in
+    #   simplegmail
 cachetools==4.2.4
     # via google-auth
 certifi==2021.10.8
