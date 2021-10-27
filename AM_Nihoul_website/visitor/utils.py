@@ -5,6 +5,9 @@ Utils
 from bs4 import BeautifulSoup
 
 
+FIRST_LEVEL = 'h3'
+
+
 def make_summary_in_soup(soup: BeautifulSoup) -> BeautifulSoup:
     summary_node = soup.find('summary')
     if summary_node is not None:
@@ -12,7 +15,7 @@ def make_summary_in_soup(soup: BeautifulSoup) -> BeautifulSoup:
         new_summary_node = soup.new_tag('ul')
         new_summary_node['class'] = 'summary'
 
-        for title_node in soup.find_all('h1'):
+        for title_node in soup.find_all(FIRST_LEVEL):
             node_id = 'title-{}'.format(id_node)
             title_node['id'] = node_id
             li_tag = soup.new_tag('li')
@@ -29,4 +32,4 @@ def make_summary_in_soup(soup: BeautifulSoup) -> BeautifulSoup:
 
 
 def make_summary(html: str) -> str:
-    return str(make_summary_in_soup(BeautifulSoup(html, 'lxml')))
+    return str(make_summary_in_soup(BeautifulSoup(html, 'html.parser')))

@@ -7,6 +7,7 @@ from sqlalchemy import event
 
 from AM_Nihoul_website import db, uploads_set
 from AM_Nihoul_website.base_models import BaseModel
+from AM_Nihoul_website.visitor.utils import make_summary
 
 
 class OrderableMixin:
@@ -243,6 +244,9 @@ class Newsletter(BaseModel):
             o.date_published = datetime.datetime.now()
 
         return o
+
+    def content_with_summary(self):
+        return make_summary(self.content)
 
 
 @event.listens_for(Newsletter.title, 'set', named=True)

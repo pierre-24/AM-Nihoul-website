@@ -328,10 +328,10 @@ class TestNewsletter(TestFlask):
 
     def test_make_summary_ok(self):
         titles = ['a first', 'a second']
-        input_text = '<summary></summary> <h1>{}</h1><h1>{}</h1>'.format(*titles)
+        input_text = '<summary></summary> <h3>{}</h3><h3>{}</h3>'.format(*titles)
 
         output_text = make_summary(input_text)
-        soup = BeautifulSoup(output_text, 'lxml')
+        soup = BeautifulSoup(output_text, 'html.parser')
 
         summary_list = soup.find('ul', class_='summary')
         self.assertIsNotNone(summary_list)
