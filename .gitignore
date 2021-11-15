@@ -253,6 +253,7 @@ venv
 data
 AM_Nihoul_website/static
 settings_prod.py
-client_secrets.json
+client_secret.json
 tmp.py
-gmail-token.json
+gmail_token.json
+node_modules

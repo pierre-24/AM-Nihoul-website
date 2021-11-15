@@ -1,28 +1,39 @@
 import flask
 import datetime
 import os
+import pathlib
+from bs4 import BeautifulSoup
+
+from werkzeug.datastructures import FileStorage
 
 from AM_Nihoul_website.tests import TestFlask
 from AM_Nihoul_website import db, settings, bot
-from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email, Newsletter
+from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email, Newsletter, UploadedFile, EmailImageAttachment
+from AM_Nihoul_website.admin.utils import Message
+from AM_Nihoul_website.visitor.utils import make_summary
+
+
+BASE = pathlib.Path(__file__).parent.parent
 
 
 class TestFakeMailClient(TestFlask):
     def test_fake_ok(self):
         f = bot.FakeMailClient()
 
-        subject = 'test'
-        content = 'test1325'
-        to = 'test@xyz.com'
-        sender = 'me@xyz.com'
+        message = Message(
+            recipient='test@xyz.com',
+            sender='me@xyz.com',
+            subject='test',
+            msg_html='test1325'
+        )
 
-        f.send_message(to, sender, subject, content)
+        f.send(message)
 
         with open(os.path.join(self.data_files_directory, bot.FakeMailClient.OUT)) as f:
             f_content = f.read()
-            self.assertIn(subject, f_content)
-            self.assertIn(to, f_content)
-            self.assertIn(content, f_content)
+            self.assertIn(message.subject, f_content)
+            self.assertIn(message.recipient, f_content)
+            self.assertIn(message.msg_plain, f_content)
 
 
 class TestNewsletterRecipient(TestFlask):
@@ -35,13 +46,21 @@ class TestNewsletterRecipient(TestFlask):
 
         db.session.add(self.subscribed_first_step)
         db.session.add(self.subscribed)
-        db.session.commit()
 
         self.num_recipients = NewsletterRecipient.query.count()
         self.login()
 
         # mute recaptcha
         settings.WEBPAGE_INFO['recaptcha_public_key'] = ''
+
+        # add image
+        with (BASE / './assets/images/favicon.png').open('rb') as f:
+            storage = FileStorage(stream=f, filename='favicon.png', content_type='image/png')
+            self.image = UploadedFile.create(storage, storage.filename)
+            db.session.add(self.image)
+
+        # commit everything
+        db.session.commit()
 
     def test_subscribe_first_step_ok(self):
         name = 'test3'
@@ -183,9 +202,22 @@ class TestNewsletterRecipient(TestFlask):
         db.session.add(e)
         db.session.commit()
 
+        # add attachment
+        attachment = EmailImageAttachment.create(e.id, self.image.id)
+        db.session.add(attachment)
+        db.session.commit()
+
+        # send it
         bot.bot_iteration()
 
+        # check
         self.assertTrue(Email.query.get(e.id).sent)
+
+        with open(os.path.join(self.data_files_directory, bot.FakeMailClient.OUT)) as f:
+            content = f.read()
+
+            self.assertIn(self.subscribed_first_step.email, content)
+            self.assertIn(self.image.base_file_name, content)
 
 
 class TestNewsletter(TestFlask):
@@ -193,6 +225,16 @@ class TestNewsletter(TestFlask):
     def setUp(self):
         super().setUp()
 
+        # add image
+        with (BASE / './assets/images/favicon.png').open('rb') as f:
+            storage = FileStorage(stream=f, filename='favicon.png', content_type='image/png')
+            self.image = UploadedFile.create(storage, storage.filename)
+            db.session.add(self.image)
+
+        db.session.add(self.image)
+        db.session.commit()
+
+        # add others
         self.subscribed_first_step = NewsletterRecipient.create('test1', 'x1@yz.com')
         self.subscribed = NewsletterRecipient.create('test2', 'x2@yz.com', confirmed=True)
 
@@ -201,8 +243,13 @@ class TestNewsletter(TestFlask):
 
         self.draft_newsletter = Newsletter.create('test1', 'content of test1')
         self.published_newsletter = Newsletter.create('test2', 'content of test2', draft=False)
+        self.draft_newsletter_with_image = Newsletter.create(
+            'test3',
+            'content: <img src="{p}" alt="test" /> <img src="{p}" alt="test2" />'.format(p=flask.url_for(
+                'visitor.upload-view', id=self.image.id, filename=self.image.file_name, _external=True)))
 
         db.session.add(self.draft_newsletter)
+        db.session.add(self.draft_newsletter_with_image)
         db.session.add(self.published_newsletter)
 
         db.session.commit()
@@ -211,6 +258,21 @@ class TestNewsletter(TestFlask):
         self.num_newsletter = Newsletter.query.count()
         self.num_email = Email.query.count()
         self.login()
+
+    def test_make_summary_ok(self):
+        titles = ['a first', 'a second']
+        input_text = '<summary></summary> <h3>{}</h3><h3>{}</h3>'.format(*titles)
+
+        output_text = make_summary(input_text)
+        soup = BeautifulSoup(output_text, 'html.parser')
+
+        self.assertIsNone(soup.find('summary'))
+        summary_list = soup.find('ul', class_='summary')
+        self.assertIsNotNone(summary_list)
+
+        a_tags = list(summary_list.find_all('a'))
+        self.assertEqual(len(a_tags), len(titles))
+        self.assertEqual([a.string for a in a_tags], titles)
 
     def test_create_newsletter_ok(self):
         self.assertEqual(self.num_newsletter, Newsletter.query.count())
@@ -257,6 +319,28 @@ class TestNewsletter(TestFlask):
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.draft_newsletter.title, response.get_data(as_text=True))
 
+    def test_view_draft_newsletter_with_summary_ok(self):
+        # make summary
+        titles = ['a first', 'a second']
+        input_text = '<summary></summary> <h3>{}</h3><h3>{}</h3>'.format(*titles)
+
+        self.draft_newsletter.content = input_text
+        self.db_session.add(self.draft_newsletter)
+        self.db_session.commit()
+
+        # visit (as admin)
+        response = self.client.get(flask.url_for('admin.newsletter-view', id=self.draft_newsletter.id))
+        self.assertEqual(response.status_code, 200)
+
+        soup = BeautifulSoup(response.get_data(as_text=True), 'html.parser')
+        self.assertIsNone(soup.find('summary'))
+        summary_list = soup.find('ul', class_='summary')
+        self.assertIsNotNone(summary_list)
+
+        a_tags = list(summary_list.find_all('a'))
+        self.assertEqual(len(a_tags), len(titles))
+        self.assertEqual([a.string for a in a_tags], titles)
+
     def test_view_newsletter_not_admin_ko(self):
         self.logout()
 
@@ -278,6 +362,30 @@ class TestNewsletter(TestFlask):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.published_newsletter.content, response.get_data(as_text=True))
+
+    def test_view_newsletter_with_summary_ok(self):
+        # make summary
+        titles = ['a first', 'a second']
+        input_text = '<summary></summary> <h3>{}</h3><h3>{}</h3>'.format(*titles)
+
+        self.published_newsletter.content = input_text
+        self.db_session.add(self.published_newsletter)
+        self.db_session.commit()
+
+        # visit
+        self.logout()
+        response = self.client.get(flask.url_for(
+            'visitor.newsletter-view', id=self.published_newsletter.id, slug=self.published_newsletter.slug))
+        self.assertEqual(response.status_code, 200)
+
+        soup = BeautifulSoup(response.get_data(as_text=True), 'html.parser')
+        self.assertIsNone(soup.find('summary'))
+        summary_list = soup.find('ul', class_='summary')
+        self.assertIsNotNone(summary_list)
+
+        a_tags = list(summary_list.find_all('a'))
+        self.assertEqual(len(a_tags), len(titles))
+        self.assertEqual([a.string for a in a_tags], titles)
 
     def test_visit_draft_newsletter_ko(self):
         # admin
@@ -392,6 +500,63 @@ class TestNewsletter(TestFlask):
 
         self.assertIn(n.title, e.content)
         self.assertIn(n.content, e.content)
+
+    def test_publish_newsletter_with_image_ok(self):
+        self.assertTrue(self.draft_newsletter_with_image.draft)
+
+        response = self.client.post(
+            flask.url_for('admin.newsletter-publish', id=self.draft_newsletter_with_image.id), data={'confirm': True})
+
+        self.assertEqual(response.status_code, 302)
+
+        n = Newsletter.query.get(self.draft_newsletter_with_image.id)
+        self.assertFalse(n.draft)
+
+        # check email
+        self.assertEqual(self.num_email + 1, Email.query.count())
+        e = Email.query.order_by(Email.id.desc()).first()
+        self.assertEqual(e.recipient, self.subscribed)
+
+        # check attachment
+        attachments = e.attachments()
+        self.assertEqual(len(attachments), 1)
+        self.assertEqual(attachments[0].image.id, self.image.id)
+
+        # check cid is actually used
+        self.assertIn('cid:{}'.format(self.image.file_name), e.content)
+
+    def test_publish_newsletter_summary_ok(self):
+        # add summary
+        self.assertTrue(self.draft_newsletter.draft)
+
+        titles = ['a first', 'a second']
+        input_text = '<summary></summary> <h3>{}</h3><h3>{}</h3>'.format(*titles)
+
+        self.draft_newsletter.content = input_text
+        self.db_session.add(self.draft_newsletter)
+        self.db_session.commit()
+
+        # publish
+        response = self.client.post(
+            flask.url_for('admin.newsletter-publish', id=self.draft_newsletter.id), data={'confirm': True})
+
+        self.assertEqual(response.status_code, 302)
+
+        n = Newsletter.query.get(self.draft_newsletter.id)
+        self.assertFalse(n.draft)
+
+        # check email
+        self.assertEqual(self.num_email + 1, Email.query.count())
+        e = Email.query.order_by(Email.id.desc()).first()
+
+        soup = BeautifulSoup(e.content, 'html.parser')
+        self.assertIsNone(soup.find('summary'))
+        summary_list = soup.find('ul', class_='summary')
+        self.assertIsNotNone(summary_list)
+
+        a_tags = list(summary_list.find_all('a'))
+        self.assertEqual(len(a_tags), len(titles))
+        self.assertEqual([a.string for a in a_tags], titles)
 
     def test_publish_newsletter_not_admin_ko(self):
         self.assertTrue(self.draft_newsletter.draft)

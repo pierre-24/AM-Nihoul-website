@@ -9,7 +9,7 @@ init-back:
 
 front:
 	npm i
-	npm run gulp
+	grunt
 
 init: install init-back front
 

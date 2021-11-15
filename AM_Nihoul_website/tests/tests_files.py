@@ -5,6 +5,8 @@ import base64
 from AM_Nihoul_website.visitor.models import UploadedFile
 from AM_Nihoul_website.tests import TestFlask
 
+from AM_Nihoul_website import settings
+
 
 class TestFiles(TestFlask):
 
@@ -13,6 +15,7 @@ class TestFiles(TestFlask):
 
         self.dir = os.path.dirname(os.path.abspath(__file__))
         self.file = os.path.join(self.dir, 'random_pic.jpg')
+        self.file2 = os.path.join(self.dir, 'random_pic2.png')
 
         self.num_uploads = UploadedFile.query.count()
         self.login()
@@ -52,26 +55,53 @@ class TestFiles(TestFlask):
 
         context = 'life'  # context is found in filename
 
-        with open(self.file, 'rb') as f:
+        with open(self.file2, 'rb') as f:
             b64str = base64.b64encode(f.read())
 
         response = self.client.post(
             flask.url_for('admin.image-base64') + '?context={}'.format(context), data={
-                'image': 'data:image/jpeg;base64,' + b64str.decode('utf-8'),
+                'image': 'data:image/png;base64,' + b64str.decode('utf-8'),
             })
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json['success'])
 
         self.assertEqual(UploadedFile.query.count(), self.num_uploads + 1)
 
         u = UploadedFile.query.order_by(UploadedFile.id.desc()).first()
 
         self.assertIsNotNone(u)
+        self.assertTrue(os.path.exists(u.path()))
+        self.assertIn(context, u.file_name)
+        self.assertEqual(u.possible_mime, 'image/png')
+        self.assertEqual(
+            response.json['url'], flask.url_for('visitor.upload-view', id=u.id, filename=u.file_name, _external=True))
+
+        # now, set a ridiculously low size
+        self.app_context.push()
+        sz = settings.APP_CONFIG['UPLOAD_CONVERT_TO_JPG']
+        settings.APP_CONFIG['UPLOAD_CONVERT_TO_JPG'] = 1 * 1024
+
+        response = self.client.post(
+            flask.url_for('admin.image-base64') + '?context={}'.format(context), data={
+                'image': 'data:image/png;base64,' + b64str.decode('utf-8'),
+            })
+        self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json['success'])
+
+        settings.APP_CONFIG['UPLOAD_CONVERT_TO_JPG'] = sz
+
+        self.assertEqual(UploadedFile.query.count(), self.num_uploads + 2)
+
+        u = UploadedFile.query.order_by(UploadedFile.id.desc()).first()
+
+        self.assertIsNotNone(u)
         self.assertTrue(os.path.exists(u.path()))
         self.assertIn(context, u.file_name)
         self.assertEqual(u.possible_mime, 'image/jpeg')
         self.assertEqual(
             response.json['url'], flask.url_for('visitor.upload-view', id=u.id, filename=u.file_name, _external=True))
+
+        self.app_context.pop()
 
     def test_visitor_view_ok(self):
         # upload file first (as admin)

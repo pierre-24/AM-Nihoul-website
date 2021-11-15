@@ -6,6 +6,6 @@
     <section>
     <h2>{{ newsletter.title }}</h2>
         <p class="newsletter-info">Infolettre publiée {{ newsletter.date_published|date_formatter }}{% if newsletter.date_published < newsletter.date_modified %} (dernière modification <b>{{ newsletter.date_modified|date_formatter }}</b>){% endif %}.</p>
-    {{ newsletter.content|safe }}
+    {{ newsletter.content_with_summary()|safe }}
     </section>
 {% endblock %}

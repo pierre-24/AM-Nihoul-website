@@ -30,12 +30,14 @@ APP_CONFIG = {
 
     # upload
     'UPLOADED_UPLOADS_DEST': os.path.join(DATA_DIRECTORY, 'uploads/'),
+    'UPLOAD_CONVERT_TO_JPG': 250 * 1024,
 
     # newsletter
     'REMOVE_RECIPIENTS_DELTA': timedelta(days=1),
     'NEWSLETTER_SENDER_EMAIL': 'xyz@test.com',
     'USE_FAKE_MAIL_SENDER': False,
     'LAUNCH_BOT': True,
+    'NEWSLETTER_LOGO': 'AM_Nihoul_website/assets/images/newsletter_logo.png',
 
     # scheduler
     'JOBS': [
@@ -69,7 +71,7 @@ WEBPAGE_INFO = {
     'site_name': 'Association Anne-Marie Nihoul ASBL',
     'site_description': 'aide aux malades',
     'site_keywords': 'leucémie, aide au malades',
-    'site_version': '0.4',
+    'site_version': '0.5',
 
     # external services
     'fa_kit': '',  # FontAwesome
@@ -80,6 +82,7 @@ WEBPAGE_INFO = {
 
 # limit over inscription at the newsletter
 NEWSLETTER_LIMIT = '10/hour;1 per 5 second'
+LOGIN_LIMIT = '10/hour;1 per 5 second'
 
 # Load the production settings, overwrite the existing ones if needed
 try:
