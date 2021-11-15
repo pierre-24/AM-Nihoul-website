@@ -1,3 +1,5 @@
+from bs4 import BeautifulSoup
+
 import flask
 
 from AM_Nihoul_website import db
@@ -403,6 +405,29 @@ class TestPage(TestFlask):
         response = self.client.get(flask.url_for('visitor.page-view', id=p.id, slug=p.slug))
         self.assertIn(title, response.get_data(as_text=True))
         self.assertIn(content, response.get_data(as_text=True))
+
+    def test_with_summary_ok(self):
+        # make summary
+        title = 'test'
+        titles = ['a first', 'a second']
+        content = '<summary></summary> <h3>{}</h3><h3>{}</h3>'.format(*titles)
+
+        p = Page.create(title, content)
+        db.session.add(p)
+        db.session.commit()
+
+        # admin
+        response = self.client.get(flask.url_for('visitor.page-view', id=p.id, slug=p.slug))
+        self.assertEqual(response.status_code, 200)
+
+        soup = BeautifulSoup(response.get_data(as_text=True), 'html.parser')
+        self.assertIsNone(soup.find('summary'))
+        summary_list = soup.find('ul', class_='summary')
+        self.assertIsNotNone(summary_list)
+
+        a_tags = list(summary_list.find_all('a'))
+        self.assertEqual(len(a_tags), len(titles))
+        self.assertEqual([a.string for a in a_tags], titles)
 
     def test_visitor_hidden_page_ko(self):
         title = 'a special title'
