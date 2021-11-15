@@ -639,7 +639,7 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
             )
 
             image_regex = re.compile('(?P<begin><img .*?)src="(?P<path>.*?)"(?P<end>.*?>)')
-            content = self.object.content
+            content = self.object.content_with_summary()
 
             actual_attachments = set()
             content = image_regex.sub(

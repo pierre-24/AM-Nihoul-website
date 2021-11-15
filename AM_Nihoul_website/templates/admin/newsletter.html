@@ -12,6 +12,6 @@
             <a href="{{ url_for('admin.newsletter-edit', id=newsletter.id, slug=newsletter.slug) }}">Éditer cette newsletter</a> ou
             <a href="{{ url_for('admin.newsletters') }}">revenir à la liste</a>.
         </p>
-    {{ newsletter.content|safe }}
+    {{ newsletter.content_with_summary()|safe }}
     </section>
 {% endblock %}

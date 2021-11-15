@@ -2,6 +2,7 @@ import flask
 import datetime
 import os
 import pathlib
+from bs4 import BeautifulSoup
 
 from werkzeug.datastructures import FileStorage
 
@@ -9,6 +10,7 @@ from AM_Nihoul_website.tests import TestFlask
 from AM_Nihoul_website import db, settings, bot
 from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email, Newsletter, UploadedFile, EmailImageAttachment
 from AM_Nihoul_website.admin.utils import Message
+from AM_Nihoul_website.visitor.utils import make_summary
 
 
 BASE = pathlib.Path(__file__).parent.parent
@@ -257,6 +259,21 @@ class TestNewsletter(TestFlask):
         self.num_email = Email.query.count()
         self.login()
 
+    def test_make_summary_ok(self):
+        titles = ['a first', 'a second']
+        input_text = '<summary></summary> <h3>{}</h3><h3>{}</h3>'.format(*titles)
+
+        output_text = make_summary(input_text)
+        soup = BeautifulSoup(output_text, 'html.parser')
+
+        self.assertIsNone(soup.find('summary'))
+        summary_list = soup.find('ul', class_='summary')
+        self.assertIsNotNone(summary_list)
+
+        a_tags = list(summary_list.find_all('a'))
+        self.assertEqual(len(a_tags), len(titles))
+        self.assertEqual([a.string for a in a_tags], titles)
+
     def test_create_newsletter_ok(self):
         self.assertEqual(self.num_newsletter, Newsletter.query.count())
 
@@ -302,6 +319,28 @@ class TestNewsletter(TestFlask):
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.draft_newsletter.title, response.get_data(as_text=True))
 
+    def test_view_draft_newsletter_with_summary_ok(self):
+        # make summary
+        titles = ['a first', 'a second']
+        input_text = '<summary></summary> <h3>{}</h3><h3>{}</h3>'.format(*titles)
+
+        self.draft_newsletter.content = input_text
+        self.db_session.add(self.draft_newsletter)
+        self.db_session.commit()
+
+        # visit (as admin)
+        response = self.client.get(flask.url_for('admin.newsletter-view', id=self.draft_newsletter.id))
+        self.assertEqual(response.status_code, 200)
+
+        soup = BeautifulSoup(response.get_data(as_text=True), 'html.parser')
+        self.assertIsNone(soup.find('summary'))
+        summary_list = soup.find('ul', class_='summary')
+        self.assertIsNotNone(summary_list)
+
+        a_tags = list(summary_list.find_all('a'))
+        self.assertEqual(len(a_tags), len(titles))
+        self.assertEqual([a.string for a in a_tags], titles)
+
     def test_view_newsletter_not_admin_ko(self):
         self.logout()
 
@@ -323,6 +362,30 @@ class TestNewsletter(TestFlask):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.published_newsletter.content, response.get_data(as_text=True))
+
+    def test_view_newsletter_with_summary_ok(self):
+        # make summary
+        titles = ['a first', 'a second']
+        input_text = '<summary></summary> <h3>{}</h3><h3>{}</h3>'.format(*titles)
+
+        self.published_newsletter.content = input_text
+        self.db_session.add(self.published_newsletter)
+        self.db_session.commit()
+
+        # visit
+        self.logout()
+        response = self.client.get(flask.url_for(
+            'visitor.newsletter-view', id=self.published_newsletter.id, slug=self.published_newsletter.slug))
+        self.assertEqual(response.status_code, 200)
+
+        soup = BeautifulSoup(response.get_data(as_text=True), 'html.parser')
+        self.assertIsNone(soup.find('summary'))
+        summary_list = soup.find('ul', class_='summary')
+        self.assertIsNotNone(summary_list)
+
+        a_tags = list(summary_list.find_all('a'))
+        self.assertEqual(len(a_tags), len(titles))
+        self.assertEqual([a.string for a in a_tags], titles)
 
     def test_visit_draft_newsletter_ko(self):
         # admin
@@ -461,6 +524,39 @@ class TestNewsletter(TestFlask):
 
         # check cid is actually used
         self.assertIn('cid:{}'.format(self.image.file_name), e.content)
+
+    def test_publish_newsletter_summary_ok(self):
+        # add summary
+        self.assertTrue(self.draft_newsletter.draft)
+
+        titles = ['a first', 'a second']
+        input_text = '<summary></summary> <h3>{}</h3><h3>{}</h3>'.format(*titles)
+
+        self.draft_newsletter.content = input_text
+        self.db_session.add(self.draft_newsletter)
+        self.db_session.commit()
+
+        # publish
+        response = self.client.post(
+            flask.url_for('admin.newsletter-publish', id=self.draft_newsletter.id), data={'confirm': True})
+
+        self.assertEqual(response.status_code, 302)
+
+        n = Newsletter.query.get(self.draft_newsletter.id)
+        self.assertFalse(n.draft)
+
+        # check email
+        self.assertEqual(self.num_email + 1, Email.query.count())
+        e = Email.query.order_by(Email.id.desc()).first()
+
+        soup = BeautifulSoup(e.content, 'html.parser')
+        self.assertIsNone(soup.find('summary'))
+        summary_list = soup.find('ul', class_='summary')
+        self.assertIsNotNone(summary_list)
+
+        a_tags = list(summary_list.find_all('a'))
+        self.assertEqual(len(a_tags), len(titles))
+        self.assertEqual([a.string for a in a_tags], titles)
 
     def test_publish_newsletter_not_admin_ko(self):
         self.assertTrue(self.draft_newsletter.draft)
