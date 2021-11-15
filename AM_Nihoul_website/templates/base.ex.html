@@ -64,12 +64,22 @@
     <div id="newsletter" class="jumbotron-fluid">
         <div class="container">
         <p>Pour ne rien rater, inscrivez vous à nos infolettres !</p>
-        <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post">
+        <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post" id="newsletter-form">
             {{ newsletter_form.hidden_tag() }}
             <div class="form-row">
                 <div class="col-md-5">{{ newsletter_form.name(placeholder='Prénom et nom', class_='form-control mb-2') }}</div>
                 <div class="col-md-5">{{ newsletter_form.email(placeholder='Adresse email', class_='form-control mb-2') }}</div>
-                <div class="col-md-2">{{ newsletter_form.submit_button(class_='btn btn-primary mb-2') }}</div>
+                {% if recaptcha_public_key != '' and not no_tracking %}
+                    <button id="submit_button" name="submit_button" class="btn btn-primary mb-2 g-recaptcha"
+                            data-sitekey="{{ recaptcha_public_key }}"
+                            data-action="submit"
+                            data-callback="recaptcha_submit">
+                        S'inscrire</button>
+                {% else %}
+                    <div class="col-md-2">{{ newsletter_form.submit_button(
+                        class_='btn btn-primary mb-2'
+                    ) }}</div>
+                {% endif %}
             </div>
 
         </form>
@@ -110,7 +120,7 @@
         {% if fa_kit != '' %}
             <script src="https://kit.fontawesome.com/{{ fa_kit }}.js"></script>
         {% endif %}
-        {% if gtag != '' and not no_gtag %}
+        {% if gtag != '' and not no_tracking %}
             <script src="https://cdn.jsdelivr.net/npm/cookies-eu-banner@2.0.1/dist/cookies-eu-banner.min.js"></script>
             <script>
                 new CookiesEuBanner(function () {
@@ -129,6 +139,15 @@
                         gtag('config', i);
                     })(window, document, 'script', 'https://www.googletagmanager.com/gtag/js', '{{ gtag }}');
                 }, true);
+            </script>
+        {% endif %}
+        {% if recaptcha_public_key != '' and not no_tracking %}
+            <script src="https://www.google.com/recaptcha/api.js"></script>
+            <script>
+                function recaptcha_submit(token) {
+                    let form = document.getElementById('newsletter-form');
+                    form.submit();
+                }
             </script>
         {% endif %}
     {% endblock %}

@@ -295,11 +295,26 @@ class TestPage(TestFlask):
         p = Page.query.get(self.page_with_next.id)
         self.assertEqual(p.next_id, self.protected_page.id)
 
+    def test_toggle_visibility_ok(self):
+        self.assertEqual(Page.query.count(), self.num_pages)
+
+        self.assertTrue(Page.query.get(self.protected_page.id).visible)
+
+        response = self.client.get(flask.url_for('admin.page-toggle-visibility', id=self.protected_page.id))
+        self.assertEqual(response.status_code, 302)
+
+        self.assertFalse(Page.query.get(self.protected_page.id).visible)
+
+        response = self.client.get(flask.url_for('admin.page-toggle-visibility', id=self.protected_page.id))
+        self.assertEqual(response.status_code, 302)
+
+        self.assertTrue(Page.query.get(self.protected_page.id).visible)
+
     def test_delete_page_ok(self):
         self.assertEqual(Page.query.count(), self.num_pages)
 
         response = self.client.delete(
-            flask.url_for('admin.page-delete', id=self.unprotected_page.id, slug=self.unprotected_page.slug),
+            flask.url_for('admin.page-delete', id=self.unprotected_page.id),
             follow_redirects=False)
 
         self.assertEqual(response.status_code, 302)
@@ -312,7 +327,7 @@ class TestPage(TestFlask):
         self.logout()
 
         response = self.client.delete(
-            flask.url_for('admin.page-delete', id=self.unprotected_page.id, slug=self.unprotected_page.slug),
+            flask.url_for('admin.page-delete', id=self.unprotected_page.id),
             follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
@@ -323,7 +338,7 @@ class TestPage(TestFlask):
         self.assertEqual(Page.query.count(), self.num_pages)
 
         response = self.client.delete(
-            flask.url_for('admin.page-delete', id=self.page_with_cat.id, slug=self.page_with_cat.slug),
+            flask.url_for('admin.page-delete', id=self.page_with_cat.id),
             follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
@@ -337,7 +352,7 @@ class TestPage(TestFlask):
         self.assertEqual(self.page_with_next.next_id, self.page_with_cat.id)
 
         response = self.client.delete(
-            flask.url_for('admin.page-delete', id=self.page_with_cat.id, slug=self.page_with_cat.slug),
+            flask.url_for('admin.page-delete', id=self.page_with_cat.id),
             follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
@@ -351,7 +366,7 @@ class TestPage(TestFlask):
         self.assertEqual(self.page_with_next.next_id, self.page_with_cat.id)
 
         response = self.client.delete(
-            flask.url_for('admin.page-delete', id=self.page_with_next.id, slug=self.page_with_next.slug),
+            flask.url_for('admin.page-delete', id=self.page_with_next.id),
             follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
@@ -363,7 +378,7 @@ class TestPage(TestFlask):
         self.assertEqual(Page.query.count(), self.num_pages)
 
         response = self.client.delete(
-            flask.url_for('admin.page-delete', id=self.protected_page.id, slug=self.protected_page.slug),
+            flask.url_for('admin.page-delete', id=self.protected_page.id),
             follow_redirects=False)
         self.assertEqual(response.status_code, 403)
 
@@ -388,3 +403,21 @@ class TestPage(TestFlask):
         response = self.client.get(flask.url_for('visitor.page-view', id=p.id, slug=p.slug))
         self.assertIn(title, response.get_data(as_text=True))
         self.assertIn(content, response.get_data(as_text=True))
+
+    def test_visitor_hidden_page_ko(self):
+        title = 'a special title'
+        content = 'test with a very special content: "pôtichat"!'
+
+        p = Page.create(title, content, visible=False)
+        db.session.add(p)
+        db.session.commit()
+
+        # view as admin
+        response = self.client.get(flask.url_for('visitor.page-view', id=p.id, slug=p.slug))
+        self.assertIn(title, response.get_data(as_text=True))
+        self.assertIn(content, response.get_data(as_text=True))  # ok :)
+
+        # view as visitor
+        self.logout()
+        response = self.client.get(flask.url_for('visitor.page-view', id=p.id, slug=p.slug))
+        self.assertEqual(response.status_code, 404)  # cannot view
