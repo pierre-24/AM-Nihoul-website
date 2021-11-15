@@ -68,12 +68,20 @@
                 customFormatting: {
                     dropdown: ['p', 'blockquote', 'shiftedh1', 'shiftedh2'],
                     ico: 'p'
+                },
+                summary: {
+                    fn: () => {
+                        document.execCommand('insertHTML', false, '<summary>Le sommaire sera visible ici</summary>');
+                    },
+                    title: 'Summary',
+                    tag: 'summary',
+                    ico: 'justify-full'
                 }
             },
             btns: [
                 ['viewHTML'],
                 ['undo', 'redo'], // Only supported in Blink browsers
-                ['p', 'blockquote', 'shiftedh1', 'shiftedh2'],
+                ['p', 'blockquote', 'shiftedh1', 'shiftedh2', 'summary'],
                 ['strong', 'em', 'underline'],
                 ['link', 'insertImage'],
                 ['fontsize'],
