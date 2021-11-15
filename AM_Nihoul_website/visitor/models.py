@@ -92,13 +92,19 @@ class Category(OrderableMixin, BaseModel):
         return 'Catégorie {} ({})'.format(self.id, self.name)
 
 
-class Page(BaseModel):
+class TextMixin:
+    title = db.Column(db.VARCHAR(length=150), nullable=False)
+    content = db.Column(db.Text)
+    slug = db.Column(db.VARCHAR(150), nullable=False)
+
+    def content_with_summary(self):
+        return make_summary(self.content)
+
+
+class Page(TextMixin, BaseModel):
     """Page
     """
 
-    title = db.Column(db.VARCHAR(length=150), nullable=False)
-    slug = db.Column(db.VARCHAR(150), nullable=False)
-    content = db.Column(db.Text)
     protected = db.Column(db.Boolean, default=False, nullable=False)
     visible = db.Column(db.Boolean, default=True, nullable=False)
 
@@ -117,6 +123,7 @@ class Page(BaseModel):
         o.category_id = category_id
         o.next_id = next_id
         o.visible = visible
+        o.slug = slugify.slugify(title)
 
         return o
 
@@ -222,13 +229,9 @@ class NewsletterRecipient(BaseModel):
         return s[0][:1 + n] + '***' + (s[0][n - 3:] if len(s[0]) >= 4 else '') + '@***.' + s[1].split('.')[-1]
 
 
-class Newsletter(BaseModel):
+class Newsletter(TextMixin, BaseModel):
     """Newsletter
     """
-
-    title = db.Column(db.VARCHAR(length=150), nullable=False)
-    slug = db.Column(db.VARCHAR(150), nullable=False)
-    content = db.Column(db.Text)
     draft = db.Column(db.Boolean, default=True)
     date_published = db.Column(db.DateTime)
 
@@ -244,9 +247,6 @@ class Newsletter(BaseModel):
             o.date_published = datetime.datetime.now()
 
         return o
-
-    def content_with_summary(self):
-        return make_summary(self.content)
 
 
 @event.listens_for(Newsletter.title, 'set', named=True)
