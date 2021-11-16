@@ -426,7 +426,7 @@ class UploadBase64(AdminBaseMixin, View):
         if len(im) > settings.APP_CONFIG['UPLOAD_CONVERT_TO_JPG']:
             image = Image.open(io.BytesIO(im))
             source_fp = io.BytesIO()
-            image.convert('RGB')  # strip transparency
+            image = image.convert('RGB')  # strip transparency
             image.save(source_fp, format='jpeg')
             ext = 'jpg'
             source_fp.seek(0)  # rewind
