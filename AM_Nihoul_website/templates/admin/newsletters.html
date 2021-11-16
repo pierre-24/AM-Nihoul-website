@@ -23,6 +23,7 @@
                 </td>
                 <td class="right">
                     <span class="buttons">
+                        <a class="button-like" href="{{ url_for('admin.newsletter-cleanup', id=newsletter.id) }}"><span class="fas fa-broom"></span></a>
                         <a class="button-like" href="{{ url_for('admin.newsletter-edit', id=newsletter.id, slug=newsletter.slug) }}"><span class="fas fa-pen-square"></span></a>
                         {%  if newsletter.draft %}
                             <a class="button-like" href="#publishNewsletter{{ newsletter.id }}" data-toggle="modal"><span class="fas fa-check-square"></span></a>
