@@ -1,3 +1,4 @@
+import bs4
 import flask
 from flask import Blueprint, jsonify
 from flask.views import View
@@ -5,6 +6,7 @@ import flask_login
 from flask_login import login_required
 from flask_uploads import UploadNotAllowed
 from PIL import Image
+from bs4 import BeautifulSoup
 
 from sqlalchemy import func
 
@@ -597,6 +599,81 @@ class NewsletterDeleteView(AdminBaseMixin, DeleteObjectView):
 
 admin_blueprint.add_url_rule(
     '/infolettre-suppression-<int:id>.html', view_func=NewsletterDeleteView.as_view('newsletter-delete'))
+
+
+class NewsletterCleanupView(ObjectManagementMixin, View):
+    model = Newsletter
+    decorators = [login_required]
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        soup = BeautifulSoup(self.object.content, 'html.parser')
+
+        def clean_style(tag):
+            # clean up style
+            if type(tag) in [bs4.Tag, bs4.BeautifulSoup]:
+                for c in tag.children:
+                    clean_style(c)
+
+                if 'style' in tag.attrs:
+                    previous_styles = tag['style'].split(';')
+                    final_styles = []
+
+                    for style_def in previous_styles:
+                        if style_def.strip() != '':
+                            name, val = style_def.split(':')
+                            name = name.strip()
+                            if name == 'text-align' or (name == 'font-size' and '%' in val):
+                                final_styles.append('{}: {}'.format(name, val.strip()))
+
+                    if len(final_styles) > 0:
+                        tag['style'] = ';'.join(final_styles)
+                    else:
+                        del tag.attrs['style']
+
+                if 'align' in tag.attrs:
+                    del tag.attrs['align']
+
+        def clean_unwanted(tag):
+            # clean up unwanted
+            if type(tag) in [bs4.Tag, bs4.BeautifulSoup]:
+                for c in tag.children:
+                    clean_unwanted(c)
+                if tag.name == 'font':
+                    tag.unwrap()
+                elif tag.name == 'span' and len(tag.attrs) == 0:
+                    tag.unwrap()
+
+        def clean_empty(tag):
+            # clean empty
+            if type(tag) in [bs4.Tag, bs4.BeautifulSoup]:
+                for c in tag.children:
+                    clean_empty(c)
+                if tag.name in ['p', 'blockquote', 'h3', 'h4', 'strong', 'em', 'u', 'a']:
+                    if len(tag.contents) == 0 or (len(tag.contents) == 1 and tag.contents[0].name == 'br'):
+                        tag.unwrap()
+
+        # do it:
+        clean_style(soup)
+        clean_unwanted(soup)
+        clean_empty(soup)
+
+        self.object.content = str(soup)
+        db.session.add(self.object)
+        db.session.commit()
+
+        flask.flash('Le code a été nettoyé!')
+        return flask.redirect(flask.url_for('admin.newsletters'))
+
+    def dispatch_request(self, *args, **kwargs):
+        if flask.request.method == 'GET':
+            return self.get(*args, **kwargs)
+        else:
+            flask.abort(403)
+
+
+admin_blueprint.add_url_rule(
+    '/infolettre-nettoyage-<int:id>.html', view_func=NewsletterCleanupView.as_view('newsletter-cleanup'))
 
 
 class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
