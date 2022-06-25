@@ -264,7 +264,7 @@ class CategoriesView(AdminBaseMixin, FormView):
         ctx = super().get_context_data(*args, **kwargs)
 
         # fetch list of category
-        ctx['categories'] = Category.query.order_by(Category.order).all()
+        ctx['categories'] = Category.ordered_items()
         return ctx
 
     def form_valid(self, form):
