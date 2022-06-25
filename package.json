@@ -8,7 +8,7 @@
     "gulp": "node ./node_modules/gulp/bin/gulp.js"
   },
   "dependencies": {
-    "grunt": "^1.4.1",
+    "grunt": "^1.5.3",
     "grunt-cli": "^1.4.3",
     "grunt-contrib-jshint": "^3.1.1",
     "grunt-contrib-less": "^3.0.0",
