@@ -274,6 +274,19 @@ class TestNewsletter(TestFlask):
         self.assertEqual(len(a_tags), len(titles))
         self.assertEqual([a.string for a in a_tags], titles)
 
+    def test_make_summary_repetitive_title_ok(self):
+        titles = ['repetitive', 'repetitive', 'repetitive']
+        input_text = '<summary></summary> <h3>{}</h3><h3>{}</h3><h3>{}</h3>'.format(*titles)
+
+        output_text = make_summary(input_text)
+        soup = BeautifulSoup(output_text, 'html.parser')
+        summary_list = soup.find('ul', class_='summary')
+        a_tags = list(summary_list.find_all('a'))
+
+        links = [a['href'] for a in a_tags]
+        for link in links:
+            self.assertEqual(links.count(link), 1)
+
     def test_make_summary_page_link_ok(self):
         titles = ['a first', 'a second']
         link = 'test.html'
