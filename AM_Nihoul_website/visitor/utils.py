@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 FIRST_LEVEL = 'h3'
 
 
-def make_summary_in_soup(soup: BeautifulSoup) -> BeautifulSoup:
+def make_summary_in_soup(soup: BeautifulSoup, page_link: str = '') -> BeautifulSoup:
     summary_node = soup.find('summary')
     if summary_node is not None:
         id_node = 1
@@ -20,7 +20,7 @@ def make_summary_in_soup(soup: BeautifulSoup) -> BeautifulSoup:
             title_node['id'] = node_id
             li_tag = soup.new_tag('li')
             a_tag = soup.new_tag('a')
-            a_tag['href'] = '#{}'.format(node_id)
+            a_tag['href'] = '{}#{}'.format(page_link, node_id)
             a_tag.contents = title_node.contents
             li_tag.append(a_tag)
             new_summary_node.append(li_tag)
@@ -31,5 +31,5 @@ def make_summary_in_soup(soup: BeautifulSoup) -> BeautifulSoup:
     return soup
 
 
-def make_summary(html: str) -> str:
-    return str(make_summary_in_soup(BeautifulSoup(html, 'html.parser')))
+def make_summary(html: str, page_link: str = '') -> str:
+    return str(make_summary_in_soup(BeautifulSoup(html, 'html.parser'), page_link))

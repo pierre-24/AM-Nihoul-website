@@ -274,6 +274,18 @@ class TestNewsletter(TestFlask):
         self.assertEqual(len(a_tags), len(titles))
         self.assertEqual([a.string for a in a_tags], titles)
 
+    def test_make_summary_page_link_ok(self):
+        titles = ['a first', 'a second']
+        link = 'test.html'
+        input_text = '<summary></summary> <h3>{}</h3><h3>{}</h3>'.format(*titles)
+
+        output_text = make_summary(input_text, page_link=link)
+        soup = BeautifulSoup(output_text, 'html.parser')
+        summary_list = soup.find('ul', class_='summary')
+        a_tags = list(summary_list.find_all('a'))
+
+        self.assertTrue(all(link in a['href'] for a in a_tags))
+
     def test_create_newsletter_ok(self):
         self.assertEqual(self.num_newsletter, Newsletter.query.count())
 
