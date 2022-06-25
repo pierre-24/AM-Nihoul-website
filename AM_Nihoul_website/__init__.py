@@ -10,7 +10,7 @@ import flask_uploads
 from flask_uploads import UploadSet, configure_uploads
 import flask_login
 from flask_apscheduler import APScheduler
-from flask_bootstrap import Bootstrap
+from flask_bootstrap import Bootstrap4
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_alembic import Alembic
@@ -24,7 +24,7 @@ db = SQLAlchemy(session_options={'expire_on_commit': False})
 uploads_set = UploadSet('uploads', flask_uploads.DEFAULTS)
 login_manager = flask_login.LoginManager()
 scheduler = APScheduler()
-bootstrap = Bootstrap()
+bootstrap = Bootstrap4()
 alembic = Alembic()
 limiter = Limiter(key_func=get_remote_address)
 
