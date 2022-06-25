@@ -97,8 +97,8 @@ class TextMixin:
     content = db.Column(db.Text)
     slug = db.Column(db.VARCHAR(150), nullable=False)
 
-    def content_with_summary(self):
-        return make_summary(self.content)
+    def content_with_summary(self, link_page: str = ''):
+        return make_summary(self.content, link_page)
 
 
 class Page(TextMixin, BaseModel):

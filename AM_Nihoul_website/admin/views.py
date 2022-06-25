@@ -717,7 +717,9 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
             )
 
             image_regex = re.compile('(?P<begin><img .*?)src="(?P<path>.*?)"(?P<end>.*?>)')
-            content = self.object.content_with_summary()
+            content = self.object.content_with_summary(
+                link_page=flask.url_for(
+                    'visitor.newsletter-view', id=self.object.id, slug=self.object.slug, _external=True))
 
             actual_attachments = set()
             content = image_regex.sub(
