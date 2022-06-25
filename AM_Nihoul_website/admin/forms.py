@@ -70,3 +70,10 @@ class MenuEditForm(FlaskForm):
     id_menu = f.IntegerField(widget=f.widgets.HiddenInput(), default=-1)
 
     submit_button = f.SubmitField('Enregistrer')
+
+
+class BlockEditForm(FlaskForm):
+    content = f.TextAreaField('Contenu', widget=TrumbowygTextarea())
+    attributes = f.StringField('Classes HTML')
+
+    submit_button = f.SubmitField('Enregistrer')

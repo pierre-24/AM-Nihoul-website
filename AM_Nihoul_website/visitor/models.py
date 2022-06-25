@@ -328,7 +328,7 @@ class Block(OrderableMixin, BaseModel):
     def create(cls, text: str, attributes=''):
         o = cls()
         o.text = text
-        o.attributes = ''
+        o.attributes = attributes
 
         # set order
         last_m = Block.ordered_items(desc=True).first()
