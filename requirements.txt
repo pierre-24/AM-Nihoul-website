@@ -30,12 +30,23 @@ dnspython==2.1.0
     # via email-validator
 email-validator==1.1.3
     # via -r requirements/requirements-base.in
-flake8-quotes==3.3.1
-    # via -r requirements/requirements.in
 flake8==4.0.1
     # via
     #   -r requirements/requirements.in
     #   flake8-quotes
+flake8-quotes==3.3.1
+    # via -r requirements/requirements.in
+flask==2.0.2
+    # via
+    #   -r requirements/requirements-base.in
+    #   bootstrap-flask
+    #   flask-alembic
+    #   flask-apscheduler
+    #   flask-limiter
+    #   flask-login
+    #   flask-sqlalchemy
+    #   flask-uploads
+    #   flask-wtf
 flask-alembic==2.0.1
     # via -r requirements/requirements-base.in
 flask-apscheduler==1.12.2
@@ -48,32 +59,21 @@ flask-sqlalchemy==2.5.1
     # via
     #   -r requirements/requirements-base.in
     #   flask-alembic
-git+https://github.com/maxcountryman/flask-uploads.git@f66d7dc93e684fa0a3a4350a38e41ae00483a796
+flask-uploads @ git+https://github.com/maxcountryman/flask-uploads.git@f66d7dc93e684fa0a3a4350a38e41ae00483a796
     # via -r requirements/requirements-base.in
 flask-wtf==0.15.1
     # via -r requirements/requirements-base.in
-flask==2.0.2
-    # via
-    #   -r requirements/requirements-base.in
-    #   bootstrap-flask
-    #   flask-alembic
-    #   flask-apscheduler
-    #   flask-limiter
-    #   flask-login
-    #   flask-sqlalchemy
-    #   flask-uploads
-    #   flask-wtf
 google-api-core==2.1.1
     # via google-api-python-client
 google-api-python-client==2.27.0
     # via simplegmail
-google-auth-httplib2==0.1.0
-    # via google-api-python-client
 google-auth==2.3.0
     # via
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
+google-auth-httplib2==0.1.0
+    # via google-api-python-client
 googleapis-common-protos==1.53.0
     # via google-api-core
 greenlet==1.1.2
@@ -115,21 +115,21 @@ mccabe==0.6.1
     # via flake8
 oauth2client==4.1.3
     # via simplegmail
-pillow==8.4.0
+pillow==9.0.1
     # via -r requirements/requirements-base.in
 protobuf==3.19.0
     # via
     #   google-api-core
     #   googleapis-common-protos
-pyasn1-modules==0.2.8
-    # via
-    #   google-auth
-    #   oauth2client
 pyasn1==0.4.8
     # via
     #   oauth2client
     #   pyasn1-modules
     #   rsa
+pyasn1-modules==0.2.8
+    # via
+    #   google-auth
+    #   oauth2client
 pycodestyle==2.8.0
     # via
     #   autopep8
@@ -168,14 +168,14 @@ six==1.16.0
     #   sqlalchemy-utils
 soupsieve==2.2.1
     # via beautifulsoup4
-sqlalchemy-utils==0.37.9
-    # via -r requirements/requirements-base.in
 sqlalchemy==1.4.26
     # via
     #   alembic
     #   flask-alembic
     #   flask-sqlalchemy
     #   sqlalchemy-utils
+sqlalchemy-utils==0.37.9
+    # via -r requirements/requirements-base.in
 text-unidecode==1.3
     # via python-slugify
 toml==0.10.2
