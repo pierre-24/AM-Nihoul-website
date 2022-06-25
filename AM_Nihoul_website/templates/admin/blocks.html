@@ -1,0 +1,34 @@
+{% extends "admin/base.ex.html" %}
+{% from "helpers.inc.html" import create_delete_modal, create_modal %}
+{% from 'bootstrap/form.html' import render_field %}
+
+{% set admin_current = 'blocks' %}
+
+{% block page_title %}Gestion des blocs{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Gestion des blocs</h2>
+
+    <p>
+        <a class="button-like" href="{{ url_for('admin.block-create') }}"><span class="fas fa-plus"></span> Ajouter un bloc</a>
+    </p>
+    </section>
+    <div class="row gy-5" id="admin-row-block">
+        {% for block in blocks %}
+            <div class="{{ block.attributes }}">
+                <div class="block">
+                    <div class="buttons">
+                        <a class="button-like" href="{{ url_for('admin.block-edit', id=block.id) }}"><span class="fas fa-pen-square"></span></a>
+                        <a class="button-like" href="{{ url_for('admin.block-move', id=block.id, action='down') }}"><span class="fas fa-caret-square-up"></span></a>
+                        <a class="button-like" href="{{ url_for('admin.block-move', id=block.id, action='up') }}"><span class="fas fa-caret-square-down"></span></a>
+                        <a class="button-like" href="#delete-block-{{ block.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
+                        {{ create_delete_modal('block', block.id, 'le bloc sélectionné', 'admin.block-delete') }}
+                    </div>
+
+                    {{ block.text|safe }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

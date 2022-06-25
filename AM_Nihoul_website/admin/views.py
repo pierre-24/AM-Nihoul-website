@@ -871,12 +871,12 @@ class BlockEditView(ObjectManagementMixin, AdminBaseMixin, FormView):
 
     def get_form_kwargs(self):
         return {
-            'content': self.object.content,
+            'content': self.object.text,
             'attributes': self.object.attributes
         }
 
     def form_valid(self, form):
-        self.object.content = form.content.data
+        self.object.text = form.content.data
         self.object.attributes = form.attributes.data
 
         db.session.add(self.object)
