@@ -14,7 +14,8 @@
         <a class="button-like" href="{{ url_for('admin.block-create') }}"><span class="fas fa-plus"></span> Ajouter un bloc</a>
     </p>
     </section>
-    <div class="row gy-5" id="admin-row-block">
+
+    <div class="row" id="admin-row-block">
         {% for block in blocks %}
             <div class="{{ block.attributes }}">
                 <div class="block">

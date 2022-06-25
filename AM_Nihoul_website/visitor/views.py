@@ -6,7 +6,7 @@ import requests
 
 from AM_Nihoul_website import db, settings, limiter
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
-from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email
+from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email, Block
 from AM_Nihoul_website.visitor.forms import NewsletterForm
 
 visitor_blueprint = Blueprint('visitor', __name__)
@@ -20,6 +20,7 @@ class IndexView(BaseMixin, RenderTemplateView):
         ctx = super().get_context_data(*args, **kwargs)
 
         ctx['content'] = Page.query.get(settings.APP_CONFIG['PAGES']['visitor_index'])
+        ctx['blocks'] = Block.ordered_items()
         ctx['latest_newsletters'] = Newsletter.query\
             .filter(Newsletter.draft.is_(False))\
             .order_by(Newsletter.date_published.desc())\

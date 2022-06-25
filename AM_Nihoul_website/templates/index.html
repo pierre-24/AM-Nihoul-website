@@ -8,6 +8,16 @@
     {{ content.content|safe }}
     </section>
 
+    <div class="row" id="admin-row-block">
+        {% for block in blocks %}
+            <div class="{{ block.attributes }}">
+                <div class="block">
+                    {{ block.text|safe }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
     {% if latest_newsletters|length > 0 %}
 
     <section>
