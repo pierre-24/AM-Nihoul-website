@@ -247,10 +247,13 @@ class TestNewsletter(TestFlask):
             'test3',
             'content: <img src="{p}" alt="test" /> <img src="{p}" alt="test2" />'.format(p=flask.url_for(
                 'visitor.upload-view', id=self.image.id, filename=self.image.file_name, _external=True)))
+        self.draft_newsletter_with_summary = Newsletter.create(
+            'test4', '<summary></summary> <h1>test</h1> content of test4')
 
         db.session.add(self.draft_newsletter)
         db.session.add(self.draft_newsletter_with_image)
         db.session.add(self.published_newsletter)
+        db.session.add(self.draft_newsletter_with_summary)
 
         db.session.commit()
 
@@ -556,6 +559,8 @@ class TestNewsletter(TestFlask):
 
         titles = ['a first', 'a second']
         input_text = '<summary></summary> <h3>{}</h3><h3>{}</h3>'.format(*titles)
+        link = flask.url_for(
+            'visitor.newsletter-view', id=self.draft_newsletter.id, slug=self.draft_newsletter.slug, _external=True)
 
         self.draft_newsletter.content = input_text
         self.db_session.add(self.draft_newsletter)
@@ -582,6 +587,7 @@ class TestNewsletter(TestFlask):
         a_tags = list(summary_list.find_all('a'))
         self.assertEqual(len(a_tags), len(titles))
         self.assertEqual([a.string for a in a_tags], titles)
+        self.assertTrue(all(link in a['href'] for a in a_tags))
 
     def test_publish_newsletter_not_admin_ko(self):
         self.assertTrue(self.draft_newsletter.draft)
