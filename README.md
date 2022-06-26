@@ -4,6 +4,8 @@
 
 Mise au gout du jour du site web [http://annemarienihoul.be/](http://annemarienihoul.be/).
 
+Version: 0.5.0
+
 # Installation
 
 ```bash
@@ -61,6 +63,9 @@ Pour l'envoi des emails, le code utilise [`simplegmail`](https://github.com/jere
 
 ```bash
 make sync # mettre à jour les dépendances du back
-flask db upgrade  # mettre à jour la BDD
-make front # mettre à jour et reconstruire le front
+make front  # reconstruire front
+
+ # mettre à jour la BDD
+export FLASK_APP=AM_Nihoul_website
+flask db upgrade 
 ```

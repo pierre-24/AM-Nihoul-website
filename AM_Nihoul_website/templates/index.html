@@ -8,12 +8,22 @@
     {{ content.content|safe }}
     </section>
 
+    <div class="row" id="admin-row-block">
+        {% for block in blocks %}
+            <div class="{{ block.attributes }}">
+                <div class="block">
+                    {{ block.text|safe }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
     {% if latest_newsletters|length > 0 %}
 
     <section>
     {% with newsletter = latest_newsletters[0] %}
     <h2>{{ newsletter.title }}</h2>
-    {{ newsletter.content|safe }}
+    {{ newsletter.content_with_summary()|safe }}
     {% endwith %}
 
     {% if latest_newsletters|length > 1 %}

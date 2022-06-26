@@ -1,0 +1,30 @@
+{% extends "admin/base.ex.html" %}
+{% from 'bootstrap/form.html' import render_field %}
+{% from 'helpers.inc.html' import include_editor %}
+
+{% set admin_current = 'block' %}
+
+{% block page_title %}Modification d'un bloc{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Modification d'un bloc</h2>
+    <form method="post">
+        {{ form.hidden_tag() }}
+        {{ render_field(form.content) }}
+        {{ render_field(form.attributes) }}
+        {{ render_field(form.submit_button) }}
+    </form>
+    </section>
+{% endblock %}
+
+{# add editor #}
+{% block scripts %}
+    {{ super() }}
+    {{ include_editor('block') }}
+{% endblock %}
+
+
+{% block other_head_stuffs %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.21.0/ui/trumbowyg.min.css">
+{% endblock %}

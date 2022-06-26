@@ -97,8 +97,8 @@ class TextMixin:
     content = db.Column(db.Text)
     slug = db.Column(db.VARCHAR(150), nullable=False)
 
-    def content_with_summary(self):
-        return make_summary(self.content)
+    def content_with_summary(self, link_page: str = ''):
+        return make_summary(self.content, link_page)
 
 
 class Page(TextMixin, BaseModel):
@@ -316,3 +316,22 @@ class MenuEntry(OrderableMixin, BaseModel):
 
     def down(self):
         super().down()
+
+
+class Block(OrderableMixin, BaseModel):
+    """Simple block of text for the home page"""
+
+    text = db.Column(db.Text(), nullable=False)
+    attributes = db.Column(db.Text())
+
+    @classmethod
+    def create(cls, text: str, attributes=''):
+        o = cls()
+        o.text = text
+        o.attributes = attributes
+
+        # set order
+        last_m = Block.ordered_items(desc=True).first()
+        o.order = last_m.order + 1 if last_m else 0
+
+        return o

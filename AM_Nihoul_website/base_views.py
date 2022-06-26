@@ -182,10 +182,10 @@ class BaseMixin:
         from AM_Nihoul_website.visitor.models import Page, Category, MenuEntry
 
         # top menu
-        ctx['menus'] = MenuEntry.query.order_by(MenuEntry.order).all()
+        ctx['menus'] = MenuEntry.ordered_items()
 
         # bottom menu
-        categories = Category.query.order_by(Category.order).all()
+        categories = Category.ordered_items()
         pages = Page.query.filter(Page.category_id.isnot(None)).all()
 
         cats = {}

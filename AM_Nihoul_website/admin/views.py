@@ -1,3 +1,4 @@
+import bs4
 import flask
 from flask import Blueprint, jsonify
 from flask.views import View
@@ -5,6 +6,7 @@ import flask_login
 from flask_login import login_required
 from flask_uploads import UploadNotAllowed
 from PIL import Image
+from bs4 import BeautifulSoup
 
 from sqlalchemy import func
 
@@ -19,9 +21,9 @@ from AM_Nihoul_website import settings, db, User, limiter
 from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteObjectView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm, \
-    NewsletterPublishForm, MenuEditForm
+    NewsletterPublishForm, MenuEditForm, BlockEditForm
 from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient, Newsletter, Email, \
-    MenuEntry, EmailImageAttachment
+    MenuEntry, EmailImageAttachment, Block
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -262,7 +264,7 @@ class CategoriesView(AdminBaseMixin, FormView):
         ctx = super().get_context_data(*args, **kwargs)
 
         # fetch list of category
-        ctx['categories'] = Category.query.order_by(Category.order).all()
+        ctx['categories'] = Category.ordered_items()
         return ctx
 
     def form_valid(self, form):
@@ -309,9 +311,9 @@ admin_blueprint.add_url_rule(
     '/catégorie-suppression-<int:id>.html', view_func=CategoryDeleteView.as_view('category-delete'))
 
 
-class CategoryMoveView(AdminBaseMixin, ObjectManagementMixin, View):
+class BaseMoveView(AdminBaseMixin, ObjectManagementMixin, View):
+    redirect_url = ''
     methods = ['GET']
-    model = Category
 
     def get(self, *args, **kwargs):
         self.get_object_or_abort(*args, **kwargs)
@@ -324,13 +326,18 @@ class CategoryMoveView(AdminBaseMixin, ObjectManagementMixin, View):
         else:
             flask.abort(403)
 
-        return flask.redirect(flask.url_for('admin.categories'))
+        return flask.redirect(flask.url_for(self.redirect_url))
 
     def dispatch_request(self, *args, **kwargs):
         if flask.request.method == 'GET':
             return self.get(*args, **kwargs)
         else:
             flask.abort(403)
+
+
+class CategoryMoveView(BaseMoveView):
+    model = Category
+    redirect_url = 'admin.categories'
 
 
 admin_blueprint.add_url_rule(
@@ -424,6 +431,7 @@ class UploadBase64(AdminBaseMixin, View):
         if len(im) > settings.APP_CONFIG['UPLOAD_CONVERT_TO_JPG']:
             image = Image.open(io.BytesIO(im))
             source_fp = io.BytesIO()
+            image = image.convert('RGB')  # strip transparency
             image.save(source_fp, format='jpeg')
             ext = 'jpg'
             source_fp.seek(0)  # rewind
@@ -599,6 +607,80 @@ admin_blueprint.add_url_rule(
     '/infolettre-suppression-<int:id>.html', view_func=NewsletterDeleteView.as_view('newsletter-delete'))
 
 
+class NewsletterCleanupView(AdminBaseMixin, ObjectManagementMixin, View):
+    model = Newsletter
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        soup = BeautifulSoup(self.object.content, 'html.parser')
+
+        def clean_style(tag):
+            # clean up style
+            if type(tag) in [bs4.Tag, bs4.BeautifulSoup]:
+                for c in tag.children:
+                    clean_style(c)
+
+                if 'style' in tag.attrs:
+                    previous_styles = tag['style'].split(';')
+                    final_styles = []
+
+                    for style_def in previous_styles:
+                        if style_def.strip() != '':
+                            name, val = style_def.split(':')
+                            name = name.strip()
+                            if name == 'text-align' or (name == 'font-size' and '%' in val):
+                                final_styles.append('{}: {}'.format(name, val.strip()))
+
+                    if len(final_styles) > 0:
+                        tag['style'] = ';'.join(final_styles)
+                    else:
+                        del tag.attrs['style']
+
+                if 'align' in tag.attrs:
+                    del tag.attrs['align']
+
+        def clean_unwanted(tag):
+            # clean up unwanted
+            if type(tag) in [bs4.Tag, bs4.BeautifulSoup]:
+                for c in tag.children:
+                    clean_unwanted(c)
+                if tag.name == 'font':
+                    tag.unwrap()
+                elif tag.name == 'span' and len(tag.attrs) == 0:
+                    tag.unwrap()
+
+        def clean_empty(tag):
+            # clean empty
+            if type(tag) in [bs4.Tag, bs4.BeautifulSoup]:
+                for c in tag.children:
+                    clean_empty(c)
+                if tag.name in ['p', 'blockquote', 'h3', 'h4', 'strong', 'em', 'u', 'a']:
+                    if len(tag.contents) == 0 or (len(tag.contents) == 1 and tag.contents[0].name == 'br'):
+                        tag.unwrap()
+
+        # do it:
+        clean_style(soup)
+        clean_unwanted(soup)
+        clean_empty(soup)
+
+        self.object.content = str(soup)
+        db.session.add(self.object)
+        db.session.commit()
+
+        flask.flash('Le code a été nettoyé!')
+        return flask.redirect(flask.url_for('admin.newsletters'))
+
+    def dispatch_request(self, *args, **kwargs):
+        if flask.request.method == 'GET':
+            return self.get(*args, **kwargs)
+        else:
+            flask.abort(403)
+
+
+admin_blueprint.add_url_rule(
+    '/infolettre-nettoyage-<int:id>.html', view_func=NewsletterCleanupView.as_view('newsletter-cleanup'))
+
+
 class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
     form_class = NewsletterPublishForm
     model = Newsletter
@@ -639,7 +721,9 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
             )
 
             image_regex = re.compile('(?P<begin><img .*?)src="(?P<path>.*?)"(?P<end>.*?>)')
-            content = self.object.content_with_summary()
+            content = self.object.content_with_summary(
+                link_page=flask.url_for(
+                    'visitor.newsletter-view', id=self.object.id, slug=self.object.slug, _external=True))
 
             actual_attachments = set()
             content = image_regex.sub(
@@ -712,11 +796,6 @@ class MenuEditView(AdminBaseMixin, FormView, RenderTemplateView):
     template_name = 'admin/menus.html'
     form_class = MenuEditForm
 
-    def get_context_data(self, *args, **kwargs):
-        ctx = super().get_context_data(*args, **kwargs)
-
-        return ctx
-
     def form_valid(self, form):
         if form.is_create.data:
             c = MenuEntry.create(form.text.data, form.url.data)
@@ -752,29 +831,101 @@ admin_blueprint.add_url_rule(
     '/menu-suppression-<int:id>.html', view_func=MenuDeleteView.as_view('menu-delete'))
 
 
-class MenuMoveView(AdminBaseMixin, ObjectManagementMixin, View):
-    methods = ['GET']
+class MenuMoveView(BaseMoveView):
     model = MenuEntry
-
-    def get(self, *args, **kwargs):
-        self.get_object_or_abort(*args, **kwargs)
-        action = kwargs.get('action')
-
-        if action == 'up':
-            self.object.up()
-        elif action == 'down':
-            self.object.down()
-        else:
-            flask.abort(403)
-
-        return flask.redirect(flask.url_for('admin.menus'))
-
-    def dispatch_request(self, *args, **kwargs):
-        if flask.request.method == 'GET':
-            return self.get(*args, **kwargs)
-        else:
-            flask.abort(403)
+    redirect_url = 'admin.menus'
 
 
 admin_blueprint.add_url_rule(
     '/menu-mouvement-<string:action>-<int:id>.html', view_func=MenuMoveView.as_view('menu-move'))
+
+
+# -- Blocks
+class BlocksView(AdminBaseMixin, RenderTemplateView):
+    template_name = 'admin/blocks.html'
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        # fetch blocks
+        ctx['blocks'] = Block.ordered_items()
+
+        return ctx
+
+
+admin_blueprint.add_url_rule('/blocs.html', view_func=BlocksView.as_view(name='blocks'))
+
+
+class BlockEditView(ObjectManagementMixin, AdminBaseMixin, FormView):
+    template_name = 'admin/block-edit.html'
+    form_class = BlockEditForm
+    model = Block
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().post(*args, **kwargs)
+
+    def get_form_kwargs(self):
+        return {
+            'content': self.object.text,
+            'attributes': self.object.attributes
+        }
+
+    def form_valid(self, form):
+        self.object.text = form.content.data
+        self.object.attributes = form.attributes.data
+
+        db.session.add(self.object)
+        db.session.commit()
+
+        flask.flash('Bloc modifié.')
+
+        self.success_url = flask.url_for('admin.blocks')
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule(
+    '/bloc-edition-<int:id>.html', view_func=BlockEditView.as_view(name='block-edit'))
+
+
+class BlockCreateView(AdminBaseMixin, FormView):
+    template_name = 'admin/block-edit.html'
+    form_class = BlockEditForm
+
+    def form_valid(self, form):
+        block = Block.create(form.content.data, form.attributes.data)
+
+        db.session.add(block)
+        db.session.commit()
+
+        flask.flash('Bloc créé.')
+
+        self.success_url = flask.url_for('admin.blocks')
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule('/bloc-nouveau.html', view_func=BlockCreateView.as_view(name='block-create'))
+
+
+class BlockDeleteView(AdminBaseMixin, DeleteObjectView):
+    model = Block
+
+    def post_deletion(self, obj):
+        self.success_url = flask.url_for('admin.blocks')
+        flask.flash('Bloc supprimé.')
+
+
+admin_blueprint.add_url_rule('/bloc-suppression-<int:id>.html', view_func=BlockDeleteView.as_view('block-delete'))
+
+
+class BlockMoveView(BaseMoveView):
+    model = Block
+    redirect_url = 'admin.blocks'
+
+
+admin_blueprint.add_url_rule(
+    '/bloc-mouvement-<string:action>-<int:id>.html', view_func=BlockMoveView.as_view('block-move'))
