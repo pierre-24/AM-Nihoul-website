@@ -71,7 +71,7 @@ WEBPAGE_INFO = {
     'site_name': 'Association Anne-Marie Nihoul ASBL',
     'site_description': 'aide aux malades',
     'site_keywords': 'leucémie, aide au malades',
-    'site_version': '0.6.3',
+    'site_version': '0.6.4',
 
     # external services
     'fa_kit': '',  # FontAwesome
