@@ -21,7 +21,7 @@ from AM_Nihoul_website.base_filters import filters
 
 # init modules
 db = SQLAlchemy(session_options={'expire_on_commit': False})
-uploads_set = UploadSet('uploads', flask_uploads.DEFAULTS)
+uploads_set = UploadSet('uploads', flask_uploads.DEFAULTS + ('gpx', ))
 login_manager = flask_login.LoginManager()
 scheduler = APScheduler()
 bootstrap = Bootstrap4()

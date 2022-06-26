@@ -150,11 +150,16 @@ class UploadedFile(BaseModel):
         try:
             import magic
             mime = magic.Magic(mime=True)
-            return mime.from_file(path)
+            mime_type = mime.from_file(path)
         except ImportError:
             import mimetypes
             mime = mimetypes.MimeTypes()
-            return mime.guess_type(path)[0]
+            mime_type = mime.guess_type(path)[0]
+
+        if mime_type is None:
+            mime_type = 'application/octet-stream'
+
+        return mime_type
 
     @classmethod
     def create(cls, uploaded, filename, description=None):
