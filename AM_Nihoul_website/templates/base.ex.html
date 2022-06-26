@@ -104,7 +104,7 @@
 
         <div id="bottom-txt" class="mt-2">
             &copy; {{ site_name }}
-            &bull; Site web par <a href="{{ author_url }}">{{ author_name }}</a>  (version: <a href="{{ repo_url }}">{{ site_version }}</a>)
+            &bull; Site web par <a href="{{ author_url }}">{{ author_name }}</a>  (version: <a href="{{ repo_url }}/tree/v{{ site_version }}">{{ site_version }}</a>)
             {# admin #}
             {% if not current_user.is_authenticated %}
                 &bull; <a href="{{ url_for('admin.login') }}">Sésame</a>
