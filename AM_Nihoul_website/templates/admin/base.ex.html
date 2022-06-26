@@ -12,6 +12,7 @@
         <li class="nav-item"><a href="{{ url_for('admin.categories') }}" class="nav-link {%  if admin_current == 'category' %}active{% endif %}">Catégories</a></li>
         <li class="nav-item"><a href="{{ url_for('admin.newsletter-recipients') }}" class="nav-link {%  if admin_current == 'recipient' %}active{% endif %}">Inscrits aux infolettres</a></li>
         <li class="nav-item"><a href="{{ url_for('admin.menus') }}" class="nav-link {%  if admin_current == 'menus' %}active{% endif %}">Menus</a></li>
+        <li class="nav-item"><a href="{{ url_for('admin.blocks') }}" class="nav-link {%  if admin_current == 'blocks' %}active{% endif %}">Blocs</a></li>
     </ul>
     <div id="content" class="admin-content">
         {% block content %}{% endblock %}
