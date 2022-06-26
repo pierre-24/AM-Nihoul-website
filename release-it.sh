@@ -41,12 +41,12 @@ git pull
 bump2version "$RELEASE_PART" --verbose
 git push --follow-tags origin $DEV_BRANCH
 
-# go to $MAIN_BRANCH, ensure latest version and merge $DEV_BRANCH in it
+# go to $MAIN_BRANCH, ensure latest version and merge $DEV_BRANCH in it (then push)
 git checkout $MAIN_BRANCH
 git pull
 
-git merge origin/dev -m "$NEW_VERSION"
-git push
+git merge origin/dev
+git push origin $MAIN_BRANCH
 
 # switch back to current branch
 if [[ $CURRENT_BRANCH != "$MAIN_BRANCH" ]]; then
