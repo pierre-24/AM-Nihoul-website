@@ -115,6 +115,7 @@
     </footer>
 
     {% block scripts %}
+        <script src="{{ url_for('static', filename='scripts.min.js') }}"></script>
         {{ bootstrap.load_js() }}
         {# add FontAwesome kit if available #}
         {% if fa_kit != '' %}

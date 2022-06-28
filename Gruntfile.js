@@ -30,9 +30,13 @@ module.exports = function(grunt) {
             }
         },
         uglify: {
-            build: {
+            build_editor: {
                 src: `${input_dir}/editor.js`,
                 dest: `${output_dir}/editor.min.js`
+            },
+            build_other: {
+                src: `${input_dir}/html-fix.js`,
+                dest: `${output_dir}/scripts.min.js`
             }
         },
         image: {

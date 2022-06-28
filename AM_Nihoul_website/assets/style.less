@@ -117,6 +117,21 @@ blockquote {
       img {
           max-width: 100%;
       }
+
+      h3 {
+         a.anchor {
+            display: none;
+            margin-left: 8px;
+            font-weight: normal !important;
+            color: black;
+            text-decoration: none;
+        }
+
+        &:hover a.anchor {
+          display: inline;
+          color: @main-color;
+        }
+      }
     }
   }
 }
