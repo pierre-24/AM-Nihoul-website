@@ -5,7 +5,7 @@
   "author": "Pierre Beaujean",
   "license": "MIT",
   "scripts": {
-    "gulp": "node ./node_modules/gulp/bin/gulp.js"
+    "grunt": "node ./node_modules/grunt/bin/grunt"
   },
   "dependencies": {
     "grunt": "^1.5.3",

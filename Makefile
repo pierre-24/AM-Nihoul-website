@@ -9,7 +9,7 @@ init-back:
 
 front:
 	npm i
-	grunt
+	npm run grunt
 
 init: install init-back front
 
