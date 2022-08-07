@@ -356,7 +356,7 @@ class Picture(BaseModel):
     picture_size = db.Column(db.Integer)
 
     album_id = db.Column(db.Integer, db.ForeignKey('album.id'))
-    album = db.relationship('Album', uselist=False)
+    album = db.relationship('Album', uselist=False, backref=db.backref('pictures', cascade='all,delete'))
 
     @classmethod
     def create(
@@ -419,9 +419,6 @@ class Album(OrderableMixin, BaseModel):
 
     def query_pictures(self) -> sqlalchemy.orm.Query:
         return Picture.query.filter(Picture.album_id.is_(self.id))
-
-    def pictures(self) -> List[Picture]:
-        return self.query_pictures().order_by(Picture.date_taken).all()
 
 
 @event.listens_for(Album.title, 'set', named=True)

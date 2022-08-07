@@ -1010,7 +1010,7 @@ class AlbumView(AdminBaseMixin, ObjectManagementMixin, FormView):
         ctx = super().get_context_data(*args, **kwargs)
 
         ctx['album'] = self.object
-        ctx['pictures'] = self.object.pictures()
+        ctx['pictures'] = self.object.pictures
         ctx['total_size'] = sum(f.picture_size for f in ctx['pictures'])
 
         return ctx
