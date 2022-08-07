@@ -1103,7 +1103,7 @@ class AlbumSetThumbnailView(AdminBaseMixin, ObjectManagementMixin, View):
         db.session.add(self.object)
         db.session.commit()
 
-        flask.flash('Cette photo sera utilisée comme miniature de l\'album.')
+        flask.flash("Cette photo sera utilisée comme miniature de l'album.")
 
         return flask.redirect(flask.url_for('admin.album', id=self.object.id))
 

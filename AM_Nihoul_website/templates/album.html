@@ -1,0 +1,15 @@
+{% extends "base.ex.html" %}
+
+{% block page_title %}{{ album.title }} (album photo){% endblock %}
+
+{% block content %}
+    <section>
+    <h2>{{ album.title }}</h2>
+    {{ album.description|safe }}
+    <div class="row">
+        {% for picture in pictures %}
+            <img class="col-lg-4 col-md-6 col-sm-6 my-2" src="{{ picture.url_thumb() }}" alt="{{ album.title }}" />
+        {% endfor %}
+    </div>
+    </section>
+{% endblock %}

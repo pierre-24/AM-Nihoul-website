@@ -406,7 +406,7 @@ class Album(OrderableMixin, BaseModel):
     slug = db.Column(db.VARCHAR(150), nullable=False)
 
     thumbnail_id = db.Column(db.Integer, db.ForeignKey('picture.id'))
-    thumbnail = db.relationship('Picture', uselist=False, foreign_keys=[thumbnail_id])
+    thumbnail = db.relationship('Picture', uselist=False, foreign_keys=[thumbnail_id], post_update=True)
 
     @classmethod
     def create(cls, title: str, description: str = ''):

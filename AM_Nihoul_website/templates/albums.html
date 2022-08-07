@@ -10,9 +10,11 @@
         {% for album in albums %}
 
         <div class="card mx-2 my-2 flex-shrink-0" style="max-width: 500px;">
-            <img class="card-img-top" src="{{ album.get_thumbnail().url() }}" alt="{{ album.title }}" />
+            <a href="{{ url_for('visitor.album', id=album.id, slug=album.slug) }}">
+                <img class="card-img-top" src="{{ album.get_thumbnail().url() }}" alt="{{ album.title }}" />
+            </a>
             <div class="card-body">
-                <h5 class="card-title">{{ album.title }}</h5>
+                <h5 class="card-title"><a href="{{ url_for('visitor.album', id=album.id, slug=album.slug) }}">{{ album.title }}</a></h5>
                 <p class="card-text">{{ album.description|safe }}</p>
             </div>
         </div>
