@@ -60,7 +60,7 @@
                         <a class="button-like" href="{{ url_for('admin.album-move', id=album.id, action='down') }}"><span class="fas fa-caret-square-up"></span></a>
                         <a class="button-like" href="{{ url_for('admin.album-move', id=album.id, action='up') }}"><span class="fas fa-caret-square-down"></span></a>
                         <a class="button-like" href="#delete-album-{{ album.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
-                        {{ create_delete_modal('album', album.id, 'l\'album "' + album.title + '"', 'admin.album-delete') }}
+                        {{ create_delete_modal('album', album.id, 'l\'album "' + album.title + '" et tout ce qu\'il contient', 'admin.album-delete') }}
                     </span>
                 </td>
             </tr>

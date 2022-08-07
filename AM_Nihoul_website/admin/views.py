@@ -1010,7 +1010,7 @@ class AlbumView(AdminBaseMixin, ObjectManagementMixin, FormView):
         ctx = super().get_context_data(*args, **kwargs)
 
         ctx['album'] = self.object
-        ctx['pictures'] = self.object.pictures
+        ctx['pictures'] = sorted(self.object.pictures, key=lambda k: k.date_taken)
         ctx['total_size'] = sum(f.picture_size for f in ctx['pictures'])
 
         return ctx
@@ -1086,6 +1086,36 @@ class AlbumView(AdminBaseMixin, ObjectManagementMixin, FormView):
 
 
 admin_blueprint.add_url_rule('/album-<int:id>.html', view_func=AlbumView.as_view(name='album'))
+
+
+class AlbumSetThumbnailView(AdminBaseMixin, ObjectManagementMixin, View):
+    methods = ['GET']
+    model = Album
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        picture_id = kwargs.get('picture')
+        picture = Picture.query.get(picture_id)
+        if picture is None:
+            flask.abort(404)
+
+        self.object.thumbnail = picture
+        db.session.add(self.object)
+        db.session.commit()
+
+        flask.flash('Cette photo sera utilisée comme miniature de l\'album.')
+
+        return flask.redirect(flask.url_for('admin.album', id=self.object.id))
+
+    def dispatch_request(self, *args, **kwargs):
+        if flask.request.method == 'GET':
+            return self.get(*args, **kwargs)
+        else:
+            flask.abort(403)
+
+
+admin_blueprint.add_url_rule(
+    '/album-<int:id>-miniature-<int:picture>.html', view_func=AlbumSetThumbnailView.as_view(name='album-set-thumbnail'))
 
 
 class PictureDeleteView(AdminBaseMixin, DeleteObjectView):

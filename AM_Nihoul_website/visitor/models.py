@@ -356,7 +356,8 @@ class Picture(BaseModel):
     picture_size = db.Column(db.Integer)
 
     album_id = db.Column(db.Integer, db.ForeignKey('album.id'))
-    album = db.relationship('Album', uselist=False, backref=db.backref('pictures', cascade='all,delete'))
+    album = db.relationship(
+        'Album', uselist=False, backref=db.backref('pictures', cascade='all,delete'), foreign_keys=[album_id])
 
     @classmethod
     def create(
@@ -404,6 +405,9 @@ class Album(OrderableMixin, BaseModel):
     description = db.Column(db.Text(), nullable=False)
     slug = db.Column(db.VARCHAR(150), nullable=False)
 
+    thumbnail_id = db.Column(db.Integer, db.ForeignKey('picture.id'))
+    thumbnail = db.relationship('Picture', uselist=False, foreign_keys=[thumbnail_id])
+
     @classmethod
     def create(cls, title: str, description: str = ''):
         o = cls()
@@ -419,6 +423,15 @@ class Album(OrderableMixin, BaseModel):
 
     def query_pictures(self) -> sqlalchemy.orm.Query:
         return Picture.query.filter(Picture.album_id.is_(self.id))
+
+    def ordered_pictures(self):
+        return self.query_pictures().order_by(Picture.date_taken).all()
+
+    def get_thumbnail(self):
+        if self.thumbnail is None:
+            return self.query_pictures().order_by(Picture.date_taken).first()
+        else:
+            return self.thumbnail
 
 
 @event.listens_for(Album.title, 'set', named=True)

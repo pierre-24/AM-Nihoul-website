@@ -6,7 +6,7 @@ import requests
 
 from AM_Nihoul_website import db, settings, limiter
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
-from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email, Block
+from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email, Block, Album
 from AM_Nihoul_website.visitor.forms import NewsletterForm
 
 visitor_blueprint = Blueprint('visitor', __name__)
@@ -328,3 +328,19 @@ class NewslettersView(BaseMixin, RenderTemplateView):
 
 
 visitor_blueprint.add_url_rule('/infolettres.html', view_func=NewslettersView.as_view(name='newsletters'))
+
+
+# -- ALBUMS
+class AlbumsView(BaseMixin, RenderTemplateView):
+    template_name = 'albums.html'
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        # fetch albums
+        ctx['albums'] = Album.ordered_items()
+
+        return ctx
+
+
+visitor_blueprint.add_url_rule('/albums.html', view_func=AlbumsView.as_view(name='albums'))

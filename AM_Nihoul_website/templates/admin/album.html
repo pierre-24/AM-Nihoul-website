@@ -27,10 +27,11 @@
 
         <div class="row">
             {% for picture in pictures %}
-                <div class="card mx-2 my-2">
+                <div class="card mx-2 my-2" style="max-width: 300px;">
                     <img class="card-img-top" src="{{ picture.url_thumb() }}" alt="{{ picture.picture_name }}" />
                     <div class="card-body">
                         <a class="card-link" href="{{ picture.url() }}"><span class="fas fa-image"></span> voir</a>
+                        <a class="card-link" href="{{ url_for('admin.album-set-thumbnail', id=album.id, picture=picture.id) }}"><span class="fas fa-pen-square"></span> choisir comme miniature</a>
                         <a class="card-link" href="#delete-picture-{{ picture.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span> supprimer</a>
                     </div>
                 </div>
