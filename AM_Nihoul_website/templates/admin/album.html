@@ -1,0 +1,42 @@
+{% extends "admin/base.ex.html" %}
+{% from "helpers.inc.html" import create_delete_modal, create_modal %}
+{% from 'bootstrap4/form.html' import render_field %}
+
+{% set admin_current = 'album' %}
+
+{% block page_title %}{{ album.title  }} (album){% endblock %}
+
+{% block content %}
+    <section>
+        <h2>{{ album.title }}</h2>
+        <p>Taille totale des fichiers: {{ total_size|file_size_formatter }}</p>
+
+        <p>
+            <a class="button-like" href="#uploadFile" data-toggle="modal"><span class="fas fa-plus"></span> <i>Uploader</i> une nouvelle photo</a>
+            {% set modal_create_content %}
+                {{ form.hidden_tag() }}
+                {{ render_field(form.file_uploaded) }}
+            {% endset %}
+            {{ create_modal(
+                'uploadFile',
+                'Uploader une image',
+                modal_create_content,
+                render_field(form.submit_button),
+                multipart=True) }}
+        </p>
+
+        <div class="row">
+            {% for picture in pictures %}
+                <div class="card mx-2 my-2">
+                    <img class="card-img-top" src="{{ picture.url_thumb() }}" alt="{{ picture.picture_name }}" />
+                    <div class="card-body">
+                        <a class="card-link" href="{{ picture.url() }}"><span class="fas fa-image"></span> voir</a>
+                        <a class="card-link" href="#delete-picture-{{ picture.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span> supprimer</a>
+                    </div>
+                </div>
+                {{ create_delete_modal('picture', picture.id, 'la photo sélectionnée', 'admin.picture-delete') }}
+            {% endfor %}
+        </div>
+
+    </section>
+{% endblock %}

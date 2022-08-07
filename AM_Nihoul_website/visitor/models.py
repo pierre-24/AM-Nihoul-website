@@ -8,7 +8,7 @@ from typing import List, Union
 import sqlalchemy.orm
 from sqlalchemy import event
 
-from AM_Nihoul_website import db, uploads_set
+from AM_Nihoul_website import db, uploads_set, pictures_set
 from AM_Nihoul_website.base_models import BaseModel
 from AM_Nihoul_website.visitor.utils import make_summary
 
@@ -351,21 +351,25 @@ class Block(OrderableMixin, BaseModel):
 class Picture(BaseModel):
     date_taken = db.Column(db.DateTime, default=db.func.current_timestamp())
 
-    base_file_name = db.Column(db.VARCHAR(length=150), nullable=False)
-    file_name = db.Column(db.VARCHAR(length=150), nullable=False)
-    file_size = db.Column(db.Integer)
-    possible_mime = db.Column(db.VARCHAR(length=150), nullable=False)
+    picture_name = db.Column(db.VARCHAR(length=150), nullable=False)
+    picture_thumb_name = db.Column(db.VARCHAR(length=150), nullable=False)
+    picture_size = db.Column(db.Integer)
 
     album_id = db.Column(db.Integer, db.ForeignKey('album.id'))
     album = db.relationship('Album', uselist=False)
 
     @classmethod
-    def create(cls, uploaded, filename: str, album: Union['Album', int], date_taken: Union[int, datetime.datetime]):
+    def create(
+            cls,
+            filename: str,
+            filename_thumb: str,
+            album: Union['Album', int],
+            date_taken: Union[int, datetime.datetime]
+    ):
         o = cls()
-        o.base_file_name = uploaded.filename
-        o.file_name = uploads_set.save(uploaded, name=filename)
-        o.file_size = os.path.getsize(o.path())
-        o.possible_mime = UploadedFile.get_mimetype(o.path())
+        o.picture_name = filename
+        o.picture_thumb_name = filename_thumb
+        o.picture_size = os.path.getsize(pictures_set.path(o.picture_name))
 
         if type(album) is Album:
             o.album_id = album.id
@@ -376,15 +380,23 @@ class Picture(BaseModel):
 
         return o
 
-    def path(self):
-        return uploads_set.path(self.file_name)
+    def url(self):
+        return pictures_set.url(self.picture_name)
+
+    def url_thumb(self):
+        return pictures_set.url(self.picture_thumb_name)
 
 
 @event.listens_for(Picture, 'before_delete')
 def before_delete_picture(mapper, connect, target):
     """Remove file before deletion from BDD"""
-    if os.path.exists(target.path()):
-        os.remove(target.path())
+    pic = pictures_set.path(target.picture_name)
+    if os.path.exists(pic):
+        os.remove(pic)
+
+    thumb = pictures_set.path(target.picture_thumb_name)
+    if os.path.exists(thumb):
+        os.remove(thumb)
 
 
 class Album(OrderableMixin, BaseModel):

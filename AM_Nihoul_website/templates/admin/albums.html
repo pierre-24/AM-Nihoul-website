@@ -30,7 +30,7 @@
         {% for album in albums %}
             <tr>
                 <td class="left">
-                    <span class="title">{{ album.title }}</span>
+                    <span class="title"><a href="{{ url_for('admin.album', id=album.id) }}">{{ album.title }}</a></span>
                     <span class="info">{{ album.description|safe }}</span>
                 </td>
                 <td class="right">

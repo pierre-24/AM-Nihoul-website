@@ -1,5 +1,5 @@
 import flask
-from flask import Blueprint, views, request
+from flask import Blueprint, views, request, send_from_directory
 from flask_login import current_user
 
 import requests
@@ -166,6 +166,11 @@ class UploadView(ObjectManagementMixin, views.View):
 
 
 visitor_blueprint.add_url_rule('/fichier/<int:id>/<string:filename>', view_func=UploadView.as_view(name='upload-view'))
+
+
+@visitor_blueprint.route('/photos/<string:filename>')
+def get_picture(filename):
+    return send_from_directory('../' + settings.APP_CONFIG['UPLOADED_PICTURES_DEST'], filename)
 
 
 # -- Newsletter

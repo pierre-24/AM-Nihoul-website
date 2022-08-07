@@ -22,6 +22,7 @@ from AM_Nihoul_website.base_filters import filters
 # init modules
 db = SQLAlchemy(session_options={'expire_on_commit': False})
 uploads_set = UploadSet('uploads', flask_uploads.DEFAULTS + ('gpx', ))
+pictures_set = UploadSet('pictures', flask_uploads.IMAGES)
 login_manager = flask_login.LoginManager()
 scheduler = APScheduler()
 bootstrap = Bootstrap4()
@@ -56,6 +57,7 @@ def init_command():
     # directories
     data_dir = settings.DATA_DIRECTORY
     upload_dir = current_app.config['UPLOADED_UPLOADS_DEST']
+    picture_dir = current_app.config['UPLOADED_PICTURES_DEST']
 
     if os.path.exists(data_dir):
         shutil.rmtree(data_dir)
@@ -68,6 +70,12 @@ def init_command():
 
     os.mkdir(upload_dir)
     print('!! Upload directory in {}'.format(upload_dir))
+
+    if os.path.exists(picture_dir):
+        shutil.rmtree(picture_dir)
+
+    os.mkdir(picture_dir)
+    print('!! Picture directory in {}'.format(picture_dir))
 
     # DB:
     db.create_all()
@@ -94,7 +102,7 @@ def create_app():
     app.config.update(settings.APP_CONFIG)
     db.init_app(app)
     db.app = app
-    configure_uploads(app, (uploads_set, ))
+    configure_uploads(app, (uploads_set, pictures_set))
 
     login_manager.init_app(app)
     login_manager.login_view = 'admin.login'  # automatic redirection
@@ -114,7 +122,7 @@ def create_app():
     from AM_Nihoul_website.admin.views import admin_blueprint
     app.register_blueprint(admin_blueprint)
 
-    # add filtersn
+    # add filters
     app.jinja_env.filters.update(**filters)
 
     # launch bot, if any

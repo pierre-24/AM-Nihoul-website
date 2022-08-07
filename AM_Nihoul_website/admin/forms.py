@@ -87,3 +87,9 @@ class AlbumEditForm(FlaskForm):
     id_album = f.IntegerField(widget=f.widgets.HiddenInput(), default=-1)
 
     submit_button = f.SubmitField('Enregistrer')
+
+
+class PictureUploadForm(FlaskForm):
+    file_uploaded = wtf_file.FileField('Image', validators=[wtf_file.FileRequired()])
+
+    submit_button = f.SubmitField('Envoyer')
