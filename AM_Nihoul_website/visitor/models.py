@@ -381,6 +381,12 @@ class Picture(BaseModel):
 
         return o
 
+    def path(self):
+        return pictures_set.path(self.picture_name)
+
+    def path_thumb(self):
+        return pictures_set.path(self.picture_thumb_name)
+
     def url(self):
         return pictures_set.url(self.picture_name)
 

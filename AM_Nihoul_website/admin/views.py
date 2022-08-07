@@ -1057,7 +1057,6 @@ class AlbumView(AdminBaseMixin, ObjectManagementMixin, FormView):
 
         # create object
         try:
-            print(image.getexif())
             date_taken = datetime.strptime(image.getexif()[306], '%Y:%m:%d %H:%M:%S')
         except KeyError:
             date_taken = datetime.now()

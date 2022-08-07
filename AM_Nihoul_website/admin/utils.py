@@ -237,7 +237,11 @@ class Thumbnailer:
     def transform(self, image: Image) -> Image:
 
         # rotate file based on the exif tag, if any
-        rot = image._getexif()[0x0112]
+        try:
+            rot = image._getexif()[0x0112]
+        except KeyError:
+            rot = 0
+
         rotate = {3: 180, 6: 270, 8: 90}
 
         if rot in rotate:
