@@ -21,9 +21,9 @@ from AM_Nihoul_website import settings, db, User, limiter
 from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteObjectView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm, \
-    NewsletterPublishForm, MenuEditForm, BlockEditForm
+    NewsletterPublishForm, MenuEditForm, BlockEditForm, AlbumEditForm
 from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient, Newsletter, Email, \
-    MenuEntry, EmailImageAttachment, Block
+    MenuEntry, EmailImageAttachment, Block, Album
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -929,3 +929,59 @@ class BlockMoveView(BaseMoveView):
 
 admin_blueprint.add_url_rule(
     '/bloc-mouvement-<string:action>-<int:id>.html', view_func=BlockMoveView.as_view('block-move'))
+
+
+# -- Albums
+class BlocksView(AdminBaseMixin, FormView):
+    template_name = 'admin/albums.html'
+    form_class = AlbumEditForm
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        # fetch albums
+        ctx['albums'] = Album.ordered_items()
+
+        return ctx
+
+    def form_valid(self, form):
+        if form.is_create.data:
+            c = Album.create(form.title.data, form.description.data)
+            flask.flash('Album "{}" créé.'.format(c.title))
+        else:
+            c = Album.query.get(form.id_album.data)
+            if c is None:
+                flask.abort(403)
+
+            c.name = form.title.data
+            c.description = form.description.data
+            flask.flash('Album "{}" modifié.'.format(c.title))
+
+        db.session.add(c)
+        db.session.commit()
+
+        self.success_url = flask.url_for('admin.albums')
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule('/albums.html', view_func=BlocksView.as_view(name='albums'))
+
+
+class AlbumDeleteView(AdminBaseMixin, DeleteObjectView):
+    model = Album
+
+    def post_deletion(self, obj):
+        self.success_url = flask.url_for('admin.albums')
+        flask.flash('Album "{}" supprimé.'.format(obj.title))
+
+
+admin_blueprint.add_url_rule('/album-suppression-<int:id>.html', view_func=AlbumDeleteView.as_view('album-delete'))
+
+
+class AlbumMoveView(BaseMoveView):
+    model = Album
+    redirect_url = 'admin.albums'
+
+
+admin_blueprint.add_url_rule(
+    '/album-mouvement-<string:action>-<int:id>.html', view_func=AlbumMoveView.as_view('album-move'))

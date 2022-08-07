@@ -360,7 +360,7 @@ class Picture(BaseModel):
     album = db.relationship('Album', uselist=False)
 
     @classmethod
-    def create(cls, uploaded, filename, album, date_taken):
+    def create(cls, uploaded, filename: str, album: Union['Album', int], date_taken: Union[int, datetime.datetime]):
         o = cls()
         o.base_file_name = uploaded.filename
         o.file_name = uploads_set.save(uploaded, name=filename)

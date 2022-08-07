@@ -1,0 +1,81 @@
+{% extends "admin/base.ex.html" %}
+{% from "helpers.inc.html" import create_delete_modal, create_modal %}
+{% from 'bootstrap4/form.html' import render_field %}
+{% from 'helpers.inc.html' import include_editor %}
+
+{% set admin_current = 'album' %}
+
+{% block page_title %}Gestion des albums{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Gestion des albums</h2>
+
+    <p>
+        <a class="button-like" href="#createAlbum" data-toggle="modal"><span class="fas fa-plus"></span> Ajouter un album</a>
+        {% set modal_create_content %}
+            {{ form.hidden_tag() }}
+            {{ render_field(form.title) }}
+            {{ render_field(form.description) }}
+        {% endset %}
+        {{ create_modal(
+            'createAlbum',
+            'Créer un album',
+            modal_create_content,
+            render_field(form.submit_button)
+         ) }}
+    </p>
+
+    <table class="admin-list">
+        {% for album in albums %}
+            <tr>
+                <td class="left">
+                    <span class="title">{{ album.title }}</span>
+                    <span class="info">{{ album.description|safe }}</span>
+                </td>
+                <td class="right">
+                    <span class="buttons">
+                       <a class="button-like" href="#editAlbum{{ album.id }}" data-toggle="modal"><span class="fas fa-pen-square"></span></a>
+                        {% set modal_edit_content %}
+                            {{ form.csrf_token }}
+                            {{ form.is_create(value=False) }}
+                            {{ form.id_album(value=album.id) }}
+
+                            <div class="form-group required">
+                                {{ form.title.label(class_='form-control-label') }} {{ form.title(value=album.title, class_='form-control') }}
+                            </div>
+
+                            <div class="form-group required">
+                                {% set f = form.description.process_data(album.description) %}
+                                {{ form.description.label(class_='form-control-label') }} {{ form.description(class_='form-control') }}
+                            </div>
+
+                        {% endset %}
+                        {{ create_modal(
+                            'editAlbum' + album.id|string,
+                            'Éditer un albym',
+                            modal_edit_content,
+                            render_field(form.submit_button)
+                        ) }}
+                        <a class="button-like" href="{{ url_for('admin.album-move', id=album.id, action='down') }}"><span class="fas fa-caret-square-up"></span></a>
+                        <a class="button-like" href="{{ url_for('admin.album-move', id=album.id, action='up') }}"><span class="fas fa-caret-square-down"></span></a>
+                        <a class="button-like" href="#delete-album-{{ album.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
+                        {{ create_delete_modal('album', album.id, 'l\'album "' + album.title + '"', 'admin.album-delete') }}
+                    </span>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    </section>
+{% endblock %}
+
+{# add editor #}
+{% block scripts %}
+    {{ super() }}
+    {{ include_editor('page') }}
+{% endblock %}
+
+
+{% block other_head_stuffs %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.25.1/ui/trumbowyg.min.css">
+{% endblock %}
