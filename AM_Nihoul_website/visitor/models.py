@@ -207,7 +207,7 @@ class UploadedFile(BaseModel):
 
 
 @event.listens_for(UploadedFile, 'before_delete')
-def after_delete_shop_category(mapper, connect, target):
+def before_delete_uploaded_file(mapper, connect, target):
     """Remove file before deletion from BDD"""
     if os.path.exists(target.path()):
         os.remove(target.path())
@@ -380,15 +380,24 @@ class Picture(BaseModel):
         return uploads_set.path(self.file_name)
 
 
+@event.listens_for(Picture, 'before_delete')
+def before_delete_picture(mapper, connect, target):
+    """Remove file before deletion from BDD"""
+    if os.path.exists(target.path()):
+        os.remove(target.path())
+
+
 class Album(OrderableMixin, BaseModel):
     title = db.Column(db.Text(), nullable=False)
     description = db.Column(db.Text(), nullable=False)
+    slug = db.Column(db.VARCHAR(150), nullable=False)
 
     @classmethod
     def create(cls, title: str, description: str = ''):
         o = cls()
         o.title = title
         o.description = description
+        o.slug = slugify.slugify(title)
 
         # set order
         last_m = Album.ordered_items(desc=True).first()
@@ -401,3 +410,9 @@ class Album(OrderableMixin, BaseModel):
 
     def pictures(self) -> List[Picture]:
         return self.query_pictures().order_by(Picture.date_taken).all()
+
+
+@event.listens_for(Album.title, 'set', named=True)
+def receive_album_title_set(target, value, oldvalue, initiator):
+    """Set the slug accordingly"""
+    target.slug = slugify.slugify(value)

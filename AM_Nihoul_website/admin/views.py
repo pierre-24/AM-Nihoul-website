@@ -946,18 +946,18 @@ class BlocksView(AdminBaseMixin, FormView):
 
     def form_valid(self, form):
         if form.is_create.data:
-            c = Album.create(form.title.data, form.description.data)
-            flask.flash('Album "{}" créé.'.format(c.title))
+            a = Album.create(form.title.data, form.description.data)
+            flask.flash('Album "{}" créé.'.format(a.title))
         else:
-            c = Album.query.get(form.id_album.data)
-            if c is None:
+            a = Album.query.get(form.id_album.data)
+            if a is None:
                 flask.abort(403)
 
-            c.name = form.title.data
-            c.description = form.description.data
-            flask.flash('Album "{}" modifié.'.format(c.title))
+            a.title = form.title.data
+            a.description = form.description.data
+            flask.flash('Album "{}" modifié.'.format(a.title))
 
-        db.session.add(c)
+        db.session.add(a)
         db.session.commit()
 
         self.success_url = flask.url_for('admin.albums')
