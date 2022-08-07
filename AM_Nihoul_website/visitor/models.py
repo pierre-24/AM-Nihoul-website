@@ -3,6 +3,9 @@ import secrets
 import slugify
 import datetime
 
+from typing import List, Union
+
+import sqlalchemy.orm
 from sqlalchemy import event
 
 from AM_Nihoul_website import db, uploads_set
@@ -278,8 +281,11 @@ class Email(BaseModel):
 
         return o
 
-    def attachments(self):
-        return EmailImageAttachment.query.filter(EmailImageAttachment.email_id.is_(self.id)).all()
+    def query_attachments(self) -> sqlalchemy.orm.Query:
+        return EmailImageAttachment.query.filter(EmailImageAttachment.email_id.is_(self.id))
+
+    def attachments(self) -> List['EmailImageAttachment']:
+        return self.query_attachments().all()
 
 
 class EmailImageAttachment(BaseModel):
@@ -330,7 +336,7 @@ class Block(OrderableMixin, BaseModel):
     attributes = db.Column(db.Text())
 
     @classmethod
-    def create(cls, text: str, attributes=''):
+    def create(cls, text: str, attributes: str = ''):
         o = cls()
         o.text = text
         o.attributes = attributes
@@ -340,3 +346,58 @@ class Block(OrderableMixin, BaseModel):
         o.order = last_m.order + 1 if last_m else 0
 
         return o
+
+
+class Picture(BaseModel):
+    date_taken = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+    base_file_name = db.Column(db.VARCHAR(length=150), nullable=False)
+    file_name = db.Column(db.VARCHAR(length=150), nullable=False)
+    file_size = db.Column(db.Integer)
+    possible_mime = db.Column(db.VARCHAR(length=150), nullable=False)
+
+    album_id = db.Column(db.Integer, db.ForeignKey('album.id'))
+    album = db.relationship('Album', uselist=False)
+
+    @classmethod
+    def create(cls, uploaded, filename, album, date_taken):
+        o = cls()
+        o.base_file_name = uploaded.filename
+        o.file_name = uploads_set.save(uploaded, name=filename)
+        o.file_size = os.path.getsize(o.path())
+        o.possible_mime = UploadedFile.get_mimetype(o.path())
+
+        if type(album) is Album:
+            o.album_id = album.id
+        else:
+            o.album_id = album
+
+        o.date_taken = date_taken
+
+        return o
+
+    def path(self):
+        return uploads_set.path(self.file_name)
+
+
+class Album(OrderableMixin, BaseModel):
+    title = db.Column(db.Text(), nullable=False)
+    description = db.Column(db.Text(), nullable=False)
+
+    @classmethod
+    def create(cls, title: str, description: str = ''):
+        o = cls()
+        o.title = title
+        o.description = description
+
+        # set order
+        last_m = Album.ordered_items(desc=True).first()
+        o.order = last_m.order + 1 if last_m else 0
+
+        return o
+
+    def query_pictures(self) -> sqlalchemy.orm.Query:
+        return Picture.query.filter(Picture.album_id.is_(self.id))
+
+    def pictures(self) -> List[Picture]:
+        return self.query_pictures().order_by(Picture.date_taken).all()
