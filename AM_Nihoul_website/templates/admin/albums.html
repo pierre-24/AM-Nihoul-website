@@ -57,6 +57,7 @@
                             modal_edit_content,
                             render_field(form.submit_button)
                         ) }}
+                        <a class="button-like" href="{{ url_for('visitor.album', id=album.id, slug=album.slug) }}"><span class="fas fa-image"></span></a>
                         <a class="button-like" href="{{ url_for('admin.album-move', id=album.id, action='down') }}"><span class="fas fa-caret-square-up"></span></a>
                         <a class="button-like" href="{{ url_for('admin.album-move', id=album.id, action='up') }}"><span class="fas fa-caret-square-down"></span></a>
                         <a class="button-like" href="#delete-album-{{ album.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>

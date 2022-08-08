@@ -5,6 +5,15 @@
 {% block content %}
     <section>
     <h2>{{ album.title }}</h2>
+
+        <p class="page-info">
+            {% if current_user.is_authenticated %}
+                Dernière modification <b>{{ album.date_modified|date_formatter }}</b>.
+                <a href="{{ url_for('admin.album', id=album.id) }}">Éditer cet album</a>.
+            {% endif %}
+            <a href="{{ url_for('visitor.albums') }}">Retour à la liste des albums photo</a>.
+        </p>
+
     {{ album.description|safe }}
     <div class="row" id="lightgallery">
         {% for picture in pictures %}

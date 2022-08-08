@@ -6,13 +6,12 @@
     <section>
     <h2>{{ page.title }}</h2>
 
-
-        <p class="page-info">
-            {% if current_user.is_authenticated %}
+        {% if current_user.is_authenticated %}
+            <p class="page-info">
                 Dernière modification <b>{{ page.date_modified|date_formatter }}</b>.
                 <a href="{{ url_for('admin.page-edit', id=page.id, slug=page.slug) }}">Éditer cette page</a>.
-            {% endif %}
-        </p>
+            </p>
+        {% endif %}
 
     {{ page.content_with_summary()|safe }}
     </section>

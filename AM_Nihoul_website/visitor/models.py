@@ -370,7 +370,7 @@ class Picture(BaseModel):
         o = cls()
         o.picture_name = filename
         o.picture_thumb_name = filename_thumb
-        o.picture_size = os.path.getsize(pictures_set.path(o.picture_name))
+        o.picture_size = os.path.getsize(o.path()) + os.path.getsize(o.path_thumb())
 
         if type(album) is Album:
             o.album_id = album.id

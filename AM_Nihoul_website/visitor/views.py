@@ -338,7 +338,7 @@ class AlbumsView(BaseMixin, RenderTemplateView):
         ctx = super().get_context_data(*args, **kwargs)
 
         # fetch albums
-        ctx['albums'] = Album.ordered_items()
+        ctx['albums'] = Album.ordered_items(desc=True)
 
         return ctx
 
