@@ -17,13 +17,14 @@ import io
 from datetime import datetime
 import re
 
-from AM_Nihoul_website import settings, db, User, limiter
+from AM_Nihoul_website import settings, db, User, limiter, pictures_set
+from AM_Nihoul_website.admin.utils import Thumbnailer
 from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteObjectView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm, \
-    NewsletterPublishForm, MenuEditForm, BlockEditForm
+    NewsletterPublishForm, MenuEditForm, BlockEditForm, AlbumEditForm, PictureUploadForm
 from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient, Newsletter, Email, \
-    MenuEntry, EmailImageAttachment, Block
+    MenuEntry, EmailImageAttachment, Block, Album, Picture
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -84,8 +85,11 @@ class IndexView(AdminBaseMixin, RenderTemplateView):
         ctx['content'] = Page.query.get(settings.APP_CONFIG['PAGES']['admin_index'])
 
         # few statistics
-        sz = UploadedFile.query\
+        sz_uploads = UploadedFile.query\
             .with_entities(func.sum(UploadedFile.file_size).label('total'))\
+            .first()
+        sz_pictures = Picture.query\
+            .with_entities(func.sum(Picture.picture_size).label('total'))\
             .first()
         ctx['statistics'] = {
             "Nombre d'inscrits à l'infolettre": NewsletterRecipient.query.count(),
@@ -93,7 +97,9 @@ class IndexView(AdminBaseMixin, RenderTemplateView):
                 Newsletter.query.count(), Newsletter.query.filter(Newsletter.draft.is_(False)).count()),
             'Nombre de pages': Page.query.count(),
             'Taille des fichiers': '{:.2f} Mio'.format(
-                sz[0] / 1024 / 1024 if sz[0] is not None else 0)
+                sz_uploads[0] / 1024 / 1024 if sz_uploads[0] is not None else 0),
+            'Taille des photos': '{:.2f} Mio'.format(
+                sz_pictures[0] / 1024 / 1024 if sz_pictures[0] is not None else 0)
         }
 
         return ctx
@@ -929,3 +935,194 @@ class BlockMoveView(BaseMoveView):
 
 admin_blueprint.add_url_rule(
     '/bloc-mouvement-<string:action>-<int:id>.html', view_func=BlockMoveView.as_view('block-move'))
+
+
+# -- Albums
+class AlbumsView(AdminBaseMixin, FormView):
+    template_name = 'admin/albums.html'
+    form_class = AlbumEditForm
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        # fetch albums
+        ctx['albums'] = Album.ordered_items(desc=True)
+
+        return ctx
+
+    def form_valid(self, form):
+        if form.is_create.data:
+            a = Album.create(form.title.data, form.description.data)
+            flask.flash('Album "{}" créé.'.format(a.title))
+        else:
+            a = Album.query.get(form.id_album.data)
+            if a is None:
+                flask.abort(403)
+
+            a.title = form.title.data
+            a.description = form.description.data
+            flask.flash('Album "{}" modifié.'.format(a.title))
+
+        db.session.add(a)
+        db.session.commit()
+
+        self.success_url = flask.url_for('admin.albums')
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule('/albums.html', view_func=AlbumsView.as_view(name='albums'))
+
+
+class AlbumDeleteView(AdminBaseMixin, DeleteObjectView):
+    model = Album
+
+    def post_deletion(self, obj):
+        self.success_url = flask.url_for('admin.albums')
+        flask.flash('Album "{}" supprimé.'.format(obj.title))
+
+
+admin_blueprint.add_url_rule('/album-suppression-<int:id>.html', view_func=AlbumDeleteView.as_view('album-delete'))
+
+
+class AlbumMoveView(BaseMoveView):
+    model = Album
+    redirect_url = 'admin.albums'
+
+
+admin_blueprint.add_url_rule(
+    '/album-mouvement-<string:action>-<int:id>.html', view_func=AlbumMoveView.as_view('album-move'))
+
+
+class AlbumView(AdminBaseMixin, ObjectManagementMixin, FormView):
+    model = Album
+    template_name = 'admin/album.html'
+    form_class = PictureUploadForm
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().post(*args, **kwargs)
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        ctx['album'] = self.object
+        ctx['pictures'] = sorted(self.object.pictures, key=lambda k: k.date_taken)
+        ctx['total_size'] = sum(f.picture_size for f in ctx['pictures'])
+
+        return ctx
+
+    def upload_picture(self, data):
+        # take care of filename
+        filename = data.filename
+
+        if '.' in filename:
+            fsplit = filename.split('.')
+            basename = '.'.join(fsplit[:-1])
+            ext = fsplit[-1]
+        else:
+            basename = filename
+            ext = ''
+
+        f = Picture.query.filter(Picture.picture_name == filename).all()
+
+        if len(f) > 0:  # if this name already exists, adds its size
+            basename = '{}_{}'.format(basename, len(f))
+
+        filename = '{}.{}'.format(basename, ext)
+        filename_thumb = '{}_thumb.{}'.format(basename, ext)
+
+        # save image:
+        r_filename = pictures_set.save(data, name=filename)
+
+        # create thumbnail:
+        image = Thumbnailer(*settings.APP_CONFIG['PICTURE_THUMB_SIZE'])\
+            .transform(Image.open(pictures_set.path(r_filename)))
+
+        thumb_fp = io.BytesIO()
+        image.save(thumb_fp, format='jpeg', quality=85, optimize=True)
+        thumb_fp.seek(0)  # rewind
+
+        data_thumb = FileStorage(
+            stream=thumb_fp,
+            content_type='image/jpeg',
+            name='thumbnail',
+            filename=filename_thumb
+        )
+
+        r_filename_thumb = pictures_set.save(data_thumb, name=filename_thumb)
+
+        # create object
+        try:
+            date_taken = datetime.strptime(image.getexif()[306], '%Y:%m:%d %H:%M:%S')
+        except KeyError:
+            date_taken = datetime.now()
+
+        picture = Picture.create(
+            filename=r_filename,
+            filename_thumb=r_filename_thumb,
+            album=self.object,
+            date_taken=date_taken
+        )
+
+        return picture
+
+    def form_valid(self, form):
+        try:
+            picture = self.upload_picture(form.file_uploaded.data)
+        except UploadNotAllowed:
+            flask.flash("Ce type de fichier n'est pas autorisé", category='error')
+            return super().form_invalid(form)
+
+        db.session.add(picture)
+        db.session.commit()
+
+        self.success_url = flask.url_for('admin.album', id=self.object.id)
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule('/album-<int:id>.html', view_func=AlbumView.as_view(name='album'))
+
+
+class AlbumSetThumbnailView(AdminBaseMixin, ObjectManagementMixin, View):
+    methods = ['GET']
+    model = Album
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        picture_id = kwargs.get('picture')
+        picture = Picture.query.get(picture_id)
+        if picture is None:
+            flask.abort(404)
+
+        self.object.thumbnail = picture
+        db.session.add(self.object)
+        db.session.commit()
+
+        flask.flash("Cette photo sera utilisée comme miniature de l'album.")
+
+        return flask.redirect(flask.url_for('admin.album', id=self.object.id))
+
+    def dispatch_request(self, *args, **kwargs):
+        if flask.request.method == 'GET':
+            return self.get(*args, **kwargs)
+        else:
+            flask.abort(403)
+
+
+admin_blueprint.add_url_rule(
+    '/album-<int:id>-miniature-<int:picture>.html', view_func=AlbumSetThumbnailView.as_view(name='album-set-thumbnail'))
+
+
+class PictureDeleteView(AdminBaseMixin, DeleteObjectView):
+    model = Picture
+
+    def post_deletion(self, obj):
+        self.success_url = flask.url_for('admin.album', id=obj.album_id)
+        flask.flash('Photo supprimée.')
+
+
+admin_blueprint.add_url_rule('/photo-suppression-<int:id>.html', view_func=PictureDeleteView.as_view('picture-delete'))

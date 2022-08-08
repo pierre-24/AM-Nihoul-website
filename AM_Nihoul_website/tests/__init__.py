@@ -22,6 +22,7 @@ class TestFlask(TestCase):
         # TODO: sort out this whole SERVER_NAME stuff
         # settings.APP_CONFIG['SERVER_NAME'] = 'local.domain'
         settings.APP_CONFIG['UPLOADED_UPLOADS_DEST'] = os.path.join(self.data_files_directory, 'uploads/')
+        settings.APP_CONFIG['UPLOADED_PICTURES_DEST'] = os.path.join(self.data_files_directory, 'pictures/')
 
         self.app = create_app()
 

@@ -8,6 +8,8 @@ import base64
 import mimetypes
 import pathlib
 
+from PIL import Image
+
 from email.mime.audio import MIMEAudio
 from email.mime.application import MIMEApplication
 from email.mime.base import MIMEBase
@@ -215,3 +217,53 @@ class Gmail:
         except HttpError as error:
             # Pass along the error
             raise error
+
+
+class Thumbnailer:
+    """
+    Thumbnail an image.
+    Ensure that the image will have exactly the specified size, by resizing then cropping the original one.
+    """
+
+    def __init__(
+            self,
+            width: int,
+            height: int,
+    ):
+        self.width = width
+        self.height = height
+        self.ratio = width / height
+
+    def transform(self, image: Image) -> Image:
+
+        # rotate file based on the exif tag, if any
+        try:
+            rot = image._getexif()[0x0112]
+        except KeyError:
+            rot = 0
+
+        rotate = {3: 180, 6: 270, 8: 90}
+
+        if rot in rotate:
+            image = image.rotate(rotate[rot], expand=True)
+
+        # get the new size and resize
+        size = image.size
+        ratio = size[0] / size[1]
+
+        if ratio > self.ratio:  # then the height is used
+            new_size = int(self.height * ratio), self.height
+        else:
+            new_size = self.width, int(self.width / ratio)
+
+        image = image.resize(new_size)
+
+        # crop
+        if ratio > self.ratio:
+            offset = int((new_size[0] - self.width) / 2)
+            crop = (offset, 0, offset + self.width, self.height)
+        else:
+            offset = int((new_size[1] - self.height) / 2)
+            crop = (0, offset, self.width, offset + self.height)
+
+        return image.crop(crop)

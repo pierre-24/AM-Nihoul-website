@@ -3,9 +3,12 @@ import secrets
 import slugify
 import datetime
 
+from typing import List, Union
+
+import sqlalchemy.orm
 from sqlalchemy import event
 
-from AM_Nihoul_website import db, uploads_set
+from AM_Nihoul_website import db, uploads_set, pictures_set
 from AM_Nihoul_website.base_models import BaseModel
 from AM_Nihoul_website.visitor.utils import make_summary
 
@@ -204,7 +207,7 @@ class UploadedFile(BaseModel):
 
 
 @event.listens_for(UploadedFile, 'before_delete')
-def after_delete_shop_category(mapper, connect, target):
+def before_delete_uploaded_file(mapper, connect, target):
     """Remove file before deletion from BDD"""
     if os.path.exists(target.path()):
         os.remove(target.path())
@@ -278,8 +281,11 @@ class Email(BaseModel):
 
         return o
 
-    def attachments(self):
-        return EmailImageAttachment.query.filter(EmailImageAttachment.email_id.is_(self.id)).all()
+    def query_attachments(self) -> sqlalchemy.orm.Query:
+        return EmailImageAttachment.query.filter(EmailImageAttachment.email_id.is_(self.id))
+
+    def attachments(self) -> List['EmailImageAttachment']:
+        return self.query_attachments().all()
 
 
 class EmailImageAttachment(BaseModel):
@@ -330,7 +336,7 @@ class Block(OrderableMixin, BaseModel):
     attributes = db.Column(db.Text())
 
     @classmethod
-    def create(cls, text: str, attributes=''):
+    def create(cls, text: str, attributes: str = ''):
         o = cls()
         o.text = text
         o.attributes = attributes
@@ -340,3 +346,101 @@ class Block(OrderableMixin, BaseModel):
         o.order = last_m.order + 1 if last_m else 0
 
         return o
+
+
+class Picture(BaseModel):
+    date_taken = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+    picture_name = db.Column(db.VARCHAR(length=150), nullable=False)
+    picture_thumb_name = db.Column(db.VARCHAR(length=150), nullable=False)
+    picture_size = db.Column(db.Integer)
+
+    album_id = db.Column(db.Integer, db.ForeignKey('album.id'))
+    album = db.relationship(
+        'Album', uselist=False, backref=db.backref('pictures', cascade='all,delete'), foreign_keys=[album_id])
+
+    @classmethod
+    def create(
+            cls,
+            filename: str,
+            filename_thumb: str,
+            album: Union['Album', int],
+            date_taken: Union[int, datetime.datetime]
+    ):
+        o = cls()
+        o.picture_name = filename
+        o.picture_thumb_name = filename_thumb
+        o.picture_size = os.path.getsize(o.path()) + os.path.getsize(o.path_thumb())
+
+        if type(album) is Album:
+            o.album_id = album.id
+        else:
+            o.album_id = album
+
+        o.date_taken = date_taken
+
+        return o
+
+    def path(self):
+        return pictures_set.path(self.picture_name)
+
+    def path_thumb(self):
+        return pictures_set.path(self.picture_thumb_name)
+
+    def url(self):
+        return pictures_set.url(self.picture_name)
+
+    def url_thumb(self):
+        return pictures_set.url(self.picture_thumb_name)
+
+
+@event.listens_for(Picture, 'before_delete')
+def before_delete_picture(mapper, connect, target):
+    """Remove file before deletion from BDD"""
+    pic = pictures_set.path(target.picture_name)
+    if os.path.exists(pic):
+        os.remove(pic)
+
+    thumb = pictures_set.path(target.picture_thumb_name)
+    if os.path.exists(thumb):
+        os.remove(thumb)
+
+
+class Album(OrderableMixin, BaseModel):
+    title = db.Column(db.Text(), nullable=False)
+    description = db.Column(db.Text(), nullable=False)
+    slug = db.Column(db.VARCHAR(150), nullable=False)
+
+    thumbnail_id = db.Column(db.Integer, db.ForeignKey('picture.id'))
+    thumbnail = db.relationship('Picture', uselist=False, foreign_keys=[thumbnail_id], post_update=True)
+
+    @classmethod
+    def create(cls, title: str, description: str = ''):
+        o = cls()
+        o.title = title
+        o.description = description
+        o.slug = slugify.slugify(title)
+
+        # set order
+        last_m = Album.ordered_items(desc=True).first()
+        o.order = last_m.order + 1 if last_m else 0
+
+        return o
+
+    def query_pictures(self) -> sqlalchemy.orm.Query:
+        return Picture.query.filter(Picture.album_id.is_(self.id))
+
+    def ordered_pictures(self):
+        return self.query_pictures().order_by(Picture.date_taken).all()
+
+    def get_thumbnail(self):
+        if self.thumbnail is None:
+            return self.query_pictures().order_by(Picture.date_taken).first()
+        else:
+            return self.thumbnail
+
+
+@event.listens_for(Album.title, 'set', named=True)
+def receive_album_title_set(target, value, oldvalue, initiator):
+    """Set the slug accordingly"""
+    target.slug = slugify.slugify(value)

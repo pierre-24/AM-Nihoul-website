@@ -1,0 +1,47 @@
+{% extends "admin/base.ex.html" %}
+{% from "helpers.inc.html" import create_delete_modal, create_modal %}
+{% from 'bootstrap4/form.html' import render_field %}
+
+{% set admin_current = 'album' %}
+
+{% block page_title %}{{ album.title  }} (album){% endblock %}
+
+{% block content %}
+    <section>
+        <h2>{{ album.title }}</h2>
+        <p class="page-info">
+            Taille totale des photos: <b>{{ total_size|file_size_formatter }}</b>.
+            <a href="{{ url_for('visitor.album', id=album.id, slug=album.slug) }}">Voir cet album</a> ou <a href="{{ url_for('admin.albums') }}">Retour à la liste des albums</a>.
+        </p>
+
+        <p>
+            <a class="btn btn-primary" href="#uploadFile" data-toggle="modal"><span class="fas fa-plus"></span> <i>Uploader</i> une nouvelle photo</a>
+            {% set modal_create_content %}
+                {{ form.hidden_tag() }}
+                {{ render_field(form.file_uploaded) }}
+            {% endset %}
+            {{ create_modal(
+                'uploadFile',
+                'Uploader une image',
+                modal_create_content,
+                render_field(form.submit_button),
+                multipart=True) }}
+        </p>
+
+        <div class="row">
+            {% for picture in pictures %}
+                <div class="col border col-lg-4 col-md-6 col-sm-12 col-12">
+                    <pre>{{ picture.picture_name }}</pre>
+                    <img src="{{ picture.url_thumb() }}" alt="{{ picture.picture_name }}" style="max-height:300px;" />
+                    <p>
+                        <a href="{{ picture.url() }}"><span class="fas fa-image"></span> Voir</a><br>
+                        <a href="{{ url_for('admin.album-set-thumbnail', id=album.id, picture=picture.id) }}"><span class="fas fa-pen-square"></span> Choisir comme miniature</a><br>
+                        <a href="#delete-picture-{{ picture.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span> Supprimer</a>
+                    </p>
+                </div>
+                {{ create_delete_modal('picture', picture.id, 'la photo sélectionnée', 'admin.picture-delete') }}
+            {% endfor %}
+        </div>
+
+    </section>
+{% endblock %}

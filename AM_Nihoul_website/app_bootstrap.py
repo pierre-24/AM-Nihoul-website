@@ -28,11 +28,11 @@ def bootstrap():
     # menu entries
     links = [
         MenuEntry.create(pages[2].title, flask.url_for('visitor.page-view', id=pages[2].id, slug=pages[2].slug)),
-        MenuEntry.create(pages[3].title, flask.url_for('visitor.page-view', id=pages[3].id, slug=pages[3].slug),
-                         highlight=True)
+        MenuEntry.create(pages[3].title, flask.url_for('visitor.page-view', id=pages[3].id, slug=pages[3].slug)),
+        MenuEntry.create('Albums photo', flask.url_for('visitor.albums'))
     ]
 
-    links[0].order, links[1].order = 0, 1
+    links[0].order, links[1].order, links[2].order = 0, 2, 1
 
     for o in links:
         db.session.add(o)

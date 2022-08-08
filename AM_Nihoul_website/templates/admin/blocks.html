@@ -1,6 +1,6 @@
 {% extends "admin/base.ex.html" %}
 {% from "helpers.inc.html" import create_delete_modal, create_modal %}
-{% from 'bootstrap/form.html' import render_field %}
+{% from 'bootstrap4/form.html' import render_field %}
 
 {% set admin_current = 'blocks' %}
 
@@ -11,7 +11,7 @@
     <h2>Gestion des blocs</h2>
 
     <p>
-        <a class="button-like" href="{{ url_for('admin.block-create') }}"><span class="fas fa-plus"></span> Ajouter un bloc</a>
+        <a class="btn btn-primary" href="{{ url_for('admin.block-create') }}"><span class="fas fa-plus"></span> Ajouter un bloc</a>
     </p>
     </section>
 

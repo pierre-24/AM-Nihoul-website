@@ -1,12 +1,12 @@
 import flask
-from flask import Blueprint, views, request
+from flask import Blueprint, views, request, send_from_directory
 from flask_login import current_user
 
 import requests
 
 from AM_Nihoul_website import db, settings, limiter
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
-from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email, Block
+from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email, Block, Album
 from AM_Nihoul_website.visitor.forms import NewsletterForm
 
 visitor_blueprint = Blueprint('visitor', __name__)
@@ -168,6 +168,11 @@ class UploadView(ObjectManagementMixin, views.View):
 visitor_blueprint.add_url_rule('/fichier/<int:id>/<string:filename>', view_func=UploadView.as_view(name='upload-view'))
 
 
+@visitor_blueprint.route('/photos/<string:filename>')
+def get_picture(filename):
+    return send_from_directory('../' + settings.APP_CONFIG['UPLOADED_PICTURES_DEST'], filename)
+
+
 # -- Newsletter
 class NewsletterRegisterView(BaseMixin, FormView):
     form_class = NewsletterForm
@@ -323,3 +328,45 @@ class NewslettersView(BaseMixin, RenderTemplateView):
 
 
 visitor_blueprint.add_url_rule('/infolettres.html', view_func=NewslettersView.as_view(name='newsletters'))
+
+
+# -- ALBUMS
+class AlbumsView(BaseMixin, RenderTemplateView):
+    template_name = 'albums.html'
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        # fetch albums
+        ctx['albums'] = Album.ordered_items(desc=True)
+
+        return ctx
+
+
+visitor_blueprint.add_url_rule('/albums.html', view_func=AlbumsView.as_view(name='albums'))
+
+
+class AlbumView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
+    model = Album
+    template_name = 'album.html'
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().get(*args, **kwargs)
+
+    def get_object_or_abort(self, error_code=404, *args, **kwargs):
+        super().get_object_or_abort(error_code, *args, **kwargs)
+
+        if self.object.slug != kwargs.get('slug'):
+            flask.abort(error_code)
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        ctx['album'] = self.object
+        ctx['pictures'] = sorted(self.object.pictures, key=lambda k: k.date_taken)
+
+        return ctx
+
+
+visitor_blueprint.add_url_rule('/album-<int:id>-<string:slug>.html', view_func=AlbumView.as_view(name='album'))

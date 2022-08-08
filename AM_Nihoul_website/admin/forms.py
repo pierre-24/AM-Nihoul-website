@@ -77,3 +77,19 @@ class BlockEditForm(FlaskForm):
     attributes = f.StringField('Classes HTML')
 
     submit_button = f.SubmitField('Enregistrer')
+
+
+class AlbumEditForm(FlaskForm):
+
+    title = f.StringField('Titre', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
+    description = f.TextAreaField('Description', widget=TrumbowygTextarea())
+    is_create = f.BooleanField(widget=f.widgets.HiddenInput(), default=False)
+    id_album = f.IntegerField(widget=f.widgets.HiddenInput(), default=-1)
+
+    submit_button = f.SubmitField('Enregistrer')
+
+
+class PictureUploadForm(FlaskForm):
+    file_uploaded = wtf_file.FileField('Image', validators=[wtf_file.FileRequired()])
+
+    submit_button = f.SubmitField('Envoyer')
