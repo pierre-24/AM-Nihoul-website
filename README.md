@@ -4,7 +4,7 @@
 
 Mise au gout du jour du site web [http://annemarienihoul.be/](http://annemarienihoul.be/).
 
-Version: 0.6.5
+Version: 0.7.0
 
 # Installation
 
