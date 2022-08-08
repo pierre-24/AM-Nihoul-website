@@ -9,10 +9,10 @@
 {% block content %}
     <section>
         <h2>{{ album.title }}</h2>
-        <p>Taille totale de l'album: {{ total_size|file_size_formatter }}</p>
+        <p>Taille totale de cet album: {{ total_size|file_size_formatter }}. <a href="{{ url_for('admin.albums') }}">Retour à la liste des albums</a>.</p>
 
         <p>
-            <a class="button-like" href="#uploadFile" data-toggle="modal"><span class="fas fa-plus"></span> <i>Uploader</i> une nouvelle photo</a>
+            <a class="btn btn-primary" href="#uploadFile" data-toggle="modal"><span class="fas fa-plus"></span> <i>Uploader</i> une nouvelle photo</a>
             {% set modal_create_content %}
                 {{ form.hidden_tag() }}
                 {{ render_field(form.file_uploaded) }}

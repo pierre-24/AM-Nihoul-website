@@ -11,7 +11,7 @@
     <h2>Gestion des catégories</h2>
 
     <p>
-        <a class="button-like" href="#createCat" data-toggle="modal"><span class="fas fa-plus"></span> Ajouter une catégorie</a>
+        <a class="btn btn-primary" href="#createCat" data-toggle="modal"><span class="fas fa-plus"></span> Ajouter une catégorie</a>
         {% set modal_create_content %}
             {{ form.hidden_tag() }}
             {{ render_field(form.name) }}

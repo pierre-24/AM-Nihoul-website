@@ -2,15 +2,33 @@
 
 a {
     color: #555;
-                text-decoration: underline;
+    text-decoration: underline;
 
     &:hover {
         color: @main-color;
     }
 
     &.button-like {
-        cursor: pointer;
     }
+
+    &.btn {
+      text-decoration: none;
+    }
+}
+
+.btn-primary {
+  background: @main-color;
+  border: darken(@main-color, 15%);
+
+  &:hover {
+    background: darken(@main-color, 15%);
+  }
+
+  &:focus {
+    background: darken(@main-color, 15%);
+    border: darken(@main-color, 15%);
+    box-shadow: 0 0 0 .2rem lighten(@main-color, 15%);
+  }
 }
 
 .nav a, .navbar a {

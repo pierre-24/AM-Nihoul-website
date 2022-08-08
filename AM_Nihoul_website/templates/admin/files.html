@@ -13,7 +13,7 @@
     <p>Taille totale des fichiers: {{ total_size|file_size_formatter }}</p>
 
     <p>
-        <a class="button-like" href="#uploadFile" data-toggle="modal"><span class="fas fa-plus"></span> <i>Uploader</i> un fichier</a>
+        <a class="btn btn-primary" href="#uploadFile" data-toggle="modal"><span class="fas fa-plus"></span> <i>Uploader</i> un fichier</a>
         {% set modal_create_content %}
             {{ form.hidden_tag() }}
             {{ render_field(form.file_uploaded) }}
