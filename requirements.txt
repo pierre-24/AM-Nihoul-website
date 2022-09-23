@@ -126,7 +126,7 @@ packaging==21.3
     # via limits
 pillow==9.2.0
     # via -r requirements/requirements-base.in
-protobuf==4.21.4
+protobuf==4.21.6
     # via
     #   google-api-core
     #   googleapis-common-protos
