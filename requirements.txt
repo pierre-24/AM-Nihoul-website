@@ -12,6 +12,8 @@ autopep8==1.6.0
     # via -r requirements/requirements.in
 beautifulsoup4==4.11.1
     # via bs4
+blinker==1.6.2
+    # via flask
 bootstrap-flask==2.0.2
     # via -r requirements/requirements-base.in
 bs4==0.0.1
@@ -42,7 +44,7 @@ flake8==5.0.4
     #   flake8-quotes
 flake8-quotes==3.3.1
     # via -r requirements/requirements.in
-flask==2.2.1
+flask==2.3.2
     # via
     #   -r requirements/requirements-base.in
     #   bootstrap-flask
@@ -207,7 +209,7 @@ urllib3==1.26.11
     # via
     #   -r requirements/requirements-bump.in
     #   requests
-werkzeug==2.2.1
+werkzeug==2.3.3
     # via
     #   flask
     #   flask-login
