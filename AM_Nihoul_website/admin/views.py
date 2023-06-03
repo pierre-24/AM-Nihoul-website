@@ -18,6 +18,7 @@ import base64
 import io
 from datetime import datetime
 import re
+import subprocess
 
 from AM_Nihoul_website import settings, db, User, limiter, pictures_set
 from AM_Nihoul_website.admin.utils import Thumbnailer
@@ -97,7 +98,8 @@ class IndexView(AdminBaseMixin, RenderTemplateView):
         # bot service?
         bot_service_status = 'non configuré'
         if settings.APP_CONFIG['BOT_SERVICE_NAME'] is not None:
-            status = os.system('systemctl is-active {}'.format(settings.APP_CONFIG['BOT_SERVICE_NAME']))
+            cmd = '/usr/bin/systemctl is-active {}'.format(settings.APP_CONFIG['BOT_SERVICE_NAME'])
+            status = subprocess.call(cmd, shell=True, executable='/bin/bash')
             bot_service_status = 'actif' if status == 0 else 'inactif (code={})'.format(status)
 
         ctx['statistics'] = {
