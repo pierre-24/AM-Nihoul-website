@@ -19,21 +19,20 @@ class TestFlask(TestCase):
         settings.APP_CONFIG['USE_FAKE_MAIL_SENDER'] = True
         settings.APP_CONFIG['LAUNCH_BOT'] = False
         settings.APP_CONFIG['WTF_CSRF_ENABLED'] = False
-        # TODO: sort out this whole SERVER_NAME stuff
-        # settings.APP_CONFIG['SERVER_NAME'] = 'local.domain'
         settings.APP_CONFIG['UPLOADED_UPLOADS_DEST'] = os.path.join(self.data_files_directory, 'uploads/')
         settings.APP_CONFIG['UPLOADED_PICTURES_DEST'] = os.path.join(self.data_files_directory, 'pictures/')
 
+        # prep temporary database
+        self.db_file = 'temp.db'
+        settings.APP_CONFIG['SQLALCHEMY_DATABASE_URI'] = \
+            'sqlite:///' + os.path.join(self.data_files_directory, self.db_file)
+
+        # create test app app
         self.app = create_app()
 
         # push context
         self.app_context = self.app.app_context()
         self.app_context.push()
-
-        # use temporary database
-        self.db_file = 'temp.db'
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = \
-            'sqlite:///' + os.path.join(self.data_files_directory, self.db_file)
 
         db.create_all()
         self.db_session = db.session
