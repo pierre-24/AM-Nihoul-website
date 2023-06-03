@@ -2,6 +2,7 @@ from datetime import datetime
 import logging
 import os
 import pathlib
+import base64
 
 from AM_Nihoul_website import settings, db
 from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email
@@ -17,14 +18,18 @@ BASE = pathlib.Path(__file__).parent.parent
 class FakeMailClient:
     OUT = 'fake_mail_out.txt'
 
-    def send(self, message, **kwargs):
+    def send(self, message: Message, **kwargs):
         with open(os.path.join(settings.DATA_DIRECTORY, self.OUT), 'a') as f:
-            f.write('====\nSUBJECT: {}\nTO: {}\nON: {}\n====\n{}\n'.format(
+            f.write('**********\nSUBJECT: {}\nTO: {}\nON: {}\n**********\n{}\n'.format(
                 message.subject, message.recipient, datetime.now(), message.msg_html))
 
             if message.html_attachments:
-                f.write('\n'.join('+ Attachment: {}, {}'.format(
+                f.write('\n'.join('+ Attachment: {}, {}\n'.format(
                     a.get_content_type(), a['Content-ID']) for a in message.html_attachments))
+
+            f.write('*********\n')
+            f.write(base64.urlsafe_b64decode(message.prepare()['raw']).decode())
+            f.write('*********\n')
 
 
 def bot_iteration():
@@ -68,7 +73,12 @@ def bot_iteration():
                     'recipient': e.recipient.email,
                     'subject': e.title,
                     'msg_html': e.content,
+                    'reply_to': settings.APP_CONFIG['NEWSLETTER_SENDER_EMAIL']
                 }
+
+                if 'NEWSLETTER_REPLY_TO_EMAIL' in settings.APP_CONFIG \
+                        and settings.APP_CONFIG['NEWSLETTER_REPLY_TO_EMAIL'] is not None:
+                    data['reply_to'] = settings.APP_CONFIG['NEWSLETTER_REPLY_TO_EMAIL']
 
                 message = Message(**data)
 

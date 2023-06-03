@@ -86,7 +86,7 @@ class TestsAlbum(TestFlask):
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
-        album = self.album_1.query.get(self.album_1.id)
+        album = self.db_session.get(Album, self.album_1.id)
         self.assertEqual(album.title, title)
         self.assertEqual(album.description, description)
 
@@ -103,7 +103,7 @@ class TestsAlbum(TestFlask):
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
-        album = self.album_1.query.get(self.album_1.id)
+        album = self.db_session.get(Album, self.album_1.id)
         self.assertNotEqual(album.title, title)
         self.assertNotEqual(album.description, description)
 
@@ -114,7 +114,7 @@ class TestsAlbum(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Album.query.count(), self.num_albums - 1)
-        self.assertIsNone(Album.query.get(self.album_1.id))
+        self.assertIsNone(self.db_session.get(Album, self.album_1.id))
 
     def test_delete_album_not_admin_nok(self):
         self.logout()
@@ -124,7 +124,7 @@ class TestsAlbum(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Album.query.count(), self.num_albums)
-        self.assertIsNotNone(Album.query.get(self.album_1.id))
+        self.assertIsNotNone(self.db_session.get(Album, self.album_1.id))
 
 
 class TestsPicture(TestFlask):
@@ -176,7 +176,7 @@ class TestsPicture(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Picture.query.count(), self.num_pictures)
-        self.assertIsNone(Picture.query.get(p.id))
+        self.assertIsNone(self.db_session.get(Picture, p.id))
 
         self.assertFalse(os.path.exists(p.path()))
         self.assertFalse(os.path.exists(p.path_thumb()))
@@ -214,7 +214,7 @@ class TestsPicture(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Picture.query.count(), self.num_pictures + 1)
-        self.assertIsNotNone(Picture.query.get(p1.id))
+        self.assertIsNotNone(self.db_session.get(Picture, p1.id))
 
     def test_delete_album_also_delete_picture_ok(self):
         self.assertEqual(Picture.query.count(), self.num_pictures)
@@ -227,13 +227,13 @@ class TestsPicture(TestFlask):
 
         response = self.client.delete(flask.url_for('admin.album-delete', id=self.album_1.id))
         self.assertEqual(response.status_code, 302)
-        self.assertIsNone(Album.query.get(self.album_1.id))
+        self.assertIsNone(self.db_session.get(Album, self.album_1.id))
 
         self.assertEqual(Picture.query.count(), self.num_pictures + 1)
 
-        self.assertIsNone(Picture.query.get(p1.id))
-        self.assertIsNone(Picture.query.get(p2.id))
-        self.assertIsNotNone(Picture.query.get(p3.id))
+        self.assertIsNone(self.db_session.get(Picture, p1.id))
+        self.assertIsNone(self.db_session.get(Picture, p2.id))
+        self.assertIsNotNone(self.db_session.get(Picture, p3.id))
 
     def test_album_thumbnail_ok(self):
         self.assertEqual(Picture.query.count(), self.num_pictures)
@@ -252,7 +252,7 @@ class TestsPicture(TestFlask):
         response = self.client.get(flask.url_for('admin.album-set-thumbnail', id=self.album_1.id, picture=p2.id))
         self.assertEqual(response.status_code, 302)
 
-        album_1 = Album.query.get(self.album_1.id)
+        album_1 = self.db_session.get(Album, self.album_1.id)
         self.assertEqual(album_1.get_thumbnail().id, p2.id)
 
     def test_visitor_views_ok(self):

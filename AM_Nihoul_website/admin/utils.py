@@ -35,8 +35,9 @@ class Message:
         subject: str = '',
         msg_html: str = '',
         msg_plain: str = '',
-        cc: List[str] = None,
-        bcc: List[str] = None
+        cc: Optional[List[str]] = None,
+        bcc: Optional[List[str]] = None,
+        reply_to: Optional[str] = None
     ):
         self.sender = sender
         self.recipient = recipient
@@ -45,6 +46,7 @@ class Message:
         self.msg_html = msg_html
         self.cc = [] if cc is None else cc
         self.bcc = [] if bcc is None else bcc
+        self.reply_to = reply_to
 
         self.html_attachments: List[MIMEBase] = []
         self.extra_attachments: List[MIMEBase] = []
@@ -120,6 +122,9 @@ class Message:
 
         if len(self.bcc) > 0:
             msg['Bcc'] = ', '.join(self.bcc)
+
+        if self.reply_to is not None:
+            msg['Reply-To'] = self.reply_to
 
         # attach the text(s) to the message correctly
         attachments = []

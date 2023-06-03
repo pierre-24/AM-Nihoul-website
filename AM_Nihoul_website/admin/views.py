@@ -1,3 +1,5 @@
+import os
+
 import bs4
 import flask
 from flask import Blueprint, jsonify
@@ -82,7 +84,7 @@ class IndexView(AdminBaseMixin, RenderTemplateView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx['content'] = Page.query.get(settings.APP_CONFIG['PAGES']['admin_index'])
+        ctx['content'] = db.session.get(Page, settings.APP_CONFIG['PAGES']['admin_index'])
 
         # few statistics
         sz_uploads = UploadedFile.query\
@@ -91,10 +93,18 @@ class IndexView(AdminBaseMixin, RenderTemplateView):
         sz_pictures = Picture.query\
             .with_entities(func.sum(Picture.picture_size).label('total'))\
             .first()
+
+        # bot service?
+        bot_service_status = 'non configuré'
+        if settings.APP_CONFIG['BOT_SERVICE_NAME'] is not None:
+            status = os.system('systemctl is-active {}'.format(settings.APP_CONFIG['BOT_SERVICE_NAME']))
+            bot_service_status = 'actif' if status == 0 else 'inactif (code={})'.format(status)
+
         ctx['statistics'] = {
             "Nombre d'inscrits à l'infolettre": NewsletterRecipient.query.count(),
             "Nombre d'infolettres": '{} (dont {} publiées)'.format(
                 Newsletter.query.count(), Newsletter.query.filter(Newsletter.draft.is_(False)).count()),
+            'Statut service infolettre': '{}'.format(bot_service_status),
             'Nombre de pages': Page.query.count(),
             'Taille des fichiers': '{:.2f} Mio'.format(
                 sz_uploads[0] / 1024 / 1024 if sz_uploads[0] is not None else 0),
@@ -278,7 +288,7 @@ class CategoriesView(AdminBaseMixin, FormView):
             c = Category.create(form.name.data)
             flask.flash('Catégorie "{}" créée.'.format(c.name))
         else:
-            c = Category.query.get(form.id_category.data)
+            c = db.session.get(Category, form.id_category.data)
             if c is None:
                 flask.abort(403)
 
@@ -710,7 +720,7 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
     def form_valid(self, form):
         self.success_url = flask.url_for('admin.newsletters')
         if not self.object.draft:
-            flask.flash('La newsletter "{}" est déjà publiée'.format(self.object.title))
+            flask.flash("L'infolettre \"{}\" est déjà publiée".format(self.object.title))
             return super().form_valid(form)
         else:
             self.object.draft = False
@@ -807,7 +817,7 @@ class MenuEditView(AdminBaseMixin, FormView, RenderTemplateView):
             c = MenuEntry.create(form.text.data, form.url.data)
             flask.flash('Entrée "{}" créé.'.format(c.text))
         else:
-            c = MenuEntry.query.get(form.id_menu.data)
+            c = db.session.get(MenuEntry, form.id_menu.data)
             if c is None:
                 flask.abort(403)
 
@@ -955,7 +965,7 @@ class AlbumsView(AdminBaseMixin, FormView):
             a = Album.create(form.title.data, form.description.data)
             flask.flash('Album "{}" créé.'.format(a.title))
         else:
-            a = Album.query.get(form.id_album.data)
+            a = db.session.get(Album, form.id_album.data)
             if a is None:
                 flask.abort(403)
 
@@ -1094,7 +1104,7 @@ class AlbumSetThumbnailView(AdminBaseMixin, ObjectManagementMixin, View):
     def get(self, *args, **kwargs):
         self.get_object_or_abort(*args, **kwargs)
         picture_id = kwargs.get('picture')
-        picture = Picture.query.get(picture_id)
+        picture = db.session.get(Picture, picture_id)
         if picture is None:
             flask.abort(404)
 

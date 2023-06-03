@@ -19,7 +19,7 @@ class IndexView(BaseMixin, RenderTemplateView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
 
-        ctx['content'] = Page.query.get(settings.APP_CONFIG['PAGES']['visitor_index'])
+        ctx['content'] = db.session.get(Page, settings.APP_CONFIG['PAGES']['visitor_index'])
         ctx['blocks'] = Block.ordered_items()
         ctx['latest_newsletters'] = Newsletter.query\
             .filter(Newsletter.draft.is_(False))\
@@ -123,7 +123,7 @@ class PageView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
             flask.abort(error_code)  # cannot access directly a non-visible page if not connected
 
         if self.object.next_id:
-            self.object.next = Page.query.get(self.object.next_id)  # load object
+            self.object.next = db.session.get(Page, self.object.next_id)  # load object
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)

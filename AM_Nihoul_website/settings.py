@@ -38,8 +38,10 @@ APP_CONFIG = {
     # newsletter
     'REMOVE_RECIPIENTS_DELTA': timedelta(days=1),
     'NEWSLETTER_SENDER_EMAIL': 'xyz@test.com',
+    'NEWSLETTER_REPLY_TO_EMAIL': None,
     'USE_FAKE_MAIL_SENDER': False,
     'LAUNCH_BOT': True,
+    'BOT_SERVICE_NAME': None,
     'NEWSLETTER_LOGO': 'AM_Nihoul_website/assets/images/newsletter_logo.png',
 
     # scheduler

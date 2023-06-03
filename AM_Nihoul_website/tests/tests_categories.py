@@ -68,7 +68,7 @@ class TestCategories(TestFlask):
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
-        c = Category.query.get(self.category.id)
+        c = self.db_session.get(Category, self.category.id)
         self.assertIsNotNone(c)
         self.assertEqual(c.name, name)
 
@@ -83,7 +83,7 @@ class TestCategories(TestFlask):
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
-        c = Category.query.get(self.category.id)
+        c = self.db_session.get(Category, self.category.id)
         self.assertIsNotNone(c)
         self.assertNotEqual(c.name, name)
 
@@ -94,7 +94,7 @@ class TestCategories(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Category.query.count(), self.num_cat - 1)
-        self.assertIsNone(Category.query.get(self.category.id))
+        self.assertIsNone(self.db_session.get(Category, self.category.id))
 
     def test_category_delete_not_admin_ko(self):
         self.assertEqual(Category.query.count(), self.num_cat)
@@ -104,7 +104,7 @@ class TestCategories(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Category.query.count(), self.num_cat)
-        self.assertIsNotNone(Category.query.get(self.category.id))
+        self.assertIsNotNone(self.db_session.get(Category, self.category.id))
 
     def test_category_move_ok(self):
         self.assertEqual(
