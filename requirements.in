@@ -1,5 +1,4 @@
--r requirements-base.in
--r requirements-bump.in
+-e file:.#egg=AM_Nihoul_website
 flake8
 flake8-quotes
 autopep8
