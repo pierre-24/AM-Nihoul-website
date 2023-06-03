@@ -13,7 +13,7 @@
         <h2>Statistiques</h2>
         <ul>
         {%  for t,v in statistics.items() %}
-            <li>{{ t }}: {{ v }}</li>
+            <li>{{ t }}: {{ v|safe }}</li>
         {% endfor %}
         </ul>
     </section>

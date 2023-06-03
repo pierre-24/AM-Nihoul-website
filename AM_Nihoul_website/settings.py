@@ -41,7 +41,7 @@ APP_CONFIG = {
     'NEWSLETTER_REPLY_TO_EMAIL': None,
     'USE_FAKE_MAIL_SENDER': False,
     'LAUNCH_BOT': True,
-    'SERVICE_NAME': None,
+    'BOT_SERVICE_NAME': None,
     'NEWSLETTER_LOGO': 'AM_Nihoul_website/assets/images/newsletter_logo.png',
 
     # scheduler

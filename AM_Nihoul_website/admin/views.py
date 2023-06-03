@@ -1,3 +1,5 @@
+import os
+
 import bs4
 import flask
 from flask import Blueprint, jsonify
@@ -91,10 +93,18 @@ class IndexView(AdminBaseMixin, RenderTemplateView):
         sz_pictures = Picture.query\
             .with_entities(func.sum(Picture.picture_size).label('total'))\
             .first()
+
+        # bot service?
+        bot_service_status = 'non configuré'
+        if settings.APP_CONFIG['BOT_SERVICE_NAME'] is not None:
+            status = os.system('systemctl is-active {}'.format(settings.APP_CONFIG['BOT_SERVICE_NAME']))
+            bot_service_status = 'actif' if status == 0 else 'inactif (code={})'.format(status)
+
         ctx['statistics'] = {
             "Nombre d'inscrits à l'infolettre": NewsletterRecipient.query.count(),
             "Nombre d'infolettres": '{} (dont {} publiées)'.format(
                 Newsletter.query.count(), Newsletter.query.filter(Newsletter.draft.is_(False)).count()),
+            'Statut service infolettre': '{}'.format(bot_service_status),
             'Nombre de pages': Page.query.count(),
             'Taille des fichiers': '{:.2f} Mio'.format(
                 sz_uploads[0] / 1024 / 1024 if sz_uploads[0] is not None else 0),
