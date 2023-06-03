@@ -169,17 +169,23 @@ class TestNewsletterRecipient(TestFlask):
         self.subscribed_first_step.date_created -= settings.APP_CONFIG['REMOVE_RECIPIENTS_DELTA']
         self.subscribed_first_step.date_created -= datetime.timedelta(seconds=1)  # now I'm sure it's good!
 
+        self.db_session.add(self.subscribed_first_step)
+        self.db_session.commit()
+
         bot.bot_iteration()
 
-        self.assertEqual(self.num_recipients - 1, NewsletterRecipient.query.count())
-        self.assertIsNone(NewsletterRecipient.query.get(self.subscribed_first_step.id))
+        with db.app.app_context():
+            self.assertEqual(self.num_recipients - 1, NewsletterRecipient.query.count())
+            self.assertIsNone(NewsletterRecipient.query.get(self.subscribed_first_step.id))
 
     def test_not_removed_by_bot_above_limit_ok(self):
         self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
 
         bot.bot_iteration()
 
-        self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
+        with db.app.app_context():
+            self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
+
         n = NewsletterRecipient.query.get(self.subscribed_first_step.id)
         db.session.add(n)
         self.assertIsNotNone(n)
@@ -190,10 +196,14 @@ class TestNewsletterRecipient(TestFlask):
         self.subscribed.date_created -= settings.APP_CONFIG['REMOVE_RECIPIENTS_DELTA']
         self.subscribed.date_created -= datetime.timedelta(seconds=1)  # now I'm sure it's good!
 
+        self.db_session.add(self.subscribed_first_step)
+        self.db_session.commit()
+
         bot.bot_iteration()
 
-        self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
-        self.assertIsNotNone(NewsletterRecipient.query.get(self.subscribed.id))
+        with db.app.app_context():
+            self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
+            self.assertIsNotNone(NewsletterRecipient.query.get(self.subscribed.id))
 
     def test_sent_by_bot(self):
         # add an email
@@ -211,7 +221,8 @@ class TestNewsletterRecipient(TestFlask):
         bot.bot_iteration()
 
         # check
-        self.assertTrue(Email.query.get(e.id).sent)
+        with db.app.app_context():
+            self.assertTrue(Email.query.get(e.id).sent)
 
         with open(os.path.join(self.data_files_directory, bot.FakeMailClient.OUT)) as f:
             content = f.read()
