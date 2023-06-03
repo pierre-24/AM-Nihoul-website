@@ -710,7 +710,7 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
     def form_valid(self, form):
         self.success_url = flask.url_for('admin.newsletters')
         if not self.object.draft:
-            flask.flash('La newsletter "{}" est déjà publiée'.format(self.object.title))
+            flask.flash("L'infolettre \"{}\" est déjà publiée".format(self.object.title))
             return super().form_valid(form)
         else:
             self.object.draft = False
