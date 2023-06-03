@@ -116,7 +116,7 @@ class TestNewsletterRecipient(TestFlask):
             id=self.subscribed_first_step.id,
             hash=self.subscribed_first_step.hash))
 
-        r = NewsletterRecipient.query.get(self.subscribed_first_step.id)
+        r = self.db_session.get(NewsletterRecipient, self.subscribed_first_step.id)
         self.assertTrue(r.confirmed)
 
     def test_subscribe_second_step_already_done_ko(self):
@@ -139,7 +139,7 @@ class TestNewsletterRecipient(TestFlask):
             hash=self.subscribed.hash))
 
         self.assertEqual(self.num_recipients - 1, NewsletterRecipient.query.count())
-        self.assertIsNone(NewsletterRecipient.query.get(self.subscribed.id))
+        self.assertIsNone(self.db_session.get(NewsletterRecipient, self.subscribed.id))
 
     def test_subscribe_second_step_wrong_hash_ko(self):
         self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
@@ -150,7 +150,7 @@ class TestNewsletterRecipient(TestFlask):
 
         self.client.get(flask.url_for('visitor.newsletter-confirm', id=self.subscribed_first_step.id, hash=wrong_hash))
 
-        r = NewsletterRecipient.query.get(self.subscribed_first_step.id)
+        r = self.db_session.get(NewsletterRecipient, self.subscribed_first_step.id)
         self.assertFalse(r.confirmed)
 
     def test_unsubscribe_wrong_hash_ko(self):
@@ -162,7 +162,7 @@ class TestNewsletterRecipient(TestFlask):
         self.client.get(flask.url_for('visitor.newsletter-unsubscribe', id=self.subscribed.id, hash=wrong_hash))
 
         self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
-        self.assertIsNotNone(NewsletterRecipient.query.get(self.subscribed.id))
+        self.assertIsNotNone(self.db_session.get(NewsletterRecipient, self.subscribed.id))
 
     def test_removed_by_bot_ok(self):
         self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
@@ -176,7 +176,7 @@ class TestNewsletterRecipient(TestFlask):
 
         with db.app.app_context():
             self.assertEqual(self.num_recipients - 1, NewsletterRecipient.query.count())
-            self.assertIsNone(NewsletterRecipient.query.get(self.subscribed_first_step.id))
+            self.assertIsNone(self.db_session.get(NewsletterRecipient, self.subscribed_first_step.id))
 
     def test_not_removed_by_bot_above_limit_ok(self):
         self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
@@ -186,7 +186,7 @@ class TestNewsletterRecipient(TestFlask):
         with db.app.app_context():
             self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
 
-        n = NewsletterRecipient.query.get(self.subscribed_first_step.id)
+        n = self.db_session.get(NewsletterRecipient, self.subscribed_first_step.id)
         db.session.add(n)
         self.assertIsNotNone(n)
 
@@ -203,7 +203,7 @@ class TestNewsletterRecipient(TestFlask):
 
         with db.app.app_context():
             self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
-            self.assertIsNotNone(NewsletterRecipient.query.get(self.subscribed.id))
+            self.assertIsNotNone(self.db_session.get(NewsletterRecipient, self.subscribed.id))
 
     def test_sent_by_bot(self):
         # add an email
@@ -222,7 +222,7 @@ class TestNewsletterRecipient(TestFlask):
 
         # check
         with db.app.app_context():
-            self.assertTrue(Email.query.get(e.id).sent)
+            self.assertTrue(self.db_session.get(Email, e.id).sent)
 
         with open(os.path.join(self.data_files_directory, bot.FakeMailClient.OUT)) as f:
             content = f.read()
@@ -454,7 +454,7 @@ class TestNewsletter(TestFlask):
 
         self.assertEqual(response.status_code, 302)
 
-        n = Newsletter.query.get(self.draft_newsletter.id)
+        n = self.db_session.get(Newsletter, self.draft_newsletter.id)
         self.assertEqual(n.title, title)
         self.assertEqual(n.content, content)
         self.assertNotEqual(n.slug, old_slug)
@@ -476,7 +476,7 @@ class TestNewsletter(TestFlask):
 
         self.assertEqual(response.status_code, 302)
 
-        n = Newsletter.query.get(self.draft_newsletter.id)
+        n = self.db_session.get(Newsletter, self.draft_newsletter.id)
         self.assertNotEqual(n.title, title)
         self.assertNotEqual(n.content, content)
         self.assertEqual(n.slug, old_slug)
@@ -497,7 +497,7 @@ class TestNewsletter(TestFlask):
 
         self.assertEqual(response.status_code, 302)
 
-        n = Newsletter.query.get(self.published_newsletter.id)
+        n = self.db_session.get(Newsletter, self.published_newsletter.id)
         self.assertEqual(n.title, title)
         self.assertEqual(n.content, content)
         self.assertEqual(n.slug, old_slug)  # slug does not change, as it is published
@@ -509,7 +509,7 @@ class TestNewsletter(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(self.num_newsletter - 1, Newsletter.query.count())
-        self.assertIsNone(Newsletter.query.get(self.draft_newsletter.id))
+        self.assertIsNone(self.db_session.get(Newsletter, self.draft_newsletter.id))
 
     def test_delete_newsletter_not_admin_ko(self):
         self.assertEqual(self.num_newsletter, Newsletter.query.count())
@@ -519,7 +519,7 @@ class TestNewsletter(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(self.num_newsletter, Newsletter.query.count())
-        self.assertIsNotNone(Newsletter.query.get(self.draft_newsletter.id))
+        self.assertIsNotNone(self.db_session.get(Newsletter, self.draft_newsletter.id))
 
     def test_publish_newsletter_ok(self):
         self.assertTrue(self.draft_newsletter.draft)
@@ -529,7 +529,7 @@ class TestNewsletter(TestFlask):
 
         self.assertEqual(response.status_code, 302)
 
-        n = Newsletter.query.get(self.draft_newsletter.id)
+        n = self.db_session.get(Newsletter, self.draft_newsletter.id)
         self.assertFalse(n.draft)
 
         # check email
@@ -548,7 +548,7 @@ class TestNewsletter(TestFlask):
 
         self.assertEqual(response.status_code, 302)
 
-        n = Newsletter.query.get(self.draft_newsletter_with_image.id)
+        n = self.db_session.get(Newsletter, self.draft_newsletter_with_image.id)
         self.assertFalse(n.draft)
 
         # check email
@@ -583,7 +583,7 @@ class TestNewsletter(TestFlask):
 
         self.assertEqual(response.status_code, 302)
 
-        n = Newsletter.query.get(self.draft_newsletter.id)
+        n = self.db_session.get(Newsletter, self.draft_newsletter.id)
         self.assertFalse(n.draft)
 
         # check email
@@ -609,5 +609,5 @@ class TestNewsletter(TestFlask):
 
         self.assertEqual(response.status_code, 302)
 
-        n = Newsletter.query.get(self.draft_newsletter.id)
+        n = self.db_session.get(Newsletter, self.draft_newsletter.id)
         self.assertTrue(n.draft)

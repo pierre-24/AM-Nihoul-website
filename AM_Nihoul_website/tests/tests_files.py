@@ -46,7 +46,7 @@ class TestFiles(TestFlask):
         # test delete directly, as it is easier to upload a file this way
         self.client.delete(flask.url_for('admin.file-delete', id=u.id))
         self.assertEqual(UploadedFile.query.count(), self.num_uploads)
-        self.assertIsNone(UploadedFile.query.get(u.id))
+        self.assertIsNone(self.db_session.get(UploadedFile, u.id))
         self.assertFalse(os.path.exists(u.path()))
 
     def test_upload_api_ok(self):
@@ -172,4 +172,4 @@ class TestFiles(TestFlask):
         self.logout()
         self.client.delete(flask.url_for('admin.file-delete', id=u.id))
         self.assertEqual(UploadedFile.query.count(), self.num_uploads + 1)
-        self.assertIsNotNone(UploadedFile.query.get(u.id))
+        self.assertIsNotNone(self.db_session.get(UploadedFile, u.id))

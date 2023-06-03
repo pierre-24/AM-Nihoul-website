@@ -74,7 +74,7 @@ class TestMenus(TestFlask):
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
-        c = MenuEntry.query.get(self.menu_3.id)
+        c = self.db_session.get(MenuEntry, self.menu_3.id)
         self.assertEqual(c.text, text)
         self.assertEqual(c.url, url)
 
@@ -91,7 +91,7 @@ class TestMenus(TestFlask):
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
-        c = MenuEntry.query.get(self.menu_3.id)
+        c = self.db_session.get(MenuEntry, self.menu_3.id)
         self.assertNotEqual(c.text, text)
         self.assertNotEqual(c.url, url)
         self.assertFalse(c.highlight)
@@ -103,7 +103,7 @@ class TestMenus(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(MenuEntry.query.count(), self.num_menus - 1)
-        self.assertIsNone(MenuEntry.query.get(self.menu_3.id))
+        self.assertIsNone(self.db_session.get(MenuEntry, self.menu_3.id))
 
     def test_menu_delete_not_admin_ko(self):
         self.assertEqual(MenuEntry.query.count(), self.num_menus)
@@ -113,7 +113,7 @@ class TestMenus(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(MenuEntry.query.count(), self.num_menus)
-        self.assertIsNotNone(MenuEntry.query.get(self.menu_3.id))
+        self.assertIsNotNone(self.db_session.get(MenuEntry, self.menu_3.id))
 
     def test_menu_move_ok(self):
         self.assertEqual(

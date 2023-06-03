@@ -146,7 +146,7 @@ class TestPage(TestFlask):
 
         self.assertEqual(response.status_code, 302)
 
-        p = Page.query.get(self.unprotected_page.id)
+        p = db.session.get(Page, self.unprotected_page.id)
         self.assertIsNotNone(p)
         self.assertEqual(p.title, new_title)
         self.assertEqual(p.content, new_text)
@@ -171,7 +171,7 @@ class TestPage(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         # it remains untouched
-        p = Page.query.get(self.unprotected_page.id)
+        p = db.session.get(Page, self.unprotected_page.id)
         self.assertIsNotNone(p)
         self.assertEqual(p.title, self.unprotected_page.title)
         self.assertEqual(p.content, self.unprotected_page.content)
@@ -196,7 +196,7 @@ class TestPage(TestFlask):
 
         self.assertEqual(response.status_code, 302)
 
-        p = Page.query.get(self.protected_page.id)
+        p = db.session.get(Page, self.protected_page.id)
         self.assertIsNotNone(p)
         self.assertEqual(p.title, new_title)
         self.assertEqual(p.content, new_text)
@@ -222,7 +222,7 @@ class TestPage(TestFlask):
 
         self.assertEqual(response.status_code, 302)
 
-        p = Page.query.get(self.page_with_cat.id)
+        p = db.session.get(Page, self.page_with_cat.id)
         self.assertIsNotNone(p)
         self.assertEqual(p.title, new_title)
         self.assertEqual(p.content, new_text)
@@ -249,7 +249,7 @@ class TestPage(TestFlask):
 
         self.assertEqual(response.status_code, 302)
 
-        p = Page.query.get(self.page_with_next.id)
+        p = db.session.get(Page, self.page_with_next.id)
         self.assertIsNotNone(p)
         self.assertEqual(p.title, new_title)
         self.assertEqual(p.content, new_text)
@@ -275,7 +275,7 @@ class TestPage(TestFlask):
 
         self.assertEqual(response.status_code, 302)
 
-        p = Page.query.get(self.page_with_cat.id)
+        p = db.session.get(Page, self.page_with_cat.id)
         self.assertEqual(cat.id, p.category_id)
 
     def test_edit_change_next_ok(self):
@@ -294,23 +294,23 @@ class TestPage(TestFlask):
 
         self.assertEqual(response.status_code, 302)
 
-        p = Page.query.get(self.page_with_next.id)
+        p = db.session.get(Page, self.page_with_next.id)
         self.assertEqual(p.next_id, self.protected_page.id)
 
     def test_toggle_visibility_ok(self):
         self.assertEqual(Page.query.count(), self.num_pages)
 
-        self.assertTrue(Page.query.get(self.protected_page.id).visible)
+        self.assertTrue(db.session.get(Page, self.protected_page.id).visible)
 
         response = self.client.get(flask.url_for('admin.page-toggle-visibility', id=self.protected_page.id))
         self.assertEqual(response.status_code, 302)
 
-        self.assertFalse(Page.query.get(self.protected_page.id).visible)
+        self.assertFalse(db.session.get(Page, self.protected_page.id).visible)
 
         response = self.client.get(flask.url_for('admin.page-toggle-visibility', id=self.protected_page.id))
         self.assertEqual(response.status_code, 302)
 
-        self.assertTrue(Page.query.get(self.protected_page.id).visible)
+        self.assertTrue(db.session.get(Page, self.protected_page.id).visible)
 
     def test_delete_page_ok(self):
         self.assertEqual(Page.query.count(), self.num_pages)
@@ -322,7 +322,7 @@ class TestPage(TestFlask):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Page.query.count(), self.num_pages - 1)
 
-        self.assertIsNone(Page.query.get(self.unprotected_page.id))
+        self.assertIsNone(db.session.get(Page, self.unprotected_page.id))
 
     def test_delete_page_not_admin_ko(self):
         self.assertEqual(Page.query.count(), self.num_pages)
@@ -334,7 +334,7 @@ class TestPage(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Page.query.count(), self.num_pages)
-        self.assertIsNotNone(Page.query.get(self.unprotected_page.id))
+        self.assertIsNotNone(db.session.get(Page, self.unprotected_page.id))
 
     def test_delete_page_with_cat_ok(self):
         self.assertEqual(Page.query.count(), self.num_pages)
@@ -345,8 +345,8 @@ class TestPage(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Page.query.count(), self.num_pages - 1)
-        self.assertIsNone(Page.query.get(self.page_with_cat.id))
-        self.assertIsNotNone(Category.query.get(self.category.id))
+        self.assertIsNone(db.session.get(Page, self.page_with_cat.id))
+        self.assertIsNotNone(db.session.get(Category, self.category.id))
 
     def test_delete_page_which_is_next_ok(self):
         self.assertEqual(Page.query.count(), self.num_pages)
@@ -359,8 +359,8 @@ class TestPage(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Page.query.count(), self.num_pages - 1)
-        self.assertIsNone(Page.query.get(self.page_with_cat.id))
-        self.assertIsNone(Page.query.get(self.page_with_next.id).next_id)
+        self.assertIsNone(db.session.get(Page, self.page_with_cat.id))
+        self.assertIsNone(db.session.get(Page, self.page_with_next.id).next_id)
 
     def test_delete_page_which_has_next_ok(self):
         self.assertEqual(Page.query.count(), self.num_pages)
@@ -373,8 +373,8 @@ class TestPage(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Page.query.count(), self.num_pages - 1)
-        self.assertIsNone(Page.query.get(self.page_with_next.id))
-        self.assertIsNotNone(Page.query.get(self.page_with_cat.id))
+        self.assertIsNone(db.session.get(Page, self.page_with_next.id))
+        self.assertIsNotNone(db.session.get(Page, self.page_with_cat.id))
 
     def test_delete_protected_page_ko(self):
         self.assertEqual(Page.query.count(), self.num_pages)
@@ -385,7 +385,7 @@ class TestPage(TestFlask):
         self.assertEqual(response.status_code, 403)
 
         self.assertEqual(Page.query.count(), self.num_pages)
-        self.assertIsNotNone(Page.query.get(self.unprotected_page.id))
+        self.assertIsNotNone(db.session.get(Page, self.unprotected_page.id))
 
     def test_visitor_view_ok(self):
         title = 'a special title'

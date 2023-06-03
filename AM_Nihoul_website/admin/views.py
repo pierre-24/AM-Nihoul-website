@@ -82,7 +82,7 @@ class IndexView(AdminBaseMixin, RenderTemplateView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx['content'] = Page.query.get(settings.APP_CONFIG['PAGES']['admin_index'])
+        ctx['content'] = db.session.get(Page, settings.APP_CONFIG['PAGES']['admin_index'])
 
         # few statistics
         sz_uploads = UploadedFile.query\
@@ -278,7 +278,7 @@ class CategoriesView(AdminBaseMixin, FormView):
             c = Category.create(form.name.data)
             flask.flash('Catégorie "{}" créée.'.format(c.name))
         else:
-            c = Category.query.get(form.id_category.data)
+            c = db.session.get(Category, form.id_category.data)
             if c is None:
                 flask.abort(403)
 
@@ -807,7 +807,7 @@ class MenuEditView(AdminBaseMixin, FormView, RenderTemplateView):
             c = MenuEntry.create(form.text.data, form.url.data)
             flask.flash('Entrée "{}" créé.'.format(c.text))
         else:
-            c = MenuEntry.query.get(form.id_menu.data)
+            c = db.session.get(MenuEntry, form.id_menu.data)
             if c is None:
                 flask.abort(403)
 
@@ -955,7 +955,7 @@ class AlbumsView(AdminBaseMixin, FormView):
             a = Album.create(form.title.data, form.description.data)
             flask.flash('Album "{}" créé.'.format(a.title))
         else:
-            a = Album.query.get(form.id_album.data)
+            a = db.session.get(Album, form.id_album.data)
             if a is None:
                 flask.abort(403)
 
@@ -1094,7 +1094,7 @@ class AlbumSetThumbnailView(AdminBaseMixin, ObjectManagementMixin, View):
     def get(self, *args, **kwargs):
         self.get_object_or_abort(*args, **kwargs)
         picture_id = kwargs.get('picture')
-        picture = Picture.query.get(picture_id)
+        picture = db.session.get(Picture, picture_id)
         if picture is None:
             flask.abort(404)
 

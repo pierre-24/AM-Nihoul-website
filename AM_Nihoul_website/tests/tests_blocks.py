@@ -71,7 +71,7 @@ class TestsBlock(TestFlask):
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
-        c = Block.query.get(self.block_3.id)
+        c = self.db_session.get(Block, self.block_3.id)
         self.assertEqual(c.text, text)
         self.assertEqual(c.attributes, attributes)
 
@@ -86,7 +86,7 @@ class TestsBlock(TestFlask):
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
-        c = Block.query.get(self.block_3.id)
+        c = self.db_session.get(Block, self.block_3.id)
         self.assertNotEqual(c.text, text)
         self.assertNotEqual(c.attributes, attributes)
 
@@ -97,7 +97,7 @@ class TestsBlock(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Block.query.count(), self.num_blocks - 1)
-        self.assertIsNone(Block.query.get(self.block_3.id))
+        self.assertIsNone(self.db_session.get(Block, self.block_3.id))
 
     def test_block_delete_not_admin_ko(self):
         self.assertEqual(Block.query.count(), self.num_blocks)
@@ -107,7 +107,7 @@ class TestsBlock(TestFlask):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Block.query.count(), self.num_blocks)
-        self.assertIsNotNone(Block.query.get(self.block_3.id))
+        self.assertIsNotNone(self.db_session.get(Block, self.block_3.id))
 
     def test_block_move_ok(self):
         self.assertEqual(

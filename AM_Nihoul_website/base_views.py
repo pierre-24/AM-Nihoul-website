@@ -159,7 +159,7 @@ class ObjectManagementMixin:
             self.object = self._get_object(*args, **kwargs)
 
     def _get_object(self, *args, **kwargs):
-        return self.model.query.get(kwargs.get(self.url_parameter_id))
+        return db.session.get(self.model, kwargs.get(self.url_parameter_id))
 
 
 class DeleteObjectView(ObjectManagementMixin, DeleteView):
