@@ -13,12 +13,12 @@
             <div class="modal-body">
             {{ content|safe }}
             </div>
-            {%  if bottom != '' %}
             <p class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
-                {{ bottom|safe }}
+                {%  if bottom != '' %}
+                    {{ bottom|safe }}
+                {% endif %}
             </p>
-            {% endif %}
         </div>
         </form>
     </div>

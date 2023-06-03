@@ -1097,6 +1097,26 @@ class AlbumView(AdminBaseMixin, ObjectManagementMixin, FormView):
 admin_blueprint.add_url_rule('/album-<int:id>.html', view_func=AlbumView.as_view(name='album'))
 
 
+class AlbumDropzoneUpload(AlbumView):
+    def get(self, *args, **kwargs):
+        return jsonify(**{'status': 'error', 'msg': 'GET'}), 403
+
+    def form_valid(self, form):
+        try:
+            picture = self.upload_picture(form.file_uploaded.data)
+        except UploadNotAllowed as e:
+            return jsonify(**{'status': 'error', 'msg': str(e)}), 400
+
+        db.session.add(picture)
+        db.session.commit()
+
+        return jsonify(**{'status': 'ok'}), 200
+
+
+admin_blueprint.add_url_rule(
+    '/album-<int:id>-upload.html', view_func=AlbumDropzoneUpload.as_view(name='album-dropzone-upload'))
+
+
 class AlbumSetThumbnailView(AdminBaseMixin, ObjectManagementMixin, View):
     methods = ['GET']
     model = Album
