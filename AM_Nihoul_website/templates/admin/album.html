@@ -26,6 +26,15 @@
                 modal_create_content,
                 render_field(form.submit_button),
                 multipart=True) }}
+
+            <a class="btn btn-primary" href="#uploadFiles" data-toggle="modal"><span class="fas fa-plus"></span> <i>Uploader</i> plusieurs photos</a>
+            {% set modal_create_content %}
+                <div id="theDropzone" class="dropzone"></div>
+            {% endset %}
+            {{ create_modal(
+                'uploadFiles',
+                'Uploader des images',
+                modal_create_content) }}
         </p>
 
         <div class="row">
@@ -44,4 +53,27 @@
         </div>
 
     </section>
+{% endblock %}
+
+{# add dropzone #}
+{% block scripts %}
+    {{ super() }}
+    <script src="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone-min.js"></script>
+
+    <script>
+        let theDropzone = new Dropzone("#theDropzone", {
+            url: '{{ url_for('admin.album-dropzone-upload', id=album.id) }}',
+            paramName: "file_uploaded"
+        });
+
+        theDropzone.on("sending", function (file, xhr, formData) {
+            // add CSRF token to the form!
+            formData.append("csrf_token", document.getElementById("csrf_token").value);
+        });
+    </script>
+{% endblock %}
+
+
+{% block other_head_stuffs %}
+    <link href="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone.css" rel="stylesheet" type="text/css" />
 {% endblock %}
