@@ -5,6 +5,7 @@ Utils
 from bs4 import BeautifulSoup
 from slugify import slugify
 import re
+import copy
 
 
 FIRST_LEVEL = 'h3'
@@ -34,7 +35,7 @@ def make_summary_in_soup(soup: BeautifulSoup, page_link: str = '') -> BeautifulS
             li_tag = soup.new_tag('li')
             a_tag = soup.new_tag('a')
             a_tag['href'] = '{}#{}'.format(page_link, node_id)
-            a_tag.extend(title_node.contents)
+            a_tag.extend(copy.deepcopy(title_node.contents))
             li_tag.append(a_tag)
             new_summary_node.append(li_tag)
 
