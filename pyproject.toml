@@ -1,6 +1,6 @@
 [project]
 name = "AM-Nihoul-website"
-version = '0.7.1'
+version = '0.7.2'
 authors = [
     {name = "Pierre Beaujean", email = "association.annemarienihoul@gmail.com"},
 ]
