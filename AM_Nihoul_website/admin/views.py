@@ -1,5 +1,3 @@
-import os
-
 import bs4
 import flask
 from flask import Blueprint, jsonify
