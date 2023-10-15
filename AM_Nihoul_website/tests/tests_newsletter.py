@@ -280,8 +280,6 @@ class TestNewsletter(TestFlask):
         output_text = make_summary(input_text)
         soup = BeautifulSoup(output_text, 'html.parser')
 
-        print(output_text)
-
         self.assertIsNone(soup.find('summary'))
         summary_list = soup.find('ul', class_='summary')
         self.assertIsNotNone(summary_list)

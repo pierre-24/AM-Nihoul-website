@@ -214,6 +214,7 @@ class NewsletterRegisterView(BaseMixin, FormView):
                         'name': form.name.data,
                         'site_name': settings.WEBPAGE_INFO['site_name'],
                         'recipient': r,
+                        'ndays': settings.APP_CONFIG['REMOVE_RECIPIENTS_DELTA'].days
                     }
                 ),
                 r.id)
@@ -222,7 +223,10 @@ class NewsletterRegisterView(BaseMixin, FormView):
 
         # done on purpose, so that nobody knows if a given address has subscribed or not:
         flask.flash(
-            'Nous vous avons envoyé un mail. Consultez-le pour confirmer votre inscription à nos infolettres.')
+            'Veuillez consulter le mail que nous venons de vous envoyer. '
+            "Vous devez y cliquer sur le lien de confirmation d'ici {} jours !!".format(
+                settings.APP_CONFIG['REMOVE_RECIPIENTS_DELTA'].days)
+        )
         self.success_url = flask.url_for('visitor.index')
 
         return super().form_valid(form)
