@@ -36,7 +36,7 @@ APP_CONFIG = {
     'PICTURE_THUMB_SIZE': (400, 300),
 
     # newsletter
-    'REMOVE_RECIPIENTS_DELTA': timedelta(days=1),
+    'REMOVE_RECIPIENTS_DELTA': timedelta(days=5),
     'NEWSLETTER_SENDER_EMAIL': 'xyz@test.com',
     'NEWSLETTER_REPLY_TO_EMAIL': None,
     'USE_FAKE_MAIL_SENDER': False,
