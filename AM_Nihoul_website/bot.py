@@ -4,11 +4,14 @@ import os
 import pathlib
 import base64
 
-from AM_Nihoul_website import settings, db
+from flask import current_app
+
+import AM_Nihoul_website
+from AM_Nihoul_website import db
 from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email
 from AM_Nihoul_website.admin.utils import Gmail, Message
 
-logging.basicConfig(level=settings.LOGLEVEL, format='%(asctime)s (%(levelname)s) %(message)s')
+logging.basicConfig(level=AM_Nihoul_website.LOGLEVEL, format='%(asctime)s (%(levelname)s) %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -19,7 +22,7 @@ class FakeMailClient:
     OUT = 'fake_mail_out.txt'
 
     def send(self, message: Message, **kwargs):
-        with open(os.path.join(settings.DATA_DIRECTORY, self.OUT), 'a') as f:
+        with open(os.path.join(current_app.config['DATA_DIRECTORY'], self.OUT), 'a') as f:
             f.write('**********\nSUBJECT: {}\nTO: {}\nON: {}\n**********\n{}\n'.format(
                 message.subject, message.recipient, datetime.now(), message.msg_html))
 
@@ -42,11 +45,11 @@ def bot_iteration():
     logger.debug('bot_iteration:: tick')
 
     # remove recipients
-    with db.app.app_context():
+    with current_app.app_context():
         recipients = NewsletterRecipient.query\
             .filter(NewsletterRecipient.confirmed.is_(False))\
             .filter(
-                NewsletterRecipient.date_created <= datetime.now() - settings.APP_CONFIG['REMOVE_RECIPIENTS_DELTA'])\
+                NewsletterRecipient.date_created <= datetime.now() - current_app.config['REMOVE_RECIPIENTS_DELTA'])\
             .all()
 
         for r in recipients:
@@ -60,7 +63,7 @@ def bot_iteration():
 
         if len(emails) > 0:
             # get client
-            if settings.APP_CONFIG['USE_FAKE_MAIL_SENDER']:
+            if current_app.config['USE_FAKE_MAIL_SENDER']:
                 client = FakeMailClient()
             else:
                 client = Gmail()
@@ -69,22 +72,22 @@ def bot_iteration():
             for e in emails:
 
                 data = {
-                    'sender': settings.APP_CONFIG['NEWSLETTER_SENDER_EMAIL'],
+                    'sender': current_app.config['NEWSLETTER_SENDER_EMAIL'],
                     'recipient': e.recipient.email,
                     'subject': e.title,
                     'msg_html': e.content,
-                    'reply_to': settings.APP_CONFIG['NEWSLETTER_SENDER_EMAIL']
+                    'reply_to': current_app.config['NEWSLETTER_SENDER_EMAIL']
                 }
 
-                if 'NEWSLETTER_REPLY_TO_EMAIL' in settings.APP_CONFIG \
-                        and settings.APP_CONFIG['NEWSLETTER_REPLY_TO_EMAIL'] is not None:
-                    data['reply_to'] = settings.APP_CONFIG['NEWSLETTER_REPLY_TO_EMAIL']
+                if 'NEWSLETTER_REPLY_TO_EMAIL' in current_app.config \
+                        and current_app.config['NEWSLETTER_REPLY_TO_EMAIL'] is not None:
+                    data['reply_to'] = current_app.config['NEWSLETTER_REPLY_TO_EMAIL']
 
                 message = Message(**data)
 
                 # attach logo
                 message.add_html_attachment(
-                    BASE / settings.APP_CONFIG['NEWSLETTER_LOGO'], cid='newsletter-logo')
+                    BASE / current_app.config['NEWSLETTER_LOGO'], cid='newsletter-logo')
 
                 # attach others, if any
                 for attachment in e.attachments():

@@ -1,10 +1,11 @@
 import flask
-from flask import Blueprint, views, request, send_from_directory
+from flask import Blueprint, views, request, send_from_directory, current_app
 from flask_login import current_user
 
 import requests
 
-from AM_Nihoul_website import db, settings, limiter
+import AM_Nihoul_website
+from AM_Nihoul_website import db, limiter
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
 from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email, Block, Album
 from AM_Nihoul_website.visitor.forms import NewsletterForm
@@ -19,7 +20,7 @@ class IndexView(BaseMixin, RenderTemplateView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
 
-        ctx['content'] = db.session.get(Page, settings.APP_CONFIG['PAGES']['visitor_index'])
+        ctx['content'] = db.session.get(Page, current_app.config['PAGES']['visitor_index'])
         ctx['blocks'] = Block.ordered_items()
         ctx['latest_newsletters'] = Newsletter.query\
             .filter(Newsletter.draft.is_(False))\
@@ -170,25 +171,25 @@ visitor_blueprint.add_url_rule('/fichier/<int:id>/<string:filename>', view_func=
 
 @visitor_blueprint.route('/photos/<string:filename>')
 def get_picture(filename):
-    return send_from_directory('../' + settings.APP_CONFIG['UPLOADED_PICTURES_DEST'], filename)
+    return send_from_directory('../' + current_app.config['UPLOADED_PICTURES_DEST'], filename)
 
 
 # -- Newsletter
 class NewsletterRegisterView(BaseMixin, FormView):
     form_class = NewsletterForm
     template_name = 'newsletter-in.html'
-    decorators = [limiter.limit(settings.NEWSLETTER_LIMIT)]
+    decorators = [limiter.limit(AM_Nihoul_website.NEWSLETTER_LIMIT)]
 
     def form_valid(self, form):
 
         # check captcha, if any
-        if settings.WEBPAGE_INFO['recaptcha_public_key'] != '':
+        if AM_Nihoul_website.WEBPAGE_INFO['recaptcha_public_key'] != '':
             if 'g-recaptcha-response' not in request.form:
                 return self.form_invalid(form)
 
             payload = {
                 'response': request.form['g-recaptcha-response'],
-                'secret': settings.APP_CONFIG['RECAPTCHA_SECRET_KEY']
+                'secret': current_app.config['RECAPTCHA_SECRET_KEY']
             }
             response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=payload).json()
 
@@ -212,9 +213,9 @@ class NewsletterRegisterView(BaseMixin, FormView):
                     'newsletter/newsletter-in.html',
                     **{
                         'name': form.name.data,
-                        'site_name': settings.WEBPAGE_INFO['site_name'],
+                        'site_name': AM_Nihoul_website.WEBPAGE_INFO['site_name'],
                         'recipient': r,
-                        'ndays': settings.APP_CONFIG['REMOVE_RECIPIENTS_DELTA'].days
+                        'ndays': current_app.config['REMOVE_RECIPIENTS_DELTA'].days
                     }
                 ),
                 r.id)
@@ -225,7 +226,7 @@ class NewsletterRegisterView(BaseMixin, FormView):
         flask.flash(
             'Veuillez consulter le mail que nous venons de vous envoyer. '
             "Vous devez y cliquer sur le lien de confirmation d'ici {} jours !!".format(
-                settings.APP_CONFIG['REMOVE_RECIPIENTS_DELTA'].days)
+                current_app.config['REMOVE_RECIPIENTS_DELTA'].days)
         )
         self.success_url = flask.url_for('visitor.index')
 

@@ -17,43 +17,7 @@ source venv/bin/activate
 make init
 ```
 
-Et dans `settings_prod.py`,
-
-```python
-from AM_Nihoul_website import settings
-
-# config interne
-settings.APP_CONFIG.update({
-    # Pour utiliser le bot (ici comme un service externe):
-    'LAUNCH_BOT': False,  # `True` pour l'utiliser en même temps 
-    'USE_FAKE_MAIL_SENDER': False,
-    
-    # Personne indiquée comme envoyant le mail
-    'NEWSLETTER_SENDER_EMAIL': '****',
-    
-    # Clé secrète pour Flask
-    'SECRET_KEY': '****',
-    
-    # Mot de passe d'administration
-    'PASSWORD': '****',
-    
-    # Clé secrète reCAPTCHA (si utilisé)
-    'RECAPTCHA_SECRET_KEY': '***'
-})
-
-settings.WEBPAGE_INFO.update({
-    'site_keywords': 'leucémie, leucemie, nihoul, anne-marie, fondation, cancer, moelle osseuse, hla, malades, aide, aides',
-    'fa_kit': '***',
-    'gtag': '****',
-    'cookies_explain_page': '****',
-    
-    # clé publique recaptcha
-    'recaptcha_public_key': '****'
-})
-
-# ça peut poser des problèmes:
-del settings.APP_CONFIG['SERVER_NAME']
-```
+Si nécessaire, configurez `instance/settings.py`.
 
 N'oubliez pas d'utiliser un service type [gunicorn](https://gunicorn.org/).
 
