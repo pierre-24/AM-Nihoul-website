@@ -199,7 +199,7 @@ class PageEditView(ObjectManagementMixin, BasePageEditView):
 
         flask.flash('Page "{}" modifiée.'.format(self.object.title))
 
-        self.success_url = flask.url_for('admin.pages')
+        self.success_url = flask.url_for('visitor.page-view', id=self.object.id, slug=self.object.slug)
         return super().form_valid(form)
 
 
