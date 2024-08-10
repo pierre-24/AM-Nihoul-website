@@ -5,8 +5,6 @@ import base64
 from AM_Nihoul_website.visitor.models import UploadedFile
 from AM_Nihoul_website.tests import TestFlask
 
-from AM_Nihoul_website import settings
-
 
 class TestFiles(TestFlask):
 
@@ -78,8 +76,8 @@ class TestFiles(TestFlask):
 
         # now, set a ridiculously low size
         self.app_context.push()
-        sz = settings.APP_CONFIG['UPLOAD_CONVERT_TO_JPG']
-        settings.APP_CONFIG['UPLOAD_CONVERT_TO_JPG'] = 1 * 1024
+        sz = self.app.config['UPLOAD_CONVERT_TO_JPG']
+        self.app.config['UPLOAD_CONVERT_TO_JPG'] = 1 * 1024
 
         response = self.client.post(
             flask.url_for('admin.image-base64') + '?context={}'.format(context), data={
@@ -88,7 +86,7 @@ class TestFiles(TestFlask):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json['success'])
 
-        settings.APP_CONFIG['UPLOAD_CONVERT_TO_JPG'] = sz
+        self.app.config['UPLOAD_CONVERT_TO_JPG'] = sz
 
         self.assertEqual(UploadedFile.query.count(), self.num_uploads + 2)
 

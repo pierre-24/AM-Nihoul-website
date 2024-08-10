@@ -1,34 +1,30 @@
 import tempfile
 from unittest import TestCase
 import shutil
-import os
+import pathlib
 
 import flask
+from flask import current_app
 
-from AM_Nihoul_website import create_app, settings, db
+from AM_Nihoul_website import create_app, Config, db
 
 
 class TestFlask(TestCase):
 
     def setUp(self):
         # setup settings
-        self.data_files_directory = tempfile.mkdtemp()
-        settings.DATA_DIRECTORY = self.data_files_directory
-
-        settings.APP_CONFIG['TESTING'] = True
-        settings.APP_CONFIG['USE_FAKE_MAIL_SENDER'] = True
-        settings.APP_CONFIG['LAUNCH_BOT'] = False
-        settings.APP_CONFIG['WTF_CSRF_ENABLED'] = False
-        settings.APP_CONFIG['UPLOADED_UPLOADS_DEST'] = os.path.join(self.data_files_directory, 'uploads/')
-        settings.APP_CONFIG['UPLOADED_PICTURES_DEST'] = os.path.join(self.data_files_directory, 'pictures/')
-
-        # prep temporary database
-        self.db_file = 'temp.db'
-        settings.APP_CONFIG['SQLALCHEMY_DATABASE_URI'] = \
-            'sqlite:///' + os.path.join(self.data_files_directory, self.db_file)
+        self.data_files_directory = pathlib.Path(tempfile.mkdtemp())
+        Config.DATA_DIRECTORY = self.data_files_directory
+        Config.LAUNCH_BOT = False
 
         # create test app app
-        self.app = create_app()
+        self.app = create_app(False)
+
+        self.app.config.update(
+            TESTING=True,
+            USE_FAKE_MAIL_SENDER=True,
+            WTF_CSRF_ENABLED=False
+        )
 
         # push context
         self.app_context = self.app.app_context()
@@ -48,8 +44,8 @@ class TestFlask(TestCase):
         """Login client."""
 
         self.client.post(flask.url_for('admin.login'), data={
-            'login': settings.APP_CONFIG['USERNAME'],
-            'password': settings.APP_CONFIG['PASSWORD']
+            'login': current_app.config['USERNAME'],
+            'password': current_app.config['PASSWORD']
         }, follow_redirects=False)
 
         response = self.client.get(flask.url_for('admin.index'), follow_redirects=False)

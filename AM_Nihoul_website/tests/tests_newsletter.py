@@ -6,8 +6,9 @@ from bs4 import BeautifulSoup
 
 from werkzeug.datastructures import FileStorage
 
+import AM_Nihoul_website
 from AM_Nihoul_website.tests import TestFlask
-from AM_Nihoul_website import db, settings, bot
+from AM_Nihoul_website import db, bot
 from AM_Nihoul_website.visitor.models import NewsletterRecipient, Email, Newsletter, UploadedFile, EmailImageAttachment
 from AM_Nihoul_website.admin.utils import Message
 from AM_Nihoul_website.visitor.utils import make_summary
@@ -51,7 +52,7 @@ class TestNewsletterRecipient(TestFlask):
         self.login()
 
         # mute recaptcha
-        settings.WEBPAGE_INFO['recaptcha_public_key'] = ''
+        AM_Nihoul_website.WEBPAGE_INFO['recaptcha_public_key'] = ''
 
         # add image
         with (BASE / './assets/images/favicon.png').open('rb') as f:
@@ -166,7 +167,7 @@ class TestNewsletterRecipient(TestFlask):
 
     def test_removed_by_bot_ok(self):
         self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
-        self.subscribed_first_step.date_created -= settings.APP_CONFIG['REMOVE_RECIPIENTS_DELTA']
+        self.subscribed_first_step.date_created -= self.app.config['REMOVE_RECIPIENTS_DELTA']
         self.subscribed_first_step.date_created -= datetime.timedelta(seconds=1)  # now I'm sure it's good!
 
         self.db_session.add(self.subscribed_first_step)
@@ -174,7 +175,7 @@ class TestNewsletterRecipient(TestFlask):
 
         bot.bot_iteration()
 
-        with db.app.app_context():
+        with self.app.app_context():
             self.assertEqual(self.num_recipients - 1, NewsletterRecipient.query.count())
             self.assertIsNone(self.db_session.get(NewsletterRecipient, self.subscribed_first_step.id))
 
@@ -183,7 +184,7 @@ class TestNewsletterRecipient(TestFlask):
 
         bot.bot_iteration()
 
-        with db.app.app_context():
+        with self.app.app_context():
             self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
 
         n = self.db_session.get(NewsletterRecipient, self.subscribed_first_step.id)
@@ -193,7 +194,7 @@ class TestNewsletterRecipient(TestFlask):
     def test_not_removed_by_bot_confirmed_ok(self):
         self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
 
-        self.subscribed.date_created -= settings.APP_CONFIG['REMOVE_RECIPIENTS_DELTA']
+        self.subscribed.date_created -= self.app.config['REMOVE_RECIPIENTS_DELTA']
         self.subscribed.date_created -= datetime.timedelta(seconds=1)  # now I'm sure it's good!
 
         self.db_session.add(self.subscribed_first_step)
@@ -201,9 +202,8 @@ class TestNewsletterRecipient(TestFlask):
 
         bot.bot_iteration()
 
-        with db.app.app_context():
-            self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
-            self.assertIsNotNone(self.db_session.get(NewsletterRecipient, self.subscribed.id))
+        self.assertEqual(self.num_recipients, NewsletterRecipient.query.count())
+        self.assertIsNotNone(self.db_session.get(NewsletterRecipient, self.subscribed.id))
 
     def test_sent_by_bot(self):
         # add an email
@@ -221,7 +221,7 @@ class TestNewsletterRecipient(TestFlask):
         bot.bot_iteration()
 
         # check
-        with db.app.app_context():
+        with self.app.app_context():
             self.assertTrue(self.db_session.get(Email, e.id).sent)
 
         with open(os.path.join(self.data_files_directory, bot.FakeMailClient.OUT)) as f:

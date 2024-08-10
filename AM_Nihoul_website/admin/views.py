@@ -1,6 +1,6 @@
 import bs4
 import flask
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, current_app
 from flask.views import View
 import flask_login
 from flask_login import login_required
@@ -18,7 +18,8 @@ from datetime import datetime
 import re
 import subprocess
 
-from AM_Nihoul_website import settings, db, User, limiter, pictures_set
+import AM_Nihoul_website
+from AM_Nihoul_website import db, User, limiter, pictures_set
 from AM_Nihoul_website.admin.utils import Thumbnailer
 from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteObjectView
@@ -33,7 +34,7 @@ admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 class LoginView(BaseMixin, FormView):
     form_class = LoginForm
     template_name = 'admin/login.html'
-    decorators = [limiter.limit(settings.LOGIN_LIMIT)]
+    decorators = [limiter.limit(AM_Nihoul_website.LOGIN_LIMIT)]
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
@@ -50,7 +51,7 @@ class LoginView(BaseMixin, FormView):
 
     def form_valid(self, form):
 
-        if form.login.data != settings.APP_CONFIG['USERNAME'] or form.password.data != settings.APP_CONFIG['PASSWORD']:
+        if form.login.data != current_app.config['USERNAME'] or form.password.data != current_app.config['PASSWORD']:
             flask.flash('Utilisateur ou mot de passe incorrect', 'error')
             return self.form_invalid(form)
 
@@ -83,7 +84,7 @@ class IndexView(AdminBaseMixin, RenderTemplateView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx['content'] = db.session.get(Page, settings.APP_CONFIG['PAGES']['admin_index'])
+        ctx['content'] = db.session.get(Page, current_app.config['PAGES']['admin_index'])
 
         # few statistics
         sz_uploads = UploadedFile.query\
@@ -95,8 +96,8 @@ class IndexView(AdminBaseMixin, RenderTemplateView):
 
         # bot service?
         bot_service_status = 'non configuré'
-        if settings.APP_CONFIG['BOT_SERVICE_NAME'] is not None:
-            cmd = '/usr/bin/systemctl is-active {}'.format(settings.APP_CONFIG['BOT_SERVICE_NAME'])
+        if current_app.config['BOT_SERVICE_NAME'] is not None:
+            cmd = '/usr/bin/systemctl is-active {}'.format(current_app.config['BOT_SERVICE_NAME'])
             status = subprocess.call(cmd, shell=True, executable='/bin/bash')
             bot_service_status = 'actif' if status == 0 else 'inactif (code={})'.format(status)
 
@@ -444,7 +445,7 @@ class UploadBase64(AdminBaseMixin, View):
         source_fp = io.BytesIO(im)
 
         # if image is larger than a given size, use jpg instead
-        if len(im) > settings.APP_CONFIG['UPLOAD_CONVERT_TO_JPG']:
+        if len(im) > current_app.config['UPLOAD_CONVERT_TO_JPG']:
             image = Image.open(io.BytesIO(im))
             source_fp = io.BytesIO()
             image = image.convert('RGB')  # strip transparency
@@ -757,7 +758,7 @@ class NewsletterPublishView(AdminBaseMixin, ObjectManagementMixin, FormView):
                     flask.render_template(
                         'newsletter/newsletter.html',
                         **{
-                            'site_name': settings.WEBPAGE_INFO['site_name'],
+                            'site_name': AM_Nihoul_website.WEBPAGE_INFO['site_name'],
                             'newsletter': self.object,
                             'transformed_content': content,
                             'recipient': r,
@@ -1049,7 +1050,7 @@ class AlbumView(AdminBaseMixin, ObjectManagementMixin, FormView):
         r_filename = pictures_set.save(data, name=filename)
 
         # create thumbnail:
-        image = Thumbnailer(*settings.APP_CONFIG['PICTURE_THUMB_SIZE'])\
+        image = Thumbnailer(*current_app.config['PICTURE_THUMB_SIZE'])\
             .transform(Image.open(pictures_set.path(r_filename)))
 
         thumb_fp = io.BytesIO()

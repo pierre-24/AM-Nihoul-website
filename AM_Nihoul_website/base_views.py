@@ -1,7 +1,8 @@
 import flask
 from flask.views import View
 
-from AM_Nihoul_website import settings, db
+import AM_Nihoul_website
+from AM_Nihoul_website import db
 from AM_Nihoul_website.visitor.forms import NewsletterForm
 
 
@@ -177,7 +178,7 @@ class BaseMixin:
 
         # webpage info
         ctx = super().get_context_data(*args, **kwargs)
-        ctx.update(**settings.WEBPAGE_INFO)
+        ctx.update(**AM_Nihoul_website.WEBPAGE_INFO)
 
         from AM_Nihoul_website.visitor.models import Page, Category, MenuEntry
 
