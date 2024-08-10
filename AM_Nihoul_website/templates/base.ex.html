@@ -30,6 +30,14 @@
     </div>
     {% endif %}
 
+    <header>
+        <ul class="nav justify-content-end container">
+        {% for i in secondary_menu %}
+            <li class="nav-item"><a href="{{ i.url }}" class="nav-link">{{ i.text }}</a></li>
+        {% endfor %}
+        </ul>
+    </header>
+
     <nav class="navbar navbar-light bg-light navbar-expand-md">
         <div class="container">
             <a href="/" class="navbar-brand" ><img src="{{ url_for('static', filename='images/logo.svg') }}" alt="logo"> <!--<span class="d-none d-lg-inline">{{ site_name }}</span>--></a>
@@ -39,7 +47,7 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
-                    {% for i in menus %}
+                    {% for i in main_menu %}
                         <li class="nav-item"><a class="nav-link" href="{{ i.url }}">{{ i.text }}</a></li>
                     {% endfor %}
                 </ul>

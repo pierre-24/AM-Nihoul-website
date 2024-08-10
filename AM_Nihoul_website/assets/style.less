@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 @main-color: #FF5B5B;
 
 a {
@@ -40,7 +42,18 @@ body {
 }
 
 header {
-  font-size: 90%;
+  font-size: 80%;
+  background: #eee;
+
+  ul.nav li a {
+    background-color: @main-color;
+    color: white;
+    border-bottom: 4px solid @main-color;
+
+    &:hover {
+      border-bottom: 4px solid darken(@main-color, 15%);
+    }
+  }
 }
 
 blockquote {

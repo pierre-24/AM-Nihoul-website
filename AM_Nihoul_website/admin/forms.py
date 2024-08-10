@@ -68,6 +68,7 @@ class MenuEditForm(FlaskForm):
 
     is_create = f.BooleanField(widget=f.widgets.HiddenInput(), default=False)
     id_menu = f.IntegerField(widget=f.widgets.HiddenInput(), default=-1)
+    position = f.SelectField('Position du menu', choices=[(1, 'Principal'), (2, 'Secondaire')], coerce=int)
 
     submit_button = f.SubmitField('Enregistrer')
 

@@ -26,7 +26,7 @@ from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm, \
     NewsletterPublishForm, MenuEditForm, BlockEditForm, AlbumEditForm, PictureUploadForm
 from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient, Newsletter, Email, \
-    MenuEntry, EmailImageAttachment, Block, Album, Picture
+    MenuEntry, EmailImageAttachment, Block, Album, Picture, MenuType
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -813,9 +813,20 @@ class MenuEditView(AdminBaseMixin, FormView, RenderTemplateView):
     template_name = 'admin/menus.html'
     form_class = MenuEditForm
 
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx.update({
+            'menus': MenuEntry.ordered_items().order_by(MenuEntry.position).all()
+        })
+
+        return ctx
+
     def form_valid(self, form):
         if form.is_create.data:
-            c = MenuEntry.create(form.text.data, form.url.data)
+            c = MenuEntry.create(
+                form.text.data, form.url.data,
+                MenuType.main if form.position.data == 1 else MenuType.secondary
+            )
             flask.flash('Entrée "{}" créé.'.format(c.text))
         else:
             c = db.session.get(MenuEntry, form.id_menu.data)
@@ -824,6 +835,7 @@ class MenuEditView(AdminBaseMixin, FormView, RenderTemplateView):
 
             c.text = form.text.data
             c.url = form.url.data
+            c.position = MenuType.main if form.position.data == 1 else MenuType.secondary
             flask.flash('Entrée "{}" modifié.'.format(c.text))
 
         db.session.add(c)

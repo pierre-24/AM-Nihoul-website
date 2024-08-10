@@ -1,3 +1,4 @@
+import enum
 import os
 import secrets
 import slugify
@@ -7,6 +8,7 @@ from typing import List, Union
 
 import sqlalchemy.orm
 from sqlalchemy import event
+from sqlalchemy_utils.types.choice import ChoiceType
 
 from AM_Nihoul_website import db, uploads_set, pictures_set
 from AM_Nihoul_website.base_models import BaseModel
@@ -303,18 +305,25 @@ class EmailImageAttachment(BaseModel):
         return o
 
 
+class MenuType(enum.Enum):
+    main = 1
+    secondary = 2
+
+
 class MenuEntry(OrderableMixin, BaseModel):
 
     text = db.Column(db.Text(), nullable=False)
     url = db.Column(db.Text(), nullable=False)
     highlight = db.Column(db.Boolean, default=False, nullable=False)
+    position = db.Column(ChoiceType(MenuType, impl=db.Integer()), nullable=False, default=MenuType.main)
 
     @classmethod
-    def create(cls, text, url, highlight=False):
+    def create(cls, text, url, position=MenuType.main, highlight=False):
         o = cls()
         o.text = text
         o.url = url
         o.highlight = highlight
+        o.position = position
 
         # set order
         last_m = MenuEntry.ordered_items(desc=True).first()
