@@ -453,3 +453,8 @@ class Album(OrderableMixin, BaseModel):
 def receive_album_title_set(target, value, oldvalue, initiator):
     """Set the slug accordingly"""
     target.slug = slugify.slugify(value)
+
+
+class Brief(TextMixin, BaseModel):
+
+    visible = db.Column(db.Boolean, default=False, nullable=False)
