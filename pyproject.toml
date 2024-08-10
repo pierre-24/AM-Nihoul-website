@@ -35,5 +35,14 @@ dependencies = [
     'bs4'
 ]
 
+[project.optional-dependencies]
+dev = [
+    "flake8",
+    "flake8-quotes",
+    "autopep8",
+    "bump2version"
+]
+
+
 [tool.setuptools]
 packages = ['AM_Nihoul_website']

@@ -108,7 +108,7 @@ def create_app():
     login_manager.login_view = 'admin.login'  # automatic redirection
 
     bootstrap.init_app(app)
-    alembic.init_app(app, db)
+    alembic.init_app(app)
     limiter.init_app(app)
 
     # add cli

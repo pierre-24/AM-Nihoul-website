@@ -1,11 +1,16 @@
+app=AM_Nihoul_website
+
 install:
-	pip-sync && pip3 install -e .
+	pip install -r requirements.txt
+
+install-dev: install
+	pip install -e .[dev]
 
 sync:
 	pip-sync
 
 init-back:
-	export FLASK_APP=AM_Nihoul_website; flask init
+	flask --app $(app) init
 
 front:
 	npm i
@@ -17,10 +22,10 @@ lint:
 	flake8 AM_Nihoul_website --max-line-length=120 --ignore=N802
 
 run:
-	export FLASK_APP=AM_Nihoul_website; export FLASK_DEBUG=1; flask run -h 127.0.0.1 -p 5000
+	export FLASK_DEBUG=1; flask run --app $(app)
 
 test:
 	python -m unittest discover -s AM_Nihoul_website.tests
 
 bot:
-	export FLASK_APP=AM_Nihoul_website; flask bot
+	flask --app $(app) bot
