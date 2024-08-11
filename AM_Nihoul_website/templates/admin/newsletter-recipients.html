@@ -21,7 +21,7 @@
                         <a class="button-like" href="#delete-recipient-{{ recipient.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
                         {{ create_delete_modal('recipient', recipient.id, 'le destinataire nommé "' + recipient.name + '".', 'admin.newsletter-recipient-delete') }}
                     </span>
-                    <span class="info">Inscription: {{ recipient.date_created|date_formatter }}</span>
+                    <span class="info">Inscription: {{ recipient.date_created|date_formatter }}, <b>{% if not recipient.confirmed %}non{% endif %} confirmé</b></span>
                 </td>
             </tr>
         {% endfor %}

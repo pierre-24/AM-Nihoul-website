@@ -94,6 +94,9 @@ WEBPAGE_INFO = {
     'site_keywords': 'leucémie, aide au malades',
     'site_version': '0.7.3',
 
+    # trumpbowyg
+    'trumbowyg_version': '2.27.3',
+
     # external services
     'fa_kit': '',  # FontAwesome
     'gtag': '',  # Google Analytics

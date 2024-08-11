@@ -1,0 +1,33 @@
+{% extends "admin/base.ex.html" %}
+{% from "helpers.inc.html" import create_delete_modal %}
+
+{% set admin_current = 'briefs' %}
+
+{% block brief_title %}Gestion des brèves{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Gestion des briefs</h2>
+
+    <p>
+        <a class="btn btn-primary" href="{{ url_for('admin.brief-create') }}"><span class="fas fa-plus"></span> Ajouter une brève</a>
+    </p>
+
+    <table class="admin-list">
+        {% for brief in briefs %}
+            <tr>
+                <td class="left">
+                    <span class="title"><a href="{{ url_for('visitor.brief-view', id=brief.id, slug=brief.slug) }}">{{ brief.title }}</a></span>
+                </td>
+                <td class="right">
+                    <span class="buttons">
+                        <a class="button-like" href="{{ url_for('admin.brief-edit', id=brief.id, slug=brief.slug) }}"><span class="fas fa-pen-square"></span></a>
+                        <a class="button-like" href="{{ url_for('admin.brief-toggle-visibility', id=brief.id) }}"><span class="fas fa-eye{% if not brief.visible %}-slash{% endif %}"></span></a>
+                    </span>
+                    <span class="info">Dernière modification: {{ brief.date_modified|date_formatter }}</span>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    </section>
+{% endblock %}

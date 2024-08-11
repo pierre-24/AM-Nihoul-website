@@ -94,3 +94,11 @@ class PictureUploadForm(FlaskForm):
     file_uploaded = wtf_file.FileField('Image', validators=[wtf_file.FileRequired()])
 
     submit_button = f.SubmitField('Envoyer')
+
+
+class BriefEditForm(FlaskForm):
+    title = f.StringField(
+        'Titre', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
+    content = f.TextAreaField('Texte', widget=TrumbowygTextarea())
+
+    submit_button = f.SubmitField('Enregistrer')

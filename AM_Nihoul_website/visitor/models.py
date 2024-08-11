@@ -458,3 +458,19 @@ def receive_album_title_set(target, value, oldvalue, initiator):
 class Brief(TextMixin, BaseModel):
 
     visible = db.Column(db.Boolean, default=False, nullable=False)
+
+    @classmethod
+    def create(cls, title, content, visible=False):
+        o = cls()
+        o.title = title
+        o.content = content
+        o.visible = visible
+        o.slug = slugify.slugify(title)
+
+        return o
+
+
+@event.listens_for(Brief.title, 'set', named=True)
+def receive_brief_title_set(target, value, oldvalue, initiator):
+    """Set the slug accordingly"""
+    target.slug = slugify.slugify(value)

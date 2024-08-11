@@ -7,7 +7,8 @@ import requests
 import AM_Nihoul_website
 from AM_Nihoul_website import db, limiter
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
-from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email, Block, Album
+from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email, Block, Album, \
+    Brief
 from AM_Nihoul_website.visitor.forms import NewsletterForm
 
 visitor_blueprint = Blueprint('visitor', __name__)
@@ -375,3 +376,54 @@ class AlbumView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
 
 
 visitor_blueprint.add_url_rule('/album-<int:id>-<string:slug>.html', view_func=AlbumView.as_view(name='album'))
+
+
+# -- Brief
+class BriefsView(BaseMixin, RenderTemplateView):
+    template_name = 'briefs.html'
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx['briefs'] = Brief.query.filter(Brief.visible.is_(True)).order_by(Brief.id.desc()).all()
+        return ctx
+
+
+visitor_blueprint.add_url_rule('/brèves.html', view_func=BriefsView.as_view(name='briefs'))
+
+
+class BriefView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
+    template_name = 'brief.html'
+    model = Brief
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().get(*args, **kwargs)
+
+    def get_object_or_abort(self, error_code=404, *args, **kwargs):
+        super().get_object_or_abort(error_code, *args, **kwargs)
+
+        if self.object.slug != kwargs.get('slug'):
+            flask.abort(error_code)
+
+        if not self.object.visible and not current_user.is_authenticated:
+            flask.abort(error_code)  # cannot access directly a non-visible page if not connected
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx['brief'] = self.object
+
+        # next?
+        next_brief = Brief.query\
+            .filter(Brief.visible.is_(True))\
+            .order_by(Brief.id.desc())\
+            .filter(Brief.id < self.object.id)\
+            .first()
+
+        if next_brief is not None:
+            ctx['next_brief'] = next_brief
+
+        return ctx
+
+
+visitor_blueprint.add_url_rule(
+    '/brève/<int:id>-<string:slug>.html', view_func=BriefView.as_view(name='brief-view'))

@@ -21,10 +21,10 @@
 {# add editor #}
 {% block scripts %}
     {{ super() }}
-    {{ include_editor('block') }}
+    {{ include_editor('block', trumbowyg_version) }}
 {% endblock %}
 
 
 {% block other_head_stuffs %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.25.1/ui/trumbowyg.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/{{ trumbowyg_version }}/ui/trumbowyg.min.css">
 {% endblock %}

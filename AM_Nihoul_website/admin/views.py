@@ -24,9 +24,9 @@ from AM_Nihoul_website.admin.utils import Thumbnailer
 from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteObjectView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm, \
-    NewsletterPublishForm, MenuEditForm, BlockEditForm, AlbumEditForm, PictureUploadForm
+    NewsletterPublishForm, MenuEditForm, BlockEditForm, AlbumEditForm, PictureUploadForm, BriefEditForm
 from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient, Newsletter, Email, \
-    MenuEntry, EmailImageAttachment, Block, Album, Picture, MenuType
+    MenuEntry, EmailImageAttachment, Block, Album, Picture, MenuType, Brief
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -1169,3 +1169,117 @@ class PictureDeleteView(AdminBaseMixin, DeleteObjectView):
 
 
 admin_blueprint.add_url_rule('/photo-suppression-<int:id>.html', view_func=PictureDeleteView.as_view('picture-delete'))
+
+
+# -- Briefs
+class BriefsView(AdminBaseMixin, RenderTemplateView):
+    template_name = 'admin/briefs.html'
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        # fetch list of pages
+        ctx['briefs'] = Brief.query.order_by(Brief.slug).all()
+
+        return ctx
+
+
+admin_blueprint.add_url_rule('/brèves.html', view_func=BriefsView.as_view(name='briefs'))
+
+
+class BriefEditView(ObjectManagementMixin, AdminBaseMixin, FormView):
+    form_class = BriefEditForm
+    template_name = 'admin/brief-edit.html'
+    model = Brief
+
+    def get_object_or_abort(self, *args, **kwargs):
+        """Add slug check"""
+
+        super().get_object_or_abort(*args, **kwargs)
+
+        if self.object.slug != kwargs.get('slug', None):
+            flask.abort(404)
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().post(*args, **kwargs)
+
+    def get_form_kwargs(self):
+        return {
+            'title': self.object.title,
+            'content': self.object.content,
+        }
+
+    def form_valid(self, form):
+        self.object.title = form.title.data
+        self.object.content = form.content.data
+
+        db.session.add(self.object)
+        db.session.commit()
+
+        flask.flash('Brève "{}" modifiée.'.format(self.object.title))
+
+        self.success_url = flask.url_for('visitor.page-view', id=self.object.id, slug=self.object.slug)
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule(
+    '/brève-edition-<int:id>-<string:slug>.html', view_func=BriefEditView.as_view(name='brief-edit'))
+
+
+class BriefCreateView(AdminBaseMixin, FormView):
+    form_class = BriefEditForm
+    template_name = 'admin/brief-edit.html'
+
+    def form_valid(self, form):
+        brief = Brief.create(form.title.data, form.content.data)
+
+        db.session.add(brief)
+        db.session.commit()
+
+        flask.flash('Brève "{}" créée.'.format(brief.title))
+
+        self.success_url = flask.url_for('admin.briefs')
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule('/brève-nouveau.html', view_func=BriefCreateView.as_view(name='brief-create'))
+
+
+class BriefDeleteView(AdminBaseMixin, DeleteObjectView):
+    model = Brief
+
+    def post_deletion(self, obj):
+        self.success_url = flask.url_for('admin.briefs')
+        flask.flash('Brève "{}" supprimée.'.format(obj.title))
+
+
+admin_blueprint.add_url_rule('/brève-suppression-<int:id>.html', view_func=BriefDeleteView.as_view('brief-delete'))
+
+
+class BriefToggleVisibility(AdminBaseMixin, ObjectManagementMixin, View):
+    methods = ['GET']
+    model = Brief
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        self.object.visible = not self.object.visible
+
+        db.session.add(self.object)
+        db.session.commit()
+
+        return flask.redirect(flask.url_for('admin.briefs'))
+
+    def dispatch_request(self, *args, **kwargs):
+        if flask.request.method == 'GET':
+            return self.get(*args, **kwargs)
+        else:
+            flask.abort(403)
+
+
+admin_blueprint.add_url_rule(
+    '/brève-visible-<int:id>.html', view_func=BriefToggleVisibility.as_view('brief-toggle-visibility'))

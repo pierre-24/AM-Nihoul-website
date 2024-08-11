@@ -1,0 +1,20 @@
+{% extends "base.ex.html" %}
+
+{% block page_title %}Brèves{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>Brèves</h2>
+
+    <table class="admin-list">
+        {% for brief in briefs %}
+            <tr>
+                <td class="left">
+                    <span class="title"><a href="{{ url_for('visitor.brief-view', id=brief.id, slug=brief.slug) }}">{{ brief.title }}</a></span>
+                    <span class="info">Dernière modification {{ brief.date_modified|date_formatter }}.</span>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    </section>
+{% endblock %}
