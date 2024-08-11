@@ -102,3 +102,18 @@ class BriefEditForm(FlaskForm):
     content = f.TextAreaField('Texte', widget=TrumbowygTextarea())
 
     submit_button = f.SubmitField('Enregistrer')
+
+
+class FeaturedEditForm(FlaskForm):
+    title = f.StringField('Titre', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
+
+    link = f.StringField(
+        'URL', validators=[f.validators.InputRequired(), f.validators.Length(max=150), f.validators.URL()])
+    link_text = f.StringField(
+        'Texte du lien', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
+    image_link = f.StringField(
+        'Image', validators=[f.validators.InputRequired(), f.validators.Length(max=150), f.validators.URL()])
+
+    text = f.TextAreaField('Texte', widget=TrumbowygTextarea())
+
+    submit_button = f.SubmitField('Enregistrer')
