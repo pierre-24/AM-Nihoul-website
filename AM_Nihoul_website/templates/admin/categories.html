@@ -47,6 +47,7 @@
                             modal_edit_content,
                             render_field(form.submit_button)
                         ) }}
+                        <a class="button-like" href="{{ url_for('admin.category-toggle-visibility', id=category.id) }}"><span class="fas fa-eye{% if not category.visible %}-slash{% endif %}"></span></a>
                         <a class="button-like" href="{{ url_for('admin.category-move', id=category.id, action='down') }}"><span class="fas fa-caret-square-up"></span></a>
                         <a class="button-like" href="{{ url_for('admin.category-move', id=category.id, action='up') }}"><span class="fas fa-caret-square-down"></span></a>
                         <a class="button-like" href="#delete-category-{{ category.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>

@@ -361,6 +361,30 @@ admin_blueprint.add_url_rule(
     '/catégorie-mouvement-<string:action>-<int:id>.html', view_func=CategoryMoveView.as_view('category-move'))
 
 
+class CategoryToggleVisibility(AdminBaseMixin, ObjectManagementMixin, View):
+    methods = ['GET']
+    model = Category
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        self.object.visible = not self.object.visible
+
+        db.session.add(self.object)
+        db.session.commit()
+
+        return flask.redirect(flask.url_for('admin.categories'))
+
+    def dispatch_request(self, *args, **kwargs):
+        if flask.request.method == 'GET':
+            return self.get(*args, **kwargs)
+        else:
+            flask.abort(403)
+
+
+admin_blueprint.add_url_rule(
+    '/catégorie-visible-<int:id>.html', view_func=CategoryToggleVisibility.as_view('category-toggle-visibility'))
+
+
 # -- Files
 class FilesView(AdminBaseMixin, FormView):
     template_name = 'admin/files.html'

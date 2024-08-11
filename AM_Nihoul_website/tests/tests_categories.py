@@ -153,3 +153,17 @@ class TestCategories(TestFlask):
         self.assertEqual(
             [self.category, self.other_category, self.yet_another_category],
             Category.query.order_by(Category.order).all())
+
+    def test_toggle_visibility_ok(self):
+
+        self.assertTrue(db.session.get(Category, self.category.id).visible)
+
+        response = self.client.get(flask.url_for('admin.category-toggle-visibility', id=self.category.id))
+        self.assertEqual(response.status_code, 302)
+
+        self.assertFalse(db.session.get(Category, self.category.id).visible)
+
+        response = self.client.get(flask.url_for('admin.category-toggle-visibility', id=self.category.id))
+        self.assertEqual(response.status_code, 302)
+
+        self.assertTrue(db.session.get(Category, self.category.id).visible)

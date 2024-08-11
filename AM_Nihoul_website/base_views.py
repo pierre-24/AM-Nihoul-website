@@ -190,7 +190,7 @@ class BaseMixin:
         ctx['main_menu'] = MenuEntry.ordered_items().filter(MenuEntry.position.is_(MenuType.main))
 
         # bottom menu
-        categories = Category.ordered_items()
+        categories = Category.ordered_items().filter(Category.visible.is_(True))
         pages = Page.query.filter(Page.category_id.isnot(None)).all()
 
         cats = {}

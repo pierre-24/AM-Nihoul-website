@@ -81,11 +81,13 @@ class Category(OrderableMixin, BaseModel):
     """Category (of the pages)"""
 
     name = db.Column(db.VARCHAR(length=150), nullable=False)
+    visible = db.Column(db.Boolean, default=False, nullable=False)
 
     @classmethod
-    def create(cls, name):
+    def create(cls, name, visible=True):
         o = cls()
         o.name = name
+        o.visible = visible
 
         # set order
         last_c = Category.ordered_items(desc=True).first()
