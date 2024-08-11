@@ -78,7 +78,8 @@ class Config:
     # important pages
     PAGES = {
         'visitor_index': 1,
-        'admin_index': 2
+        'admin_index': 2,
+        'contact_page': 3,
     }
 
     # recaptcha secret key

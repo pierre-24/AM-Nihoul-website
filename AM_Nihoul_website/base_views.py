@@ -212,4 +212,7 @@ class BaseMixin:
         # newsletter form
         ctx['newsletter_form'] = NewsletterForm()
 
+        # contact
+        ctx['contact_page'] = Page.query.get(flask.current_app.config['PAGES']['contact_page'])
+
         return ctx

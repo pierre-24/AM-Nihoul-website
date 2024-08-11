@@ -71,21 +71,30 @@
     </div>
 
     <footer class="container mt-4">
-        <div id="bottom-nav">
-            {% for k, pages in bottom_menu.items() %}
-                <div class="bottom-nav-block">
-                <h3>{{ k }}</h3>
-                    <ul>
-                    {% for p in pages %}
-                        <li><a href="{{ url_for('visitor.page-view', id=p.id, slug=p.slug) }}">{{ p.title }}</a></li>
-                    {% endfor %}
-                    </ul>
-                </div>
+        <div class="row">
+            <div id="bottom-nav" class="col-lg-7 col-md-6 col-12">
+                <div class="row">
+                {% for k, pages in bottom_menu.items() %}
+                    <div class="bottom-nav-block col-xl-4 col-lg-6 col-12">
+                    <h3>{{ k }}</h3>
+                        <ul>
+                        {% for p in pages %}
+                            <li><a href="{{ url_for('visitor.page-view', id=p.id, slug=p.slug) }}">{{ p.title }}</a></li>
+                        {% endfor %}
+                        </ul>
+                    </div>
 
-            {% endfor %}
+                {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-1 col-0"></div>
+            <div id="contact-info" class="col-lg-4 col-md-5 col-12">
+                {{ contact_page.content|safe }}
+            </div>
         </div>
 
-        <div id="bottom-txt" class="mt-2 mb-4">
+
+        <div id="bottom-txt" class="mt-4 mb-4 pt-4">
             &copy; {{ site_name }}
             &bull; Site web par <a href="{{ author_url }}">{{ author_name }}</a>  (version: <a href="{{ repo_url }}/tree/v{{ site_version }}">{{ site_version }}</a>)
             {# admin #}
