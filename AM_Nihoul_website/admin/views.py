@@ -1216,6 +1216,7 @@ class BriefEditView(ObjectManagementMixin, AdminBaseMixin, FormView):
 
     def form_valid(self, form):
         self.object.title = form.title.data
+        self.object.summary = form.summary.data
         self.object.content = form.content.data
 
         db.session.add(self.object)
@@ -1223,7 +1224,7 @@ class BriefEditView(ObjectManagementMixin, AdminBaseMixin, FormView):
 
         flask.flash('Brève "{}" modifiée.'.format(self.object.title))
 
-        self.success_url = flask.url_for('visitor.page-view', id=self.object.id, slug=self.object.slug)
+        self.success_url = flask.url_for('visitor.brief-view', id=self.object.id, slug=self.object.slug)
         return super().form_valid(form)
 
 
@@ -1236,7 +1237,7 @@ class BriefCreateView(AdminBaseMixin, FormView):
     template_name = 'admin/brief-edit.html'
 
     def form_valid(self, form):
-        brief = Brief.create(form.title.data, form.content.data)
+        brief = Brief.create(form.title.data, form.summary.data, form.content.data)
 
         db.session.add(brief)
         db.session.commit()

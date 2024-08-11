@@ -8,10 +8,11 @@
 
 {% block content %}
     <section>
-    <h2>Modification d'une brief</h2>
+    <h2>Modification d'une brève</h2>
     <form method="post">
         {{ form.hidden_tag() }}
         {{ render_field(form.title) }}
+        {{ render_field(form.summary) }}
         {{ render_field(form.content) }}
         {{ render_field(form.submit_button) }}
     </form>

@@ -43,8 +43,8 @@
             <div class="card">
                 <div class="card-body">
                 <h2 class="card-title">{{ brief.title }}</h2>
-                <p class="card-text">{{ brief.content_with_summary()|safe }}</p>
-                    <a href="{{ url_for('static', filename='images/logo.svg') }}" class="card-link">Lire la suite</a>
+                <p class="card-text">{{ brief.summary }}</p>
+                    <a href="{{ url_for('visitor.brief-view', id=brief.id, slug=brief.slug) }}" class="card-link">Lire la suite</a>
                 </div>
             </div>
             </div>

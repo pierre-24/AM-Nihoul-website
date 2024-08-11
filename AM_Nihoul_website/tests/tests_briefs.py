@@ -11,8 +11,8 @@ class TestBrief(TestFlask):
         super().setUp()
 
         # add some briefs
-        self.visible_brief = Brief.create('test but visible', 'test', visible=True)
-        self.invisible_brief = Brief.create('test but invisible', 'test', visible=False)
+        self.visible_brief = Brief.create('test but visible', '', 'test', visible=True)
+        self.invisible_brief = Brief.create('test but invisible', '', 'test', visible=False)
 
         db.session.add(self.visible_brief)
         db.session.add(self.invisible_brief)
@@ -28,10 +28,12 @@ class TestBrief(TestFlask):
 
         title = 'test'
         text = 'this is a test'
+        summary = 'a summary'
 
         response = self.client.post(flask.url_for('admin.brief-create'), data={
             'title': title,
             'content': text,
+            'summary': summary
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
@@ -42,6 +44,7 @@ class TestBrief(TestFlask):
         self.assertEqual(p.title, title)
         self.assertEqual(p.content, text)
         self.assertFalse(p.visible)
+        self.assertEqual(p.summary, summary)
 
     def test_create_brief_not_admin_ko(self):
         self.assertEqual(Brief.query.count(), self.num_briefs)
@@ -62,6 +65,7 @@ class TestBrief(TestFlask):
 
         new_title = 'this is a new title'
         new_text = 'whatever'
+        new_summary = 'this is a new summary'
 
         # edit unprotected brief is ok
         self.assertNotEqual(self.visible_brief.title, new_title)
@@ -72,6 +76,7 @@ class TestBrief(TestFlask):
             data={
                 'title': new_title,
                 'content': new_text,
+                'summary': new_summary
             }, follow_redirects=False)
 
         self.assertEqual(response.status_code, 302)
@@ -80,6 +85,7 @@ class TestBrief(TestFlask):
         self.assertIsNotNone(p)
         self.assertEqual(p.title, new_title)
         self.assertEqual(p.content, new_text)
+        self.assertEqual(p.summary, new_summary)
 
     def test_edit_brief_not_admin_ko(self):
         self.assertEqual(Brief.query.count(), self.num_briefs)
