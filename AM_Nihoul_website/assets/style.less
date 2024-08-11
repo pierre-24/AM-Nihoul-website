@@ -103,69 +103,95 @@ blockquote {
       margin: 1rem 0;
     }
 
-  #content {
-    padding-left: 0;
-    padding-right: 0;
+    #index-page {
 
-    section {
-      padding: 8px 16px;
-      margin-bottom: 16px;
-      background: white;
-      border: 1px solid #ddd;
-      border-top: 4px solid @main-color;
-      font-size: 1.15rem;
-      line-height: 1.4;
-
-      &.page-next {
-        border-top: none;
-        background: lighten(@main-color, 5%);
-        margin-top: -17px;
-
-        p {
-          padding: 0;
-          margin: 0;
-          text-align: center;
-          color: white;
-
-          a {
-            color: white;
-            font-weight: bold;
-          }
-        }
+      #index-head-jumbotron {
+        background: @main-color;
+        color: white;
       }
 
-      h2 {
+      #index-briefs h1, #index-featured h1 {
+        text-align: center;
+        font-size: 130%;
+        font-weight: bold;
+        margin-bottom: 24px;
         color: @main-color;
       }
 
-      p.newsletter-info, p.page-info {
-          color: #555;
-          font-size: 90%;
-          background: #eee;
-          padding: 4px 8px;
+    }
+
+    #content {
+      padding-left: 0;
+      padding-right: 0;
+
+      h1.index-title {
+        text-align: center;
+        margin: 32px 0;
+
+        span {
+          border-bottom: 4px solid @main-color;
+        }
       }
 
-      img {
-          max-width: 100%;
-          height: auto;
-      }
+      section {
+        padding: 8px 16px;
+        margin-bottom: 16px;
+        background: white;
+        border: 1px solid #ddd;
+        border-top: 4px solid @main-color;
+        font-size: 1.15rem;
+        line-height: 1.4;
 
-      h3 {
-         a.anchor {
-            display: none;
-            margin-left: 8px;
-            font-weight: normal !important;
-            color: black;
-            text-decoration: none;
+        &.page-next {
+          border-top: none;
+          background: lighten(@main-color, 5%);
+          margin-top: -17px;
+
+          p {
+            padding: 0;
+            margin: 0;
+            text-align: center;
+            color: white;
+
+            a {
+              color: white;
+              font-weight: bold;
+            }
+          }
         }
 
-        &:hover a.anchor {
-          display: inline;
+        h2 {
           color: @main-color;
+        }
+
+        p.newsletter-info, p.page-info {
+            color: #555;
+            font-size: 90%;
+            background: #eee;
+            padding: 4px 8px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        h3 {
+           a.anchor {
+              display: none;
+              margin-left: 8px;
+              font-weight: normal !important;
+              color: black;
+              text-decoration: none;
+          }
+
+          &:hover a.anchor {
+            display: inline;
+            color: @main-color;
+          }
         }
       }
     }
-  }
 }
 
 // newsletter

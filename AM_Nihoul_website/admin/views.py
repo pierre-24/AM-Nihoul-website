@@ -1179,7 +1179,7 @@ class BriefsView(AdminBaseMixin, RenderTemplateView):
         ctx = super().get_context_data(*args, **kwargs)
 
         # fetch list of pages
-        ctx['briefs'] = Brief.query.order_by(Brief.slug).all()
+        ctx['briefs'] = Brief.query.order_by(Brief.id.desc()).all()
 
         return ctx
 

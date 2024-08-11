@@ -23,10 +23,10 @@ class IndexView(BaseMixin, RenderTemplateView):
 
         ctx['content'] = db.session.get(Page, current_app.config['PAGES']['visitor_index'])
         ctx['blocks'] = Block.ordered_items()
-        ctx['latest_newsletters'] = Newsletter.query\
-            .filter(Newsletter.draft.is_(False))\
-            .order_by(Newsletter.date_published.desc())\
-            .all()[:5]
+        ctx['latest_briefs'] = Brief.query\
+            .filter(Brief.visible.is_(True))\
+            .order_by(Brief.id.desc())\
+            .all()[:3]
 
         return ctx
 

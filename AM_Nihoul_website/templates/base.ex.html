@@ -62,38 +62,13 @@
     <div id="page-content">
 
         {% block page_content %}
-        <div id="content" class="container mt-4 pb-4">
-        {% block content %}{% endblock %}
-        </div>
-        {% endblock %}
-    </div>
-
-    {% if not no_newsletter %}
-    <div id="newsletter" class="jumbotron-fluid">
-        <div class="container">
-        <p>Pour ne rien rater, inscrivez vous à nos infolettres !</p>
-        <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post" id="newsletter-form">
-            {{ newsletter_form.hidden_tag() }}
-            <div class="form-row">
-                <div class="col-md-5">{{ newsletter_form.name(placeholder='Prénom et nom', class_='form-control mb-2') }}</div>
-                <div class="col-md-5">{{ newsletter_form.email(placeholder='Adresse email', class_='form-control mb-2') }}</div>
-                {% if recaptcha_public_key != '' and not no_tracking %}
-                    <button id="submit_button" name="submit_button" class="btn btn-primary mb-2 g-recaptcha"
-                            data-sitekey="{{ recaptcha_public_key }}"
-                            data-action="submit"
-                            data-callback="recaptcha_submit">
-                        S'inscrire</button>
-                {% else %}
-                    <div class="col-md-2">{{ newsletter_form.submit_button(
-                        class_='btn btn-primary mb-2'
-                    ) }}</div>
-                {% endif %}
+            <div id="content" class="container mt-4 pb-4">
+            {% block content %}{% endblock %}
             </div>
 
-        </form>
-        </div>
+            {% include "newsletter.inc.html" %}
+        {% endblock %}
     </div>
-    {% endif %}
 
     <footer class="container mt-4">
         <div id="bottom-nav">
@@ -110,7 +85,7 @@
             {% endfor %}
         </div>
 
-        <div id="bottom-txt" class="mt-2">
+        <div id="bottom-txt" class="mt-2 mb-4">
             &copy; {{ site_name }}
             &bull; Site web par <a href="{{ author_url }}">{{ author_name }}</a>  (version: <a href="{{ repo_url }}/tree/v{{ site_version }}">{{ site_version }}</a>)
             {# admin #}

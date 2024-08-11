@@ -2,41 +2,57 @@
 
 {% block page_title %}Accueil{% endblock %}
 
-{% block content %}
-    <section>
-    <h2>{{ content.title }}</h2>
-    {{ content.content|safe }}
-    </section>
-
-    <div class="row" id="admin-row-block">
-        {% for block in blocks %}
-            <div class="{{ block.attributes }}">
-                <div class="block">
-                    {{ block.text|safe }}
-                </div>
-            </div>
-        {% endfor %}
+{% block page_content %}
+    <div id="index-page">
+    <div id="index-head-jumbotron" class="jumbotron jumbotron-fluid mb-4">
+        <div class="container">
+        <h1>{{ content.title }}</h1>
+        {{ content.content|safe }}
+        </div>
     </div>
 
-    {% if latest_newsletters|length > 0 %}
+    <div id="index-featured" class="pb-4">
 
-    <section>
-    {% with newsletter = latest_newsletters[0] %}
-    <h2>{{ newsletter.title }}</h2>
-    {{ newsletter.content_with_summary()|safe }}
-    {% endwith %}
+        <h1>Mis en avant</h1>
 
-    {% if latest_newsletters|length > 1 %}
-        <h3>Infolettres plus anciennes</h3>
-        <ul>
-        {% for newsletter in latest_newsletters %}
-            {% if loop.index > 1 %}
-                <li><a href="{{ url_for('visitor.newsletter-view', id=newsletter.id, slug=newsletter.slug) }}">{{ newsletter.title }}</a> (publiée {{ newsletter.date_published|date_formatter }})</li>
-            {% endif %}
-        {% endfor %}
-        </ul>
-    {% endif %}
+        <div class="row" id="admin-row-block">
+            {% for block in blocks %}
+                <div class="{{ block.attributes }}">
+                    <div class="block">
+                        {{ block.text|safe }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+    </div> <!-- featured -->
     
-    </section>
+    {% include 'newsletter.inc.html' %}
+
+    {% if latest_briefs|length > 0 %}
+
+        <div id="index-briefs" class="pb-4">
+
+        <h1>Nos dernières infos</h1>
+
+        <div class="container">
+        <div class="row">
+
+        {%  for brief in latest_briefs %}
+            <div class="col-sm-4">
+            <div class="card">
+                <div class="card-body">
+                <h2 class="card-title">{{ brief.title }}</h2>
+                <p class="card-text">{{ brief.content_with_summary()|safe }}</p>
+                    <a href="{{ url_for('static', filename='images/logo.svg') }}" class="card-link">Lire la suite</a>
+                </div>
+            </div>
+            </div>
+        {% endfor %}
+         </div>
+        </div>
+
+        </div> <!-- briefs -->
     {% endif %}
+    </div> <!-- index page -->
 {% endblock %}
