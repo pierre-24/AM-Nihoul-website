@@ -478,3 +478,27 @@ class Brief(TextMixin, BaseModel):
 def receive_brief_title_set(target, value, oldvalue, initiator):
     """Set the slug accordingly"""
     target.slug = slugify.slugify(value)
+
+
+class Featured(OrderableMixin, BaseModel):
+
+    title = db.Column(db.VARCHAR(length=150), nullable=False)
+    link = db.Column(db.VARCHAR(length=150), nullable=False)
+    link_text = db.Column(db.VARCHAR(length=150), nullable=False)
+    image_link = db.Column(db.VARCHAR(length=150), nullable=False)
+    text = db.Column(db.Text, default='', nullable=False)
+
+    @classmethod
+    def create(cls, title, link, image_link, text):
+        o = cls()
+
+        o.title = title
+        o.link = link
+        o.image_link = image_link
+        o.text = text
+
+        # set order
+        last_c = Featured.ordered_items(desc=True).first()
+        o.order = last_c.order + 1 if last_c else 0
+
+        return o
