@@ -8,7 +8,7 @@ import AM_Nihoul_website
 from AM_Nihoul_website import db, limiter
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
 from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email, Block, Album, \
-    Brief
+    Brief, Featured
 from AM_Nihoul_website.visitor.forms import NewsletterForm
 
 visitor_blueprint = Blueprint('visitor', __name__)
@@ -27,6 +27,8 @@ class IndexView(BaseMixin, RenderTemplateView):
             .filter(Brief.visible.is_(True))\
             .order_by(Brief.id.desc())\
             .all()[:3]
+
+        ctx['featureds'] = Featured.ordered_items()[:4]
 
         return ctx
 
@@ -317,6 +319,18 @@ class NewsletterView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx['newsletter'] = self.object
+
+        # next?
+        next_newsletter = Newsletter.query\
+            .filter(Newsletter.draft.is_(False))\
+            .filter(Newsletter.date_published < self.object.date_published)\
+            .filter(Newsletter.id.isnot(self.object.id))\
+            .order_by(Newsletter.date_published.desc())\
+            .first()
+
+        if next_newsletter is not None:
+            ctx['next_newsletter'] = next_newsletter
+
         return ctx
 
 
@@ -329,7 +343,11 @@ class NewslettersView(BaseMixin, RenderTemplateView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx['newsletters'] = Newsletter.query.filter(Newsletter.draft.is_(False)).order_by(Newsletter.id.desc()).all()
+        ctx['newsletters'] = Newsletter.query\
+            .filter(Newsletter.draft.is_(False))\
+            .order_by(Newsletter.date_published.desc())\
+            .all()
+
         return ctx
 
 

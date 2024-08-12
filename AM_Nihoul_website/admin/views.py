@@ -1237,6 +1237,7 @@ class BriefEditView(ObjectManagementMixin, AdminBaseMixin, FormView):
         return {
             'title': self.object.title,
             'content': self.object.content,
+            'summary': self.object.summary
         }
 
     def form_valid(self, form):

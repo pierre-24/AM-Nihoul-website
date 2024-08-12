@@ -2,9 +2,8 @@
 
 {% block page_title %}Infolettres{% endblock %}
 
-{% block content %}
-    <section>
-    <h2>Infolettres</h2>
+
+{% block section_content %}
 
     <table class="admin-list">
         {% for newsletter in newsletters %}
@@ -16,5 +15,4 @@
             </tr>
         {% endfor %}
     </table>
-    </section>
 {% endblock %}

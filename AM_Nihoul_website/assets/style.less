@@ -108,6 +108,21 @@ blockquote {
     #index-head-jumbotron {
       background: @main-color;
       color: white;
+
+      a {
+        color: white;
+
+        &:hover {
+          color: #ddd;
+        }
+      }
+    }
+
+    .card {
+
+      &:hover {
+        box-shadow: 8px 8px  8px -4px #aaa;
+      }
     }
 
     #index-briefs h1, #index-featured h1 {
@@ -132,6 +147,16 @@ blockquote {
       &:hover:after {
         padding-left: .75em;
       }
+    }
+
+    #list-links {
+      text-align: center;
+      font-weight: bold;
+
+      a {
+        text-decoration: none;
+      }
+
     }
 
   }

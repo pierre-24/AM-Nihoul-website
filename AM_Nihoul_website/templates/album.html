@@ -2,10 +2,7 @@
 
 {% block page_title %}{{ album.title }} (album photo){% endblock %}
 
-{% block content %}
-    <section>
-    <h2>{{ album.title }}</h2>
-
+{% block section_content %}
         <p class="page-info">
             {% if current_user.is_authenticated %}
                 Dernière modification <b>{{ album.date_modified|date_formatter }}</b>.
@@ -27,7 +24,6 @@
             </a>
         {% endfor %}
     </div>
-    </section>
 {% endblock %}
 
 {% block scripts %}

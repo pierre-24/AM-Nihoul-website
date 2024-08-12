@@ -8,9 +8,20 @@
         <p class="newsletter-info">
             Infolettre publiée {{ newsletter.date_published|date_formatter }}{% if newsletter.date_published < newsletter.date_modified %} (dernière modification <b>{{ newsletter.date_modified|date_formatter }}</b>){% endif %}.
             {% if current_user.is_authenticated %}
-                <a href="{{ url_for('admin.newsletter-edit', id=newsletter.id, slug=newsletter.slug) }}">Éditer cette newsletter</a>.
+                <a href="{{ url_for('admin.newsletter-edit', id=newsletter.id, slug=newsletter.slug) }}">Éditer cette infolettre</a>.
             {% endif %}
         </p>
     {{ newsletter.content_with_summary()|safe }}
     </section>
+    
+    <section class="page-next">
+        <p>
+            <span class="fas fa-arrow-right"></span>
+            {% if next_newsletter %}
+                Infolettre suivante : <a href="{{ url_for('visitor.newsletter-view', id=next_newsletter.id, slug=next_newsletter.slug) }}">{{ next_newsletter.title }}</a>
+            {% else %}
+                <a href="{{ url_for('visitor.newsletters') }}">Retour à la liste des infolettres</a>
+            {% endif %}
+        </p>
+        </section>
 {% endblock %}

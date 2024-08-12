@@ -63,7 +63,12 @@
 
         {% block page_content %}
             <div id="content" class="container mt-4 pb-4">
-            {% block content %}{% endblock %}
+            {% block content %}
+                <section>
+                    <h2>{{ self.page_title() }}</h2>
+                    {% block section_content %}{% endblock %}
+                </section>
+            {% endblock %}
             </div>
 
             {% include "newsletter.inc.html" %}

@@ -2,10 +2,10 @@
 
 {% block page_title %}Albums photo{% endblock %}
 
-{% block content %}
-    <section>
-    <h2>Albums photo</h2>
+
+{% block section_content %}
     <p>Retrouvez ici les photos de nos différentes activités.</p>
+
     <div class="d-flex justify-content-center flex-wrap">
         {% for album in albums %}
 
@@ -20,5 +20,4 @@
         </div>
         {% endfor %}
     </div>
-    </section>
 {% endblock %}

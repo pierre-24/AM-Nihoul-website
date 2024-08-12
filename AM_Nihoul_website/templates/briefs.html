@@ -2,9 +2,8 @@
 
 {% block page_title %}Brèves{% endblock %}
 
-{% block content %}
-    <section>
-    <h2>Brèves</h2>
+
+{% block section_content %}
 
     <table class="admin-list">
         {% for brief in briefs %}
@@ -16,5 +15,4 @@
             </tr>
         {% endfor %}
     </table>
-    </section>
 {% endblock %}

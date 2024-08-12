@@ -4,7 +4,7 @@
 
 {% block page_content %}
     <div id="index-page">
-    <div id="index-head-jumbotron" class="jumbotron jumbotron-fluid mb-4">
+    <div id="index-head-jumbotron" class="jumbotron jumbotron-fluid pt-4 pb-4">
         <div class="container">
         <h1>{{ content.title }}</h1>
         {{ content.content|safe }}
@@ -15,14 +15,20 @@
 
         <h1>Mis en avant</h1>
 
-        <div class="row" id="admin-row-block">
-            {% for block in blocks %}
-                <div class="{{ block.attributes }}">
-                    <div class="block">
-                        {{ block.text|safe }}
-                    </div>
+        <div class="container">
+        <div class="card-deck">
+
+        {% for featured in featureds %}
+            <div class="card{% if loop.last %} d-none d-lg-block{% elif loop.index == 2 %} d-none d-md-block{% endif %}">
+                <img class="card-img-top" src="{{ featured.image_link }}" alt="Card image cap">
+                <div class="card-body">
+                <h3 class="card-title">{{ featured.title }}</h3>
+                <p class="card-text">{{ featured.text|safe }}</p>
+                    <a href="{{ featured.link }}" class="btn btn-primary">{{ featured.link_text }}</a>
                 </div>
-            {% endfor %}
+            </div>
+        {% endfor %}
+         </div>
         </div>
 
     </div> <!-- featured -->
@@ -36,20 +42,22 @@
         <h1>Nos dernières infos</h1>
 
         <div class="container">
-        <div class="row">
+        <div class="card-deck">
 
-        {%  for brief in latest_briefs %}
-            <div class="col-sm-4">
-            <div class="card">
+        {% for brief in latest_briefs %}
+            <div class="card{% if loop.last %} d-none d-lg-block{% endif %}">
                 <div class="card-body">
-                <h2 class="card-title">{{ brief.title }}</h2>
+                <h3 class="card-title">{{ brief.title }}</h3>
                 <p class="card-text">{{ brief.summary }}</p>
                     <a href="{{ url_for('visitor.brief-view', id=brief.id, slug=brief.slug) }}" class="card-link">Lire la suite</a>
                 </div>
             </div>
-            </div>
         {% endfor %}
          </div>
+        </div>
+
+        <div id="list-links" class="container mt-4 mb-4">
+            <a href="{{ url_for('visitor.briefs') }}">Toutes nos infos</a> &bull; <a href="{{ url_for('visitor.newsletters') }}">Toutes nos infolettres</a>
         </div>
 
         </div> <!-- briefs -->
