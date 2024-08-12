@@ -8,8 +8,16 @@
     <meta charset="UTF-8">
 
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0">
-    <meta name="description" content="{{ site_name }} : {{ site_description }}">
+    <meta name="description" content="{{ site_description }}">
     <meta name="keywords" content="{{ site_keywords }}">
+
+    <!-- facebook og -->
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}" />
+    <meta property="og:title" content="{% block og_title %}{{ self.page_title() }}{% endblock %}" />
+    <meta property="og:description" content="{% block og_description %}{{ site_description }}{% endblock %}" />
+    <meta property="og:image" content="{% block og_image %}{{ url_for('static', filename='images/facebook_placeholder.jpg', _external=True) }}{% endblock %}" />
+
+    {% block extra_meta %}{% endblock %}
 
     {{ bootstrap.load_css() }}
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">

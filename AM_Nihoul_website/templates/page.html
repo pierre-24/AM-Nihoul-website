@@ -2,6 +2,13 @@
 
 {% block page_title %}{{ page.title }}{% endblock %}
 
+{% block og_description %}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block extra_meta %}
+    <meta property="og:article:published_time" content="{{ page.date_created }}" />
+    <meta property="og:article:modified_time" content="{{ page.date_modified }}" />
+{% endblock %}
+
 {% block content %}
     <section>
     <h2>{{ page.title }}</h2>

@@ -2,6 +2,13 @@
 
 {% block page_title %}{{ newsletter.title }}{% endblock %}
 
+{% block og_description %}Infolettre du {{ newsletter.date_created.strftime('%m/%Y') }}.{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block extra_meta %}
+    <meta property="og:article:published_time" content="{{ newsletter.date_created }}" />
+    <meta property="og:article:modified_time" content="{{ newsletter.date_modified }}" />
+{% endblock %}
+
 {% block content %}
     <section>
     <h2>{{ newsletter.title }}</h2>

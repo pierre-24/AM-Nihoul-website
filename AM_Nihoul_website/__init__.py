@@ -161,7 +161,7 @@ def init_command():
     delete_then_create(upload_dir)
     print('!! Upload directory in {}'.format(upload_dir))
 
-    delete_then_create(upload_dir)
+    delete_then_create(picture_dir)
     print('!! Picture directory in {}'.format(picture_dir))
 
     # DB:
