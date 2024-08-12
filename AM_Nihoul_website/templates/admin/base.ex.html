@@ -6,6 +6,7 @@
     <div class="container  mt-4 pb-4">
     <ul  id="admin-menu" class="nav nav-tabs">
         <li class="nav-item"><a href="{{ url_for('admin.index') }}" class="nav-link {%  if not admin_current %}active{% endif %}">Accueil</a></li>
+        <li class="nav-item"><a href="{{ url_for('admin.featureds') }}" class="nav-link {%  if admin_current == 'featureds' %}active{% endif %}">Mises en avant</a></li>
         <li class="nav-item"><a href="{{ url_for('admin.briefs') }}" class="nav-link {%  if admin_current == 'briefs' %}active{% endif %}">Brèves</a></li>
         <li class="nav-item"><a href="{{ url_for('admin.newsletters') }}" class="nav-link {%  if admin_current == 'newsletter' %}active{% endif %}">Infolettres</a></li>
         <li class="nav-item"><a href="{{ url_for('admin.albums') }}" class="nav-link {%  if admin_current == 'album' %}active{% endif %}">Albums</a></li>
@@ -23,7 +24,12 @@
     </ul>
 
     <div id="content" class="admin-content">
-        {% block content %}{% endblock %}
+        {% block content %}
+            <section>
+            <h2>{{ self.page_title() }}</h2>
+            {% block section_content %}{% endblock %}
+            </section>
+        {% endblock %}
     </div>
     </div>
 {% endblock %}

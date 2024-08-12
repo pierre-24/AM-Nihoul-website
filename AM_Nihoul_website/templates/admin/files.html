@@ -6,9 +6,7 @@
 
 {% block page_title %}Gestion des fichier{% endblock %}
 
-{% block content %}
-    <section>
-    <h2>Gestion des fichiers</h2>
+{% block section_content %}
 
     <p>Taille totale des fichiers: {{ total_size|file_size_formatter }}</p>
 
@@ -46,7 +44,6 @@
             </tr>
         {% endfor %}
     </table>
-    </section>
 {% endblock %}
 
 {% block scripts %}

@@ -24,9 +24,10 @@ from AM_Nihoul_website.admin.utils import Thumbnailer
 from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteObjectView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm, \
-    NewsletterPublishForm, MenuEditForm, BlockEditForm, AlbumEditForm, PictureUploadForm, BriefEditForm
+    NewsletterPublishForm, MenuEditForm, BlockEditForm, AlbumEditForm, PictureUploadForm, BriefEditForm, \
+    FeaturedEditForm
 from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient, Newsletter, Email, \
-    MenuEntry, EmailImageAttachment, Block, Album, Picture, MenuType, Brief
+    MenuEntry, EmailImageAttachment, Block, Album, Picture, MenuType, Brief, Featured
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -1268,7 +1269,7 @@ class BriefCreateView(AdminBaseMixin, FormView):
 
         flask.flash('Brève "{}" créée.'.format(brief.title))
 
-        self.success_url = flask.url_for('admin.briefs')
+        self.success_url = flask.url_for('visitor.brief-view', id=brief.id, slug=brief.slug)
         return super().form_valid(form)
 
 
@@ -1308,3 +1309,102 @@ class BriefToggleVisibility(AdminBaseMixin, ObjectManagementMixin, View):
 
 admin_blueprint.add_url_rule(
     '/brève-visible-<int:id>.html', view_func=BriefToggleVisibility.as_view('brief-toggle-visibility'))
+
+
+# -- Featureds
+class FeaturedsView(AdminBaseMixin, RenderTemplateView):
+    template_name = 'admin/featureds.html'
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        # fetch list of pages
+        ctx['featureds'] = Featured.ordered_items()
+
+        return ctx
+
+
+admin_blueprint.add_url_rule('/meas.html', view_func=FeaturedsView.as_view(name='featureds'))
+
+
+class FeaturedEditView(ObjectManagementMixin, AdminBaseMixin, FormView):
+    form_class = FeaturedEditForm
+    template_name = 'admin/featured-edit.html'
+    model = Featured
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().post(*args, **kwargs)
+
+    def get_form_kwargs(self):
+        return {
+            'title': self.object.title,
+            'link': self.object.link,
+            'link_text': self.object.link_text,
+            'image_link': self.object.image_link,
+            'text': self.object.text,
+        }
+
+    def form_valid(self, form):
+        self.object.title = form.title.data
+        self.object.link = form.link.data
+        self.object.link_text = form.link_text.data
+        self.object.image_link = form.image_link.data
+        self.object.text = form.text.data
+
+        db.session.add(self.object)
+        db.session.commit()
+
+        flask.flash('Mise en avant "{}" modifiée.'.format(self.object.title))
+
+        self.success_url = flask.url_for('admin.featureds')
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule(
+    '/mea-edition-<int:id>.html', view_func=FeaturedEditView.as_view(name='featured-edit'))
+
+
+class FeaturedCreateView(AdminBaseMixin, FormView):
+    form_class = FeaturedEditForm
+    template_name = 'admin/featured-edit.html'
+
+    def form_valid(self, form):
+        featured = Featured.create(
+            form.title.data, form.link.data, form.link_text.data, form.image_link.data, form.text.data)
+
+        db.session.add(featured)
+        db.session.commit()
+
+        flask.flash('Mise en avant "{}" créée.'.format(featured.title))
+
+        self.success_url = flask.url_for('admin.featureds')
+        return super().form_valid(form)
+
+
+admin_blueprint.add_url_rule('/mea-nouveau.html', view_func=FeaturedCreateView.as_view(name='featured-create'))
+
+
+class FeaturedDeleteView(AdminBaseMixin, DeleteObjectView):
+    model = Featured
+
+    def post_deletion(self, obj):
+        self.success_url = flask.url_for('admin.featureds')
+        flask.flash('Mise en avant "{}" supprimée.'.format(obj.title))
+
+
+admin_blueprint.add_url_rule(
+    '/mea-suppression-<int:id>.html', view_func=FeaturedDeleteView.as_view('featured-delete'))
+
+
+class FeaturedMoveView(BaseMoveView):
+    model = Featured
+    redirect_url = 'admin.featureds'
+
+
+admin_blueprint.add_url_rule(
+    '/mea-mouvement-<string:action>-<int:id>.html', view_func=FeaturedMoveView.as_view('featured-move'))

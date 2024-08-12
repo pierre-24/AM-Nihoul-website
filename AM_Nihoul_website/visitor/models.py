@@ -489,11 +489,12 @@ class Featured(OrderableMixin, BaseModel):
     text = db.Column(db.Text, default='', nullable=False)
 
     @classmethod
-    def create(cls, title, link, image_link, text):
+    def create(cls, title, link, link_text, image_link, text):
         o = cls()
 
         o.title = title
         o.link = link
+        o.link_text = link_text
         o.image_link = image_link
         o.text = text
 

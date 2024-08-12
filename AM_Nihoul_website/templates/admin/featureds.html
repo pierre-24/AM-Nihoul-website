@@ -1,0 +1,32 @@
+{% extends "admin/base.ex.html" %}
+{% from "helpers.inc.html" import create_delete_modal %}
+
+{% set admin_current = 'featureds' %}
+
+{% block page_title %}Gestion des mises en avant{% endblock %}
+
+{% block section_content %}
+    <p>
+        <a class="btn btn-primary" href="{{ url_for('admin.featured-create') }}"><span class="fas fa-plus"></span> Nouvelle mise en avant</a>
+    </p>
+
+    <table class="admin-list">
+        {% for featured in featureds %}
+            <tr>
+                <td class="left">
+                    <span class="title">{{ featured.title }}</span>
+                </td>
+                <td class="right">
+                    <span class="buttons">
+                        <a class="button-like" href="{{ url_for('admin.featured-edit', id=featured.id, slug=featured.slug) }}"><span class="fas fa-pen-square"></span></a>
+                        <a class="button-like" href="{{ url_for('admin.featured-move', id=featured.id, action='down') }}"><span class="fas fa-caret-square-up"></span></a>
+                        <a class="button-like" href="{{ url_for('admin.featured-move', id=featured.id, action='up') }}"><span class="fas fa-caret-square-down"></span></a>
+                        <a class="button-like" href="#delete-featured-{{ featured.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
+                        {{ create_delete_modal('featured', featured.id, 'la mise en avant "' + featured.title + '"', 'admin.featured-delete') }}
+                    </span>
+                    <span class="info">Dernière modification: {{ featured.date_modified|date_formatter }}</span>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

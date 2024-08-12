@@ -6,16 +6,13 @@
 
 {% block page_title %}Modification d'un bloc{% endblock %}
 
-{% block content %}
-    <section>
-    <h2>Modification d'un bloc</h2>
+{% block section_content %}
     <form method="post">
         {{ form.hidden_tag() }}
         {{ render_field(form.content) }}
         {{ render_field(form.attributes) }}
         {{ render_field(form.submit_button) }}
     </form>
-    </section>
 {% endblock %}
 
 {# add editor #}

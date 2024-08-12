@@ -4,10 +4,8 @@
 
 {% set admin_current = 'menus' %}
 {% block page_title %}Gestion des menus{% endblock %}
-{% block content %}
-    <section>
-        <h2>Gestion des menus</h2>
 
+{% block section_content %}
         <p>
             <a class="btn btn-primary" href="#createMenu" data-toggle="modal"><span class="fas fa-plus"></span> Ajouter une entrée au menu</a>
             {% set modal_create_content %}
@@ -68,6 +66,4 @@
         </table>
 
         {% endfor %}
-
-    </section>
 {% endblock %}

@@ -2,13 +2,11 @@
 {% from 'bootstrap4/form.html' import render_field %}
 {% from 'helpers.inc.html' import include_editor %}
 
-{% set admin_current = 'brief' %}
+{% set admin_current = 'briefs' %}
 
-{% block brief_title %}Modification d'une brève{% endblock %}
+{% block page_title %}Modification d'une brève{% endblock %}
 
-{% block content %}
-    <section>
-    <h2>Modification d'une brève</h2>
+{% block section_content %}
     <form method="post">
         {{ form.hidden_tag() }}
         {{ render_field(form.title) }}
@@ -16,7 +14,6 @@
         {{ render_field(form.content) }}
         {{ render_field(form.submit_button) }}
     </form>
-    </section>
 {% endblock %}
 
 {# add editor #}

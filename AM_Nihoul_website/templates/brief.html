@@ -7,13 +7,16 @@
     <h2>{{ brief.title }}</h2>
 
         <p class="page-info">
-            Créée {{ brief.date_created|date_formatter }} {% if brief.date_created < brief.date_modified %} (dernière modification <b>{{ brief.date_modified|date_formatter }}</b>){% endif %}.
+            Créée {{ brief.date_created|date_formatter }}{% if brief.date_created < brief.date_modified %} (dernière modification <b>{{ brief.date_modified|date_formatter }}</b>){% endif %}.
+
+            {% if not brief.visible %}<b>Cette brève n'est pas publique.</b>{% endif %}
 
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('admin.brief-edit', id=brief.id, slug=brief.slug) }}">Éditer cette brève</a>.
+                <a href="{{ url_for('admin.briefs') }}">Retour à la liste des brèves</a>.
+            {% else %}
+                <a href="{{ url_for('visitor.briefs') }}">Retour à la liste des brèves</a>.
             {% endif %}
-
-            <a href="{{ url_for('visitor.briefs') }}">Retour à la liste des brèves</a>.
         </p>
 
         {{ brief.content_with_summary()|safe }}

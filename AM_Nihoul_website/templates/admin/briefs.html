@@ -3,12 +3,9 @@
 
 {% set admin_current = 'briefs' %}
 
-{% block brief_title %}Gestion des brèves{% endblock %}
+{% block page_title %}Gestion des brèves{% endblock %}
 
-{% block content %}
-    <section>
-    <h2>Gestion des brèves</h2>
-
+{% block section_content %}
     <p>
         <a class="btn btn-primary" href="{{ url_for('admin.brief-create') }}"><span class="fas fa-plus"></span> Ajouter une brève</a>
     </p>
@@ -23,11 +20,12 @@
                     <span class="buttons">
                         <a class="button-like" href="{{ url_for('admin.brief-edit', id=brief.id, slug=brief.slug) }}"><span class="fas fa-pen-square"></span></a>
                         <a class="button-like" href="{{ url_for('admin.brief-toggle-visibility', id=brief.id) }}"><span class="fas fa-eye{% if not brief.visible %}-slash{% endif %}"></span></a>
+                        <a class="button-like" href="#delete-brief-{{ brief.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
+                        {{ create_delete_modal('brief', brief.id, 'la brève "' + brief.title + '"', 'admin.brief-delete') }}
                     </span>
                     <span class="info">Dernière modification: {{ brief.date_modified|date_formatter }}</span>
                 </td>
             </tr>
         {% endfor %}
     </table>
-    </section>
 {% endblock %}
