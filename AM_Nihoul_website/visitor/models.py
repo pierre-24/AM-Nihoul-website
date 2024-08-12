@@ -423,7 +423,7 @@ class Album(OrderableMixin, BaseModel):
         return Picture.query.filter(Picture.album_id.is_(self.id))
 
     def ordered_pictures(self):
-        return self.query_pictures().order_by(Picture.date_taken).all()
+        return self.query_pictures().order_by(Picture.date_taken)
 
     def get_thumbnail(self):
         if self.thumbnail is None:

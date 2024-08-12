@@ -1,3 +1,5 @@
+import pathlib
+
 import flask
 from flask import Blueprint, views, request, send_from_directory, current_app
 from flask_login import current_user
@@ -44,7 +46,13 @@ class SitemapView(RenderTemplateView):
 
         urls = [
             {'location': flask.url_for('visitor.index', _external=True), 'changefreq': 'weekly', 'priority': 1},
-            {'location': flask.url_for('visitor.newsletters', _external=True), 'changefreq': 'weekly', 'priority': 0.8}
+            {
+                'location': flask.url_for('visitor.newsletters', _external=True),
+                'changefreq': 'monthly',
+                'priority': 0.8
+            },
+            {'location': flask.url_for('visitor.briefs', _external=True), 'changefreq': 'weekly', 'priority': 0.8},
+            {'location': flask.url_for('visitor.albums', _external=True), 'changefreq': 'weekly', 'priority': 0.8},
         ]
 
         # add pages
@@ -56,10 +64,26 @@ class SitemapView(RenderTemplateView):
                 'priority': 0.8
             })
 
-        # add newsletter
+        # add newsletters
         for n in Newsletter.query.filter(Newsletter.draft.is_(False)).all():
             urls.append({
                 'location': flask.url_for('visitor.newsletter-view', id=n.id, slug=n.slug, _external=True),
+                'changefreq': 'yearly',
+                'modified': n.date_modified
+            })
+
+        # add briefs
+        for n in Brief.query.filter(Brief.visible.is_(True)).all():
+            urls.append({
+                'location': flask.url_for('visitor.brief-view', id=n.id, slug=n.slug, _external=True),
+                'changefreq': 'yearly',
+                'modified': n.date_modified
+            })
+
+        # add albums
+        for n in Album.query.all():
+            urls.append({
+                'location': flask.url_for('visitor.album', id=n.id, slug=n.slug, _external=True),
                 'changefreq': 'yearly',
                 'modified': n.date_modified
             })
@@ -173,7 +197,7 @@ visitor_blueprint.add_url_rule('/fichier/<int:id>/<string:filename>', view_func=
 
 @visitor_blueprint.route('/photos/<string:filename>')
 def get_picture(filename):
-    return send_from_directory('../' + current_app.config['UPLOADED_PICTURES_DEST'], filename)
+    return send_from_directory(pathlib.Path('..') / current_app.config['UPLOADED_PICTURES_DEST'], filename)
 
 
 # -- Newsletter

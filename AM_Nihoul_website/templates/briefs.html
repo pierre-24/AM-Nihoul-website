@@ -10,7 +10,7 @@
             <tr>
                 <td class="left">
                     <span class="title"><a href="{{ url_for('visitor.brief-view', id=brief.id, slug=brief.slug) }}">{{ brief.title }}</a></span>
-                    <span class="info">Dernière modification {{ brief.date_modified|date_formatter }}.</span>
+                    <span class="info">{{ brief.summary }} &bull; dernière modification {{ brief.date_modified|date_formatter }}.</span>
                 </td>
             </tr>
         {% endfor %}
