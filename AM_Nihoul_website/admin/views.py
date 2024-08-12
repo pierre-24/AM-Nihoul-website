@@ -24,10 +24,10 @@ from AM_Nihoul_website.admin.utils import Thumbnailer
 from AM_Nihoul_website.base_views import FormView, BaseMixin, RenderTemplateView, ObjectManagementMixin, \
     DeleteObjectView
 from AM_Nihoul_website.admin.forms import LoginForm, PageEditForm, CategoryEditForm, UploadForm, NewsletterEditForm, \
-    NewsletterPublishForm, MenuEditForm, BlockEditForm, AlbumEditForm, PictureUploadForm, BriefEditForm, \
+    NewsletterPublishForm, MenuEditForm, AlbumEditForm, PictureUploadForm, BriefEditForm, \
     FeaturedEditForm
 from AM_Nihoul_website.visitor.models import Page, Category, UploadedFile, NewsletterRecipient, Newsletter, Email, \
-    MenuEntry, EmailImageAttachment, Block, Album, Picture, MenuType, Brief, Featured
+    MenuEntry, EmailImageAttachment, Album, Picture, MenuType, Brief, Featured
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -892,97 +892,6 @@ class MenuMoveView(BaseMoveView):
 
 admin_blueprint.add_url_rule(
     '/menu-mouvement-<string:action>-<int:id>.html', view_func=MenuMoveView.as_view('menu-move'))
-
-
-# -- Blocks
-class BlocksView(AdminBaseMixin, RenderTemplateView):
-    template_name = 'admin/blocks.html'
-
-    def get_context_data(self, *args, **kwargs):
-        ctx = super().get_context_data(*args, **kwargs)
-
-        # fetch blocks
-        ctx['blocks'] = Block.ordered_items()
-
-        return ctx
-
-
-admin_blueprint.add_url_rule('/blocs.html', view_func=BlocksView.as_view(name='blocks'))
-
-
-class BlockEditView(ObjectManagementMixin, AdminBaseMixin, FormView):
-    template_name = 'admin/block-edit.html'
-    form_class = BlockEditForm
-    model = Block
-
-    def get(self, *args, **kwargs):
-        self.get_object_or_abort(*args, **kwargs)
-        return super().get(*args, **kwargs)
-
-    def post(self, *args, **kwargs):
-        self.get_object_or_abort(*args, **kwargs)
-        return super().post(*args, **kwargs)
-
-    def get_form_kwargs(self):
-        return {
-            'content': self.object.text,
-            'attributes': self.object.attributes
-        }
-
-    def form_valid(self, form):
-        self.object.text = form.content.data
-        self.object.attributes = form.attributes.data
-
-        db.session.add(self.object)
-        db.session.commit()
-
-        flask.flash('Bloc modifié.')
-
-        self.success_url = flask.url_for('admin.blocks')
-        return super().form_valid(form)
-
-
-admin_blueprint.add_url_rule(
-    '/bloc-edition-<int:id>.html', view_func=BlockEditView.as_view(name='block-edit'))
-
-
-class BlockCreateView(AdminBaseMixin, FormView):
-    template_name = 'admin/block-edit.html'
-    form_class = BlockEditForm
-
-    def form_valid(self, form):
-        block = Block.create(form.content.data, form.attributes.data)
-
-        db.session.add(block)
-        db.session.commit()
-
-        flask.flash('Bloc créé.')
-
-        self.success_url = flask.url_for('admin.blocks')
-        return super().form_valid(form)
-
-
-admin_blueprint.add_url_rule('/bloc-nouveau.html', view_func=BlockCreateView.as_view(name='block-create'))
-
-
-class BlockDeleteView(AdminBaseMixin, DeleteObjectView):
-    model = Block
-
-    def post_deletion(self, obj):
-        self.success_url = flask.url_for('admin.blocks')
-        flask.flash('Bloc supprimé.')
-
-
-admin_blueprint.add_url_rule('/bloc-suppression-<int:id>.html', view_func=BlockDeleteView.as_view('block-delete'))
-
-
-class BlockMoveView(BaseMoveView):
-    model = Block
-    redirect_url = 'admin.blocks'
-
-
-admin_blueprint.add_url_rule(
-    '/bloc-mouvement-<string:action>-<int:id>.html', view_func=BlockMoveView.as_view('block-move'))
 
 
 # -- Albums

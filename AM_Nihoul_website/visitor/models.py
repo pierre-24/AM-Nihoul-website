@@ -340,25 +340,6 @@ class MenuEntry(OrderableMixin, BaseModel):
         super().down()
 
 
-class Block(OrderableMixin, BaseModel):
-    """Simple block of text for the home page"""
-
-    text = db.Column(db.Text(), nullable=False)
-    attributes = db.Column(db.Text())
-
-    @classmethod
-    def create(cls, text: str, attributes: str = ''):
-        o = cls()
-        o.text = text
-        o.attributes = attributes
-
-        # set order
-        last_m = Block.ordered_items(desc=True).first()
-        o.order = last_m.order + 1 if last_m else 0
-
-        return o
-
-
 class Picture(BaseModel):
     date_taken = db.Column(db.DateTime, default=db.func.current_timestamp())
 

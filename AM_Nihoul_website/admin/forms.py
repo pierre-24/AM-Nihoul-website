@@ -73,13 +73,6 @@ class MenuEditForm(FlaskForm):
     submit_button = f.SubmitField('Enregistrer')
 
 
-class BlockEditForm(FlaskForm):
-    content = f.TextAreaField('Contenu', widget=TrumbowygTextarea())
-    attributes = f.StringField('Classes HTML')
-
-    submit_button = f.SubmitField('Enregistrer')
-
-
 class AlbumEditForm(FlaskForm):
 
     title = f.StringField('Titre', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])

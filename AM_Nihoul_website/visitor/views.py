@@ -7,7 +7,7 @@ import requests
 import AM_Nihoul_website
 from AM_Nihoul_website import db, limiter
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
-from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email, Block, Album, \
+from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email, Album, \
     Brief, Featured
 from AM_Nihoul_website.visitor.forms import NewsletterForm
 
@@ -22,7 +22,6 @@ class IndexView(BaseMixin, RenderTemplateView):
         ctx = super().get_context_data(*args, **kwargs)
 
         ctx['content'] = db.session.get(Page, current_app.config['PAGES']['visitor_index'])
-        ctx['blocks'] = Block.ordered_items()
         ctx['latest_briefs'] = Brief.query\
             .filter(Brief.visible.is_(True))\
             .order_by(Brief.id.desc())\
