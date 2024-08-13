@@ -2,17 +2,18 @@
 {% from 'bootstrap4/form.html' import render_field %}
 {% from 'helpers.inc.html' import include_editor %}
 
-{% set admin_current = 'page' %}
+{% set admin_current = 'briefs' %}
 
-{% block page_title %}Modification d'une page{% endblock %}
+{% block page_title %}Modifier une mise en avant{% endblock %}
 
 {% block section_content %}
     <form method="post">
         {{ form.hidden_tag() }}
         {{ render_field(form.title) }}
-        {{ render_field(form.content) }}
-        {{ render_field(form.category) }}
-        {{ render_field(form.next) }}
+        {{ render_field(form.link) }}
+        {{ render_field(form.link_text) }}
+        {{ render_field(form.image_link) }}
+        {{ render_field(form.text) }}
         {{ render_field(form.submit_button) }}
     </form>
 {% endblock %}
@@ -20,7 +21,7 @@
 {# add editor #}
 {% block scripts %}
     {{ super() }}
-    {{ include_editor('page', trumbowyg_version) }}
+    {{ include_editor('featured', trumbowyg_version) }}
 {% endblock %}
 
 

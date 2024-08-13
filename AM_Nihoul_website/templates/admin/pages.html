@@ -5,9 +5,7 @@
 
 {% block page_title %}Gestion des pages{% endblock %}
 
-{% block content %}
-    <section>
-    <h2>Gestion des pages</h2>
+{% block section_content %}
 
     <p>
         <a class="btn btn-primary" href="{{ url_for('admin.page-create') }}"><span class="fas fa-plus"></span> Ajouter une page</a>
@@ -36,5 +34,4 @@
             </tr>
         {% endfor %}
     </table>
-    </section>
 {% endblock %}

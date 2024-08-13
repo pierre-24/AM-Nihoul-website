@@ -1,0 +1,27 @@
+
+{% if not no_newsletter %}
+<div id="newsletter" class="jumbotron jumbotron-fluid">
+<div class="container">
+<p>Pour ne rien rater, inscrivez vous à nos infolettres !</p>
+<form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post" id="newsletter-form">
+    {{ newsletter_form.hidden_tag() }}
+    <div class="form-row">
+        <div class="col-md-5">{{ newsletter_form.name(placeholder='Prénom et nom', class_='form-control mb-2') }}</div>
+        <div class="col-md-5">{{ newsletter_form.email(placeholder='Adresse email', class_='form-control mb-2') }}</div>
+        {% if recaptcha_public_key != '' and not no_tracking %}
+            <button id="submit_button" name="submit_button" class="btn btn-primary mb-2 g-recaptcha"
+                    data-sitekey="{{ recaptcha_public_key }}"
+                    data-action="submit"
+                    data-callback="recaptcha_submit">
+                S'inscrire</button>
+        {% else %}
+            <div class="col-md-2">{{ newsletter_form.submit_button(
+                class_='btn btn-primary mb-2'
+            ) }}</div>
+        {% endif %}
+    </div>
+
+</form>
+</div>
+</div>
+{% endif %}

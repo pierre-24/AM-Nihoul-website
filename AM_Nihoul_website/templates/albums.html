@@ -2,23 +2,35 @@
 
 {% block page_title %}Albums photo{% endblock %}
 
-{% block content %}
-    <section>
-    <h2>Albums photo</h2>
+
+{% block section_content %}
     <p>Retrouvez ici les photos de nos différentes activités.</p>
-    <div class="d-flex justify-content-center flex-wrap">
+    <div id="album-list">
         {% for album in albums %}
 
-        <div class="card mx-2 my-2 flex-shrink-0" style="max-width: 500px;">
-            <a href="{{ url_for('visitor.album', id=album.id, slug=album.slug) }}">
-                <img class="card-img-top" src="{{ album.get_thumbnail().url() }}" alt="{{ album.title }}" />
-            </a>
-            <div class="card-body">
-                <h5 class="card-title"><a href="{{ url_for('visitor.album', id=album.id, slug=album.slug) }}">{{ album.title }}</a></h5>
-                <p class="card-text">{{ album.description|safe }}</p>
+        <div class="album">
+            <h3>{{ album.title }}</h3>
+
+            <div class="row">
+                {% for im in album.ordered_pictures()[:3] %}
+                    <div class="col-md-3 col-sm-6 mb-4">
+                        <a href="{{ url_for('visitor.album', id=album.id, slug=album.slug) }}#lg=1&slide={{ loop.index - 1 }}">
+                        <img class="mr-3 im" src="{{ im.url_thumb() }}" alt="{{ album.title }}" width="100%" />
+                            </a>
+                    </div>
+
+                    {% endfor %}
+
+                 <div class="col-md-3 col-sm-6 mb-4">
+                     <a href="{{ url_for('visitor.album', id=album.id, slug=album.slug) }}" class="im more">...</a>
+                 </div>
             </div>
+
+
+                {{ album.description|safe }}
+
+                <p><a href="{{ url_for('visitor.album', id=album.id, slug=album.slug) }}" class="goto-album">Voir cet album</a></p>
         </div>
         {% endfor %}
     </div>
-    </section>
 {% endblock %}

@@ -6,9 +6,7 @@
 
 {% block page_title %}Gestion des infolettres{% endblock %}
 
-{% block content %}
-    <section>
-    <h2>Gestion des infolettres</h2>
+{% block section_content %}
 
     <p>
         <a class="btn btn-primary" href="{{ url_for('admin.newsletter-create') }}"><span class="fas fa-plus"></span> Nouvelle infolettre</a>
@@ -53,5 +51,4 @@
             </tr>
         {% endfor %}
     </table>
-    </section>
 {% endblock %}

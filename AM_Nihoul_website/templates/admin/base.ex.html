@@ -4,19 +4,31 @@
 
 {% block page_content %}
     <div class="container  mt-4 pb-4">
-    <ul  id="admin-menu"class="nav nav-tabs">
+    <ul  id="admin-menu" class="nav nav-tabs">
         <li class="nav-item"><a href="{{ url_for('admin.index') }}" class="nav-link {%  if not admin_current %}active{% endif %}">Accueil</a></li>
+        <li class="nav-item"><a href="{{ url_for('admin.featureds') }}" class="nav-link {%  if admin_current == 'featureds' %}active{% endif %}">Mises en avant</a></li>
+        <li class="nav-item"><a href="{{ url_for('admin.briefs') }}" class="nav-link {%  if admin_current == 'briefs' %}active{% endif %}">Brèves</a></li>
         <li class="nav-item"><a href="{{ url_for('admin.newsletters') }}" class="nav-link {%  if admin_current == 'newsletter' %}active{% endif %}">Infolettres</a></li>
         <li class="nav-item"><a href="{{ url_for('admin.albums') }}" class="nav-link {%  if admin_current == 'album' %}active{% endif %}">Albums</a></li>
-        <li class="nav-item"><a href="{{ url_for('admin.files') }}" class="nav-link {%  if admin_current == 'file' %}active{% endif %}">Fichiers</a></li>
         <li class="nav-item"><a href="{{ url_for('admin.pages') }}" class="nav-link {%  if admin_current == 'page' %}active{% endif %}">Pages</a></li>
-        <li class="nav-item"><a href="{{ url_for('admin.categories') }}" class="nav-link {%  if admin_current == 'category' %}active{% endif %}">Catégories</a></li>
-        <li class="nav-item"><a href="{{ url_for('admin.newsletter-recipients') }}" class="nav-link {%  if admin_current == 'recipient' %}active{% endif %}">Inscrits aux infolettres</a></li>
-        <li class="nav-item"><a href="{{ url_for('admin.menus') }}" class="nav-link {%  if admin_current == 'menus' %}active{% endif %}">Menus</a></li>
-        <li class="nav-item"><a href="{{ url_for('admin.blocks') }}" class="nav-link {%  if admin_current == 'blocks' %}active{% endif %}">Blocs</a></li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">Autres</a>
+            <div class="dropdown-menu">
+                <a href="{{ url_for('admin.files') }}" class="dropdown-item">Fichiers</a>
+                <a href="{{ url_for('admin.newsletter-recipients') }}" class="dropdown-item">Inscrits aux infolettres</a>
+                <a href="{{ url_for('admin.categories') }}" class="dropdown-item">Catégories</a>
+                <a href="{{ url_for('admin.menus') }}" class="dropdown-item">Menus</a>
+            </div>
+        </li>
     </ul>
+
     <div id="content" class="admin-content">
-        {% block content %}{% endblock %}
+        {% block content %}
+            <section>
+            <h2>{{ self.page_title() }}</h2>
+            {% block section_content %}{% endblock %}
+            </section>
+        {% endblock %}
     </div>
     </div>
 {% endblock %}

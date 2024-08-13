@@ -78,7 +78,8 @@ class Config:
     # important pages
     PAGES = {
         'visitor_index': 1,
-        'admin_index': 2
+        'admin_index': 2,
+        'contact_page': 3,
     }
 
     # recaptcha secret key
@@ -93,6 +94,9 @@ WEBPAGE_INFO = {
     'site_description': 'aide aux malades',
     'site_keywords': 'leucémie, aide au malades',
     'site_version': '0.7.3',
+
+    # trumpbowyg
+    'trumbowyg_version': '2.27.3',
 
     # external services
     'fa_kit': '',  # FontAwesome
@@ -157,7 +161,7 @@ def init_command():
     delete_then_create(upload_dir)
     print('!! Upload directory in {}'.format(upload_dir))
 
-    delete_then_create(upload_dir)
+    delete_then_create(picture_dir)
     print('!! Picture directory in {}'.format(picture_dir))
 
     # DB:

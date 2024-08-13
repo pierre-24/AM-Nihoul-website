@@ -4,9 +4,8 @@
 
 {% block page_title %}Inscription à nos infolettres{% endblock %}
 
-{% block content %}
-    <section>
-        <h2>Inscription à nos infolettres</h2>
+
+{% block section_content %}
         <form action="{{ url_for('visitor.newsletter-subscribe') }}" method="post" id="newsletter-form">
             {{ form.hidden_tag() }}
             {{ render_field(form.name) }}
@@ -21,5 +20,4 @@
                 <div class="col-md-2">{{ newsletter_form.submit_button(class_='btn btn-primary mb-2') }}</div>
             {% endif %}
         </form>
-    </section>
 {% endblock %}

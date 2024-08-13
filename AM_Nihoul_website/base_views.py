@@ -4,6 +4,7 @@ from flask.views import View
 import AM_Nihoul_website
 from AM_Nihoul_website import db
 from AM_Nihoul_website.visitor.forms import NewsletterForm
+from AM_Nihoul_website.visitor.models import MenuType
 
 
 class RenderTemplateView(View):
@@ -182,11 +183,14 @@ class BaseMixin:
 
         from AM_Nihoul_website.visitor.models import Page, Category, MenuEntry
 
+        # menu above
+        ctx['secondary_menu'] = MenuEntry.ordered_items().filter(MenuEntry.position.is_(MenuType.secondary))
+
         # top menu
-        ctx['menus'] = MenuEntry.ordered_items()
+        ctx['main_menu'] = MenuEntry.ordered_items().filter(MenuEntry.position.is_(MenuType.main))
 
         # bottom menu
-        categories = Category.ordered_items()
+        categories = Category.ordered_items().filter(Category.visible.is_(True))
         pages = Page.query.filter(Page.category_id.isnot(None)).all()
 
         cats = {}
@@ -207,5 +211,8 @@ class BaseMixin:
 
         # newsletter form
         ctx['newsletter_form'] = NewsletterForm()
+
+        # contact
+        ctx['contact_page'] = Page.query.get(flask.current_app.config['PAGES']['contact_page'])
 
         return ctx

@@ -6,9 +6,7 @@
 
 {% block page_title %}{{ album.title  }} (album){% endblock %}
 
-{% block content %}
-    <section>
-        <h2>{{ album.title }}</h2>
+{% block section_content %}
         <p class="page-info">
             Taille totale des photos: <b>{{ total_size|file_size_formatter }}</b>.
             <a href="{{ url_for('visitor.album', id=album.id, slug=album.slug) }}">Voir cet album</a> ou <a href="{{ url_for('admin.albums') }}">Retour à la liste des albums</a>.
@@ -51,8 +49,6 @@
                 {{ create_delete_modal('picture', picture.id, 'la photo sélectionnée', 'admin.picture-delete') }}
             {% endfor %}
         </div>
-
-    </section>
 {% endblock %}
 
 {# add dropzone #}

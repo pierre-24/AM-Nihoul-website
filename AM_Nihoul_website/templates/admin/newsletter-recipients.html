@@ -3,11 +3,9 @@
 
 {% set admin_current = 'recipient' %}
 
-{% block page_title %}Inscrits à l'infolettre'{% endblock %}
+{% block page_title %}Inscrits à l'infolettre{% endblock %}
 
-{% block content %}
-    <section>
-    <h2>Inscrits à l'infolettre</h2>
+{% block section_content %}
 
     <table class="admin-list">
         {% for recipient in recipients %}
@@ -21,7 +19,7 @@
                         <a class="button-like" href="#delete-recipient-{{ recipient.id }}" data-toggle="modal"><span class="fas fa-minus-square"></span></a>
                         {{ create_delete_modal('recipient', recipient.id, 'le destinataire nommé "' + recipient.name + '".', 'admin.newsletter-recipient-delete') }}
                     </span>
-                    <span class="info">Inscription: {{ recipient.date_created|date_formatter }}</span>
+                    <span class="info">Inscription: {{ recipient.date_created|date_formatter }}, <b>{% if not recipient.confirmed %}non{% endif %} confirmé</b></span>
                 </td>
             </tr>
         {% endfor %}
@@ -29,5 +27,4 @@
             <tr><i>Pas d'inscrits pour le moment.</i></tr>
         {% endif %}
     </table>
-    </section>
 {% endblock %}

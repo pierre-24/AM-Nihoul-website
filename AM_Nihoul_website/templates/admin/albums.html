@@ -7,10 +7,7 @@
 
 {% block page_title %}Gestion des albums{% endblock %}
 
-{% block content %}
-    <section>
-    <h2>Gestion des albums</h2>
-
+{% block section_content %}
     <p>
         <a class="btn btn-primary" href="#createAlbum" data-toggle="modal"><span class="fas fa-plus"></span> Ajouter un album</a>
         {% set modal_create_content %}
@@ -67,16 +64,15 @@
             </tr>
         {% endfor %}
     </table>
-    </section>
 {% endblock %}
 
 {# add editor #}
 {% block scripts %}
     {{ super() }}
-    {{ include_editor('page') }}
+    {{ include_editor('album', trumbowyg_version) }}
 {% endblock %}
 
 
 {% block other_head_stuffs %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.25.1/ui/trumbowyg.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/{{ trumbowyg_version }}/ui/trumbowyg.min.css">
 {% endblock %}

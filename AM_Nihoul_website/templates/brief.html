@@ -1,0 +1,40 @@
+{% extends "base.ex.html" %}
+
+{% block page_title %}{{ brief.title }}{% endblock %}
+{% block og_description %}{{ brief.summary }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block extra_meta %}
+    <meta property="og:article:published_time" content="{{ brief.date_created }}" />
+    <meta property="og:article:modified_time" content="{{ brief.date_modified }}" />
+{% endblock %}
+
+{% block content %}
+    <section>
+    <h2>{{ brief.title }}</h2>
+
+        <p class="page-info">
+            Créée {{ brief.date_created|date_formatter }}{% if brief.date_created < brief.date_modified %} (dernière modification <b>{{ brief.date_modified|date_formatter }}</b>){% endif %}.
+
+            {% if not brief.visible %}<b>Cette brève n'est pas publique.</b>{% endif %}
+
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('admin.brief-edit', id=brief.id, slug=brief.slug) }}">Éditer cette brève</a>.
+                <a href="{{ url_for('admin.briefs') }}">Retour à la liste des brèves</a>.
+            {% else %}
+                <a href="{{ url_for('visitor.briefs') }}">Retour à la liste des brèves</a>.
+            {% endif %}
+        </p>
+
+        {{ brief.content_with_summary()|safe }}
+    </section>
+        <section class="page-next">
+        <p>
+            <span class="fas fa-arrow-right"></span>
+            {% if next_brief %}
+                Brève suivante : <a href="{{ url_for('visitor.brief-view', id=next_brief.id, slug=next_brief.slug) }}">{{ next_brief.title }}</a>
+            {% else %}
+                <a href="{{ url_for('visitor.briefs') }}">Retour à la liste des brèves</a>
+            {% endif %}
+        </p>
+        </section>
+{% endblock %}

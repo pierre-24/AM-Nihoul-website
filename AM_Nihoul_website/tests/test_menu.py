@@ -1,7 +1,7 @@
 import flask
 
 from AM_Nihoul_website import db
-from AM_Nihoul_website.visitor.models import MenuEntry
+from AM_Nihoul_website.visitor.models import MenuEntry, MenuType
 from AM_Nihoul_website.tests import TestFlask
 
 
@@ -35,6 +35,7 @@ class TestMenus(TestFlask):
         response = self.client.post(flask.url_for('admin.menus'), data={
             'text': text,
             'url': url,
+            'position': MenuType.main.value,
             'is_create': 1,
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
@@ -45,6 +46,26 @@ class TestMenus(TestFlask):
         self.assertIsNotNone(c)
         self.assertEqual(c.text, text)
         self.assertEqual(c.url, url)
+        self.assertEqual(c.position, MenuType.main)
+
+    def test_menu_create_secondary_ok(self):
+        self.assertEqual(MenuEntry.query.count(), self.num_menus)
+
+        text = 'other test'
+        url = 'http://x.com/b2.html'
+
+        response = self.client.post(flask.url_for('admin.menus'), data={
+            'text': text,
+            'url': url,
+            'position': MenuType.secondary.value,
+            'is_create': 1,
+        }, follow_redirects=False)
+        self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(MenuEntry.query.count(), self.num_menus + 1)
+
+        c = MenuEntry.query.order_by(MenuEntry.id.desc()).first()
+        self.assertEqual(c.position, MenuType.secondary)
 
     def test_menu_create_not_admin_ko(self):
         self.assertEqual(MenuEntry.query.count(), self.num_menus)
@@ -69,8 +90,8 @@ class TestMenus(TestFlask):
         response = self.client.post(flask.url_for('admin.menus'), data={
             'text': text,
             'url': url,
+            'position': MenuType.main.value,
             'id_menu': self.menu_3.id,
-            'highlight': True
         }, follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 

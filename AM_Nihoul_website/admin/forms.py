@@ -68,13 +68,7 @@ class MenuEditForm(FlaskForm):
 
     is_create = f.BooleanField(widget=f.widgets.HiddenInput(), default=False)
     id_menu = f.IntegerField(widget=f.widgets.HiddenInput(), default=-1)
-
-    submit_button = f.SubmitField('Enregistrer')
-
-
-class BlockEditForm(FlaskForm):
-    content = f.TextAreaField('Contenu', widget=TrumbowygTextarea())
-    attributes = f.StringField('Classes HTML')
+    position = f.SelectField('Position du menu', choices=[(1, 'Principal'), (2, 'Secondaire')], coerce=int)
 
     submit_button = f.SubmitField('Enregistrer')
 
@@ -93,3 +87,26 @@ class PictureUploadForm(FlaskForm):
     file_uploaded = wtf_file.FileField('Image', validators=[wtf_file.FileRequired()])
 
     submit_button = f.SubmitField('Envoyer')
+
+
+class BriefEditForm(FlaskForm):
+    title = f.StringField('Titre', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
+    summary = f.StringField('Résumé', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
+    content = f.TextAreaField('Texte', widget=TrumbowygTextarea())
+
+    submit_button = f.SubmitField('Enregistrer')
+
+
+class FeaturedEditForm(FlaskForm):
+    title = f.StringField('Titre', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
+
+    link = f.StringField(
+        'URL', validators=[f.validators.InputRequired(), f.validators.Length(max=150), f.validators.URL()])
+    link_text = f.StringField(
+        'Texte du lien', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
+    image_link = f.StringField(
+        'Image', validators=[f.validators.InputRequired(), f.validators.Length(max=150), f.validators.URL()])
+
+    text = f.TextAreaField('Texte', widget=TrumbowygTextarea())
+
+    submit_button = f.SubmitField('Enregistrer')

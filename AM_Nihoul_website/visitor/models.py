@@ -1,3 +1,4 @@
+import enum
 import os
 import secrets
 import slugify
@@ -7,6 +8,7 @@ from typing import List, Union
 
 import sqlalchemy.orm
 from sqlalchemy import event
+from sqlalchemy_utils.types.choice import ChoiceType
 
 from AM_Nihoul_website import db, uploads_set, pictures_set
 from AM_Nihoul_website.base_models import BaseModel
@@ -79,11 +81,13 @@ class Category(OrderableMixin, BaseModel):
     """Category (of the pages)"""
 
     name = db.Column(db.VARCHAR(length=150), nullable=False)
+    visible = db.Column(db.Boolean, default=False, nullable=False)
 
     @classmethod
-    def create(cls, name):
+    def create(cls, name, visible=True):
         o = cls()
         o.name = name
+        o.visible = visible
 
         # set order
         last_c = Category.ordered_items(desc=True).first()
@@ -303,18 +307,25 @@ class EmailImageAttachment(BaseModel):
         return o
 
 
+class MenuType(enum.Enum):
+    main = 1
+    secondary = 2
+
+
 class MenuEntry(OrderableMixin, BaseModel):
 
     text = db.Column(db.Text(), nullable=False)
     url = db.Column(db.Text(), nullable=False)
     highlight = db.Column(db.Boolean, default=False, nullable=False)
+    position = db.Column(ChoiceType(MenuType, impl=db.Integer()), nullable=False, default=MenuType.main)
 
     @classmethod
-    def create(cls, text, url, highlight=False):
+    def create(cls, text, url, position=MenuType.main, highlight=False):
         o = cls()
         o.text = text
         o.url = url
         o.highlight = highlight
+        o.position = position
 
         # set order
         last_m = MenuEntry.ordered_items(desc=True).first()
@@ -327,25 +338,6 @@ class MenuEntry(OrderableMixin, BaseModel):
 
     def down(self):
         super().down()
-
-
-class Block(OrderableMixin, BaseModel):
-    """Simple block of text for the home page"""
-
-    text = db.Column(db.Text(), nullable=False)
-    attributes = db.Column(db.Text())
-
-    @classmethod
-    def create(cls, text: str, attributes: str = ''):
-        o = cls()
-        o.text = text
-        o.attributes = attributes
-
-        # set order
-        last_m = Block.ordered_items(desc=True).first()
-        o.order = last_m.order + 1 if last_m else 0
-
-        return o
 
 
 class Picture(BaseModel):
@@ -431,7 +423,7 @@ class Album(OrderableMixin, BaseModel):
         return Picture.query.filter(Picture.album_id.is_(self.id))
 
     def ordered_pictures(self):
-        return self.query_pictures().order_by(Picture.date_taken).all()
+        return self.query_pictures().order_by(Picture.date_taken)
 
     def get_thumbnail(self):
         if self.thumbnail is None:
@@ -444,3 +436,51 @@ class Album(OrderableMixin, BaseModel):
 def receive_album_title_set(target, value, oldvalue, initiator):
     """Set the slug accordingly"""
     target.slug = slugify.slugify(value)
+
+
+class Brief(TextMixin, BaseModel):
+
+    visible = db.Column(db.Boolean, default=False, nullable=False)
+    summary = db.Column(db.Text, default='', nullable=False)
+
+    @classmethod
+    def create(cls, title, summary, content, visible=False):
+        o = cls()
+        o.title = title
+        o.summary = summary
+        o.content = content
+        o.visible = visible
+        o.slug = slugify.slugify(title)
+
+        return o
+
+
+@event.listens_for(Brief.title, 'set', named=True)
+def receive_brief_title_set(target, value, oldvalue, initiator):
+    """Set the slug accordingly"""
+    target.slug = slugify.slugify(value)
+
+
+class Featured(OrderableMixin, BaseModel):
+
+    title = db.Column(db.VARCHAR(length=150), nullable=False)
+    link = db.Column(db.VARCHAR(length=150), nullable=False)
+    link_text = db.Column(db.VARCHAR(length=150), nullable=False)
+    image_link = db.Column(db.VARCHAR(length=150), nullable=False)
+    text = db.Column(db.Text, default='', nullable=False)
+
+    @classmethod
+    def create(cls, title, link, link_text, image_link, text):
+        o = cls()
+
+        o.title = title
+        o.link = link
+        o.link_text = link_text
+        o.image_link = image_link
+        o.text = text
+
+        # set order
+        last_c = Featured.ordered_items(desc=True).first()
+        o.order = last_c.order + 1 if last_c else 0
+
+        return o

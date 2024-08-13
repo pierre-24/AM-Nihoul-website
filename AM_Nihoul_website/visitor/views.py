@@ -1,3 +1,5 @@
+import pathlib
+
 import flask
 from flask import Blueprint, views, request, send_from_directory, current_app
 from flask_login import current_user
@@ -7,7 +9,8 @@ import requests
 import AM_Nihoul_website
 from AM_Nihoul_website import db, limiter
 from AM_Nihoul_website.base_views import RenderTemplateView, BaseMixin, ObjectManagementMixin, FormView
-from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email, Block, Album
+from AM_Nihoul_website.visitor.models import Page, UploadedFile, NewsletterRecipient, Newsletter, Email, Album, \
+    Brief, Featured
 from AM_Nihoul_website.visitor.forms import NewsletterForm
 
 visitor_blueprint = Blueprint('visitor', __name__)
@@ -21,11 +24,12 @@ class IndexView(BaseMixin, RenderTemplateView):
         ctx = super().get_context_data(*args, **kwargs)
 
         ctx['content'] = db.session.get(Page, current_app.config['PAGES']['visitor_index'])
-        ctx['blocks'] = Block.ordered_items()
-        ctx['latest_newsletters'] = Newsletter.query\
-            .filter(Newsletter.draft.is_(False))\
-            .order_by(Newsletter.date_published.desc())\
-            .all()[:5]
+        ctx['latest_briefs'] = Brief.query\
+            .filter(Brief.visible.is_(True))\
+            .order_by(Brief.id.desc())\
+            .all()[:3]
+
+        ctx['featureds'] = Featured.ordered_items()[:4]
 
         return ctx
 
@@ -42,7 +46,13 @@ class SitemapView(RenderTemplateView):
 
         urls = [
             {'location': flask.url_for('visitor.index', _external=True), 'changefreq': 'weekly', 'priority': 1},
-            {'location': flask.url_for('visitor.newsletters', _external=True), 'changefreq': 'weekly', 'priority': 0.8}
+            {
+                'location': flask.url_for('visitor.newsletters', _external=True),
+                'changefreq': 'monthly',
+                'priority': 0.8
+            },
+            {'location': flask.url_for('visitor.briefs', _external=True), 'changefreq': 'weekly', 'priority': 0.8},
+            {'location': flask.url_for('visitor.albums', _external=True), 'changefreq': 'weekly', 'priority': 0.8},
         ]
 
         # add pages
@@ -54,10 +64,26 @@ class SitemapView(RenderTemplateView):
                 'priority': 0.8
             })
 
-        # add newsletter
+        # add newsletters
         for n in Newsletter.query.filter(Newsletter.draft.is_(False)).all():
             urls.append({
                 'location': flask.url_for('visitor.newsletter-view', id=n.id, slug=n.slug, _external=True),
+                'changefreq': 'yearly',
+                'modified': n.date_modified
+            })
+
+        # add briefs
+        for n in Brief.query.filter(Brief.visible.is_(True)).all():
+            urls.append({
+                'location': flask.url_for('visitor.brief-view', id=n.id, slug=n.slug, _external=True),
+                'changefreq': 'yearly',
+                'modified': n.date_modified
+            })
+
+        # add albums
+        for n in Album.query.all():
+            urls.append({
+                'location': flask.url_for('visitor.album', id=n.id, slug=n.slug, _external=True),
                 'changefreq': 'yearly',
                 'modified': n.date_modified
             })
@@ -171,7 +197,7 @@ visitor_blueprint.add_url_rule('/fichier/<int:id>/<string:filename>', view_func=
 
 @visitor_blueprint.route('/photos/<string:filename>')
 def get_picture(filename):
-    return send_from_directory('../' + current_app.config['UPLOADED_PICTURES_DEST'], filename)
+    return send_from_directory(pathlib.Path('..') / current_app.config['UPLOADED_PICTURES_DEST'], filename)
 
 
 # -- Newsletter
@@ -316,6 +342,18 @@ class NewsletterView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx['newsletter'] = self.object
+
+        # next?
+        next_newsletter = Newsletter.query\
+            .filter(Newsletter.draft.is_(False))\
+            .filter(Newsletter.date_published < self.object.date_published)\
+            .filter(Newsletter.id.isnot(self.object.id))\
+            .order_by(Newsletter.date_published.desc())\
+            .first()
+
+        if next_newsletter is not None:
+            ctx['next_newsletter'] = next_newsletter
+
         return ctx
 
 
@@ -328,7 +366,11 @@ class NewslettersView(BaseMixin, RenderTemplateView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx['newsletters'] = Newsletter.query.filter(Newsletter.draft.is_(False)).order_by(Newsletter.id.desc()).all()
+        ctx['newsletters'] = Newsletter.query\
+            .filter(Newsletter.draft.is_(False))\
+            .order_by(Newsletter.date_published.desc())\
+            .all()
+
         return ctx
 
 
@@ -375,3 +417,54 @@ class AlbumView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
 
 
 visitor_blueprint.add_url_rule('/album-<int:id>-<string:slug>.html', view_func=AlbumView.as_view(name='album'))
+
+
+# -- Brief
+class BriefsView(BaseMixin, RenderTemplateView):
+    template_name = 'briefs.html'
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx['briefs'] = Brief.query.filter(Brief.visible.is_(True)).order_by(Brief.id.desc()).all()
+        return ctx
+
+
+visitor_blueprint.add_url_rule('/brèves.html', view_func=BriefsView.as_view(name='briefs'))
+
+
+class BriefView(BaseMixin, ObjectManagementMixin, RenderTemplateView):
+    template_name = 'brief.html'
+    model = Brief
+
+    def get(self, *args, **kwargs):
+        self.get_object_or_abort(*args, **kwargs)
+        return super().get(*args, **kwargs)
+
+    def get_object_or_abort(self, error_code=404, *args, **kwargs):
+        super().get_object_or_abort(error_code, *args, **kwargs)
+
+        if self.object.slug != kwargs.get('slug'):
+            flask.abort(error_code)
+
+        if not self.object.visible and not current_user.is_authenticated:
+            flask.abort(error_code)  # cannot access directly a non-visible page if not connected
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx['brief'] = self.object
+
+        # next?
+        next_brief = Brief.query\
+            .filter(Brief.visible.is_(True))\
+            .order_by(Brief.id.desc())\
+            .filter(Brief.id < self.object.id)\
+            .first()
+
+        if next_brief is not None:
+            ctx['next_brief'] = next_brief
+
+        return ctx
+
+
+visitor_blueprint.add_url_rule(
+    '/brève/<int:id>-<string:slug>.html', view_func=BriefView.as_view(name='brief-view'))
