@@ -5,6 +5,7 @@
 {% block og_description %}Un album photo de l'{{ site_name }}{% endblock %}
 {% block og_type %}article{% endblock %}
 {% block og_image %}{% if album.thumbnail %}{{ album.thumbnail.url() }}{% else %}{{ super() }}{% endif %}{% endblock %}
+{% block og_image_alt %}{% if album.thumbnail %}La miniature de l'album{% else %}{{ super() }}{% endif %}{% endblock %}
 
 {% block extra_meta %}
     <meta property="og:article:published_time" content="{{ album.date_created }}" />
