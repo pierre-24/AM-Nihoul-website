@@ -112,7 +112,7 @@ Disallow: /fichier/
 """
 
 
-class RobotsView(views.View):
+class RobotsView(views.MethodView):
     methods = ['GET']
 
     def get(self, *args, **kwargs):
@@ -120,12 +120,6 @@ class RobotsView(views.View):
         response.headers['Content-type'] = 'text/plain'
 
         return response
-
-    def dispatch_request(self, *args, **kwargs):
-        if flask.request.method == 'GET':
-            return self.get(*args, **kwargs)
-        else:
-            flask.abort(403)
 
 
 visitor_blueprint.add_url_rule('/robots.txt', view_func=RobotsView.as_view(name='robots'))
@@ -162,7 +156,7 @@ visitor_blueprint.add_url_rule('/page/<int:id>-<string:slug>.html', view_func=Pa
 
 
 # -- Uploads
-class UploadView(ObjectManagementMixin, views.View):
+class UploadView(ObjectManagementMixin, views.MethodView):
     methods = ['GET']
     model = UploadedFile
 
@@ -184,12 +178,6 @@ class UploadView(ObjectManagementMixin, views.View):
         response.headers['Content-type'] = self.object.possible_mime
 
         return response
-
-    def dispatch_request(self, *args, **kwargs):
-        if flask.request.method == 'GET':
-            return self.get(*args, **kwargs)
-        else:
-            flask.abort(403)
 
 
 visitor_blueprint.add_url_rule('/fichier/<int:id>/<string:filename>', view_func=UploadView.as_view(name='upload-view'))
@@ -263,7 +251,7 @@ visitor_blueprint.add_url_rule(
     '/infolettres-inscription.html', view_func=NewsletterRegisterView.as_view(name='newsletter-subscribe'))
 
 
-class BaseNewsletterMixin(BaseMixin, ObjectManagementMixin, views.View):
+class BaseNewsletterMixin(BaseMixin, ObjectManagementMixin, views.MethodView):
     model = NewsletterRecipient
 
     def get_object_or_abort(self, error_code=404, *args, **kwargs):
@@ -274,12 +262,6 @@ class BaseNewsletterMixin(BaseMixin, ObjectManagementMixin, views.View):
 
     def get(self, *args, **kwargs):
         raise NotImplementedError()
-
-    def dispatch_request(self, *args, **kwargs):
-        if flask.request.method == 'GET':
-            return self.get(*args, **kwargs)
-        else:
-            flask.abort(403)
 
 
 class NewsletterSubscribeConfirmView(BaseNewsletterMixin):

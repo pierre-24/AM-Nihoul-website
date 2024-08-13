@@ -1,7 +1,7 @@
 import bs4
 import flask
 from flask import Blueprint, jsonify, current_app
-from flask.views import View
+from flask.views import MethodView
 import flask_login
 from flask_login import login_required
 from flask_uploads import UploadNotAllowed
@@ -248,7 +248,7 @@ class PageDeleteView(AdminBaseMixin, DeleteObjectView):
 admin_blueprint.add_url_rule('/page-suppression-<int:id>.html', view_func=PageDeleteView.as_view('page-delete'))
 
 
-class PageToggleVisibility(AdminBaseMixin, ObjectManagementMixin, View):
+class PageToggleVisibility(AdminBaseMixin, ObjectManagementMixin, MethodView):
     methods = ['GET']
     model = Page
 
@@ -260,12 +260,6 @@ class PageToggleVisibility(AdminBaseMixin, ObjectManagementMixin, View):
         db.session.commit()
 
         return flask.redirect(flask.url_for('admin.pages'))
-
-    def dispatch_request(self, *args, **kwargs):
-        if flask.request.method == 'GET':
-            return self.get(*args, **kwargs)
-        else:
-            flask.abort(403)
 
 
 admin_blueprint.add_url_rule(
@@ -329,7 +323,7 @@ admin_blueprint.add_url_rule(
     '/catégorie-suppression-<int:id>.html', view_func=CategoryDeleteView.as_view('category-delete'))
 
 
-class BaseMoveView(AdminBaseMixin, ObjectManagementMixin, View):
+class BaseMoveView(AdminBaseMixin, ObjectManagementMixin, MethodView):
     redirect_url = ''
     methods = ['GET']
 
@@ -346,12 +340,6 @@ class BaseMoveView(AdminBaseMixin, ObjectManagementMixin, View):
 
         return flask.redirect(flask.url_for(self.redirect_url))
 
-    def dispatch_request(self, *args, **kwargs):
-        if flask.request.method == 'GET':
-            return self.get(*args, **kwargs)
-        else:
-            flask.abort(403)
-
 
 class CategoryMoveView(BaseMoveView):
     model = Category
@@ -362,7 +350,7 @@ admin_blueprint.add_url_rule(
     '/catégorie-mouvement-<string:action>-<int:id>.html', view_func=CategoryMoveView.as_view('category-move'))
 
 
-class CategoryToggleVisibility(AdminBaseMixin, ObjectManagementMixin, View):
+class CategoryToggleVisibility(AdminBaseMixin, ObjectManagementMixin, MethodView):
     methods = ['GET']
     model = Category
 
@@ -374,12 +362,6 @@ class CategoryToggleVisibility(AdminBaseMixin, ObjectManagementMixin, View):
         db.session.commit()
 
         return flask.redirect(flask.url_for('admin.categories'))
-
-    def dispatch_request(self, *args, **kwargs):
-        if flask.request.method == 'GET':
-            return self.get(*args, **kwargs)
-        else:
-            flask.abort(403)
 
 
 admin_blueprint.add_url_rule(
@@ -438,7 +420,7 @@ class FilesView(AdminBaseMixin, FormView):
 admin_blueprint.add_url_rule('/fichiers.html', view_func=FilesView.as_view('files'))
 
 
-class UploadBase64(AdminBaseMixin, View):
+class UploadBase64(AdminBaseMixin, MethodView):
     """Upload an image as base64 encoded string"""
 
     methods = ['POST']
@@ -495,12 +477,6 @@ class UploadBase64(AdminBaseMixin, View):
 
         return jsonify(
             success=True, url=flask.url_for('visitor.upload-view', id=u.id, filename=u.file_name, _external=True))
-
-    def dispatch_request(self, *args, **kwargs):
-        if flask.request.method == 'POST':
-            return self.post(*args, **kwargs)
-        else:
-            flask.abort(403)
 
 
 admin_blueprint.add_url_rule('/api/image-base64', view_func=UploadBase64.as_view('image-base64'))
@@ -649,8 +625,9 @@ admin_blueprint.add_url_rule(
     '/infolettre-suppression-<int:id>.html', view_func=NewsletterDeleteView.as_view('newsletter-delete'))
 
 
-class NewsletterCleanupView(AdminBaseMixin, ObjectManagementMixin, View):
+class NewsletterCleanupView(AdminBaseMixin, ObjectManagementMixin, MethodView):
     model = Newsletter
+    methods = ['GET']
 
     def get(self, *args, **kwargs):
         self.get_object_or_abort(*args, **kwargs)
@@ -711,12 +688,6 @@ class NewsletterCleanupView(AdminBaseMixin, ObjectManagementMixin, View):
 
         flask.flash('Le code a été nettoyé!')
         return flask.redirect(flask.url_for('admin.newsletters'))
-
-    def dispatch_request(self, *args, **kwargs):
-        if flask.request.method == 'GET':
-            return self.get(*args, **kwargs)
-        else:
-            flask.abort(403)
 
 
 admin_blueprint.add_url_rule(
@@ -1064,7 +1035,7 @@ admin_blueprint.add_url_rule(
     '/album-<int:id>-upload.html', view_func=AlbumDropzoneUpload.as_view(name='album-dropzone-upload'))
 
 
-class AlbumSetThumbnailView(AdminBaseMixin, ObjectManagementMixin, View):
+class AlbumSetThumbnailView(AdminBaseMixin, ObjectManagementMixin, MethodView):
     methods = ['GET']
     model = Album
 
@@ -1082,12 +1053,6 @@ class AlbumSetThumbnailView(AdminBaseMixin, ObjectManagementMixin, View):
         flask.flash("Cette photo sera utilisée comme miniature de l'album.")
 
         return flask.redirect(flask.url_for('admin.album', id=self.object.id))
-
-    def dispatch_request(self, *args, **kwargs):
-        if flask.request.method == 'GET':
-            return self.get(*args, **kwargs)
-        else:
-            flask.abort(403)
 
 
 admin_blueprint.add_url_rule(
@@ -1197,7 +1162,7 @@ class BriefDeleteView(AdminBaseMixin, DeleteObjectView):
 admin_blueprint.add_url_rule('/brève-suppression-<int:id>.html', view_func=BriefDeleteView.as_view('brief-delete'))
 
 
-class BriefToggleVisibility(AdminBaseMixin, ObjectManagementMixin, View):
+class BriefToggleVisibility(AdminBaseMixin, ObjectManagementMixin, MethodView):
     methods = ['GET']
     model = Brief
 
@@ -1209,12 +1174,6 @@ class BriefToggleVisibility(AdminBaseMixin, ObjectManagementMixin, View):
         db.session.commit()
 
         return flask.redirect(flask.url_for('admin.briefs'))
-
-    def dispatch_request(self, *args, **kwargs):
-        if flask.request.method == 'GET':
-            return self.get(*args, **kwargs)
-        else:
-            flask.abort(403)
 
 
 admin_blueprint.add_url_rule(

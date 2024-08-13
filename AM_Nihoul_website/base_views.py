@@ -1,5 +1,5 @@
 import flask
-from flask.views import View
+from flask.views import MethodView
 
 import AM_Nihoul_website
 from AM_Nihoul_website import db
@@ -7,7 +7,7 @@ from AM_Nihoul_website.visitor.forms import NewsletterForm
 from AM_Nihoul_website.visitor.models import MenuType
 
 
-class RenderTemplateView(View):
+class RenderTemplateView(MethodView):
     methods = ['GET']
     template_name = None
 
@@ -22,12 +22,6 @@ class RenderTemplateView(View):
 
         context_data = self.get_context_data(*args, **kwargs)
         return flask.render_template(self.template_name, **context_data)
-
-    def dispatch_request(self, *args, **kwargs):
-        if flask.request.method == 'GET':
-            return self.get(*args, **kwargs)
-        else:
-            flask.abort(403)
 
 
 class FormView(RenderTemplateView):
@@ -92,17 +86,8 @@ class FormView(RenderTemplateView):
         else:
             return flask.redirect(self.failure_url)
 
-    def dispatch_request(self, *args, **kwargs):
 
-        if flask.request.method == 'POST':
-            return self.post(*args, **kwargs)
-        elif flask.request.method == 'GET':
-            return self.get(*args, **kwargs)
-        else:
-            flask.abort(403)
-
-
-class DeleteView(View):
+class DeleteView(MethodView):
 
     methods = ['POST', 'DELETE']
     success_url = '/'
@@ -132,15 +117,6 @@ class DeleteView(View):
         self.post_deletion(obj)
 
         return flask.redirect(self.success_url)
-
-    def dispatch_request(self, *args, **kwargs):
-
-        if flask.request.method == 'POST':
-            return self.delete(*args, **kwargs)
-        elif flask.request.method == 'DELETE':
-            return self.delete(*args, **kwargs)
-        else:
-            flask.abort(403)
 
 
 # --- Object management

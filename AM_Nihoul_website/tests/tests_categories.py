@@ -90,7 +90,8 @@ class TestCategories(TestFlask):
     def test_category_delete_ok(self):
         self.assertEqual(Category.query.count(), self.num_cat)
 
-        response = self.client.post(flask.url_for('admin.category-delete', id=self.category.id), follow_redirects=False)
+        response = self.client.delete(
+            flask.url_for('admin.category-delete', id=self.category.id), follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Category.query.count(), self.num_cat - 1)
@@ -100,7 +101,8 @@ class TestCategories(TestFlask):
         self.assertEqual(Category.query.count(), self.num_cat)
         self.logout()
 
-        response = self.client.post(flask.url_for('admin.category-delete', id=self.category.id), follow_redirects=False)
+        response = self.client.delete(
+            flask.url_for('admin.category-delete', id=self.category.id), follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Category.query.count(), self.num_cat)
