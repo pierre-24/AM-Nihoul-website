@@ -248,9 +248,9 @@ class PageDeleteView(AdminBaseMixin, DeleteObjectView):
 admin_blueprint.add_url_rule('/page-suppression-<int:id>.html', view_func=PageDeleteView.as_view('page-delete'))
 
 
-class PageToggleVisibility(AdminBaseMixin, ObjectManagementMixin, MethodView):
+class BaseToggleVisibility(AdminBaseMixin, ObjectManagementMixin, MethodView):
     methods = ['GET']
-    model = Page
+    redirect_url = ''
 
     def get(self, *args, **kwargs):
         self.get_object_or_abort(*args, **kwargs)
@@ -259,7 +259,12 @@ class PageToggleVisibility(AdminBaseMixin, ObjectManagementMixin, MethodView):
         db.session.add(self.object)
         db.session.commit()
 
-        return flask.redirect(flask.url_for('admin.pages'))
+        return flask.redirect(flask.url_for(self.redirect_url))
+
+
+class PageToggleVisibility(BaseToggleVisibility):
+    model = Page
+    redirect_url = 'admin.pages'
 
 
 admin_blueprint.add_url_rule(
@@ -350,18 +355,9 @@ admin_blueprint.add_url_rule(
     '/catégorie-mouvement-<string:action>-<int:id>.html', view_func=CategoryMoveView.as_view('category-move'))
 
 
-class CategoryToggleVisibility(AdminBaseMixin, ObjectManagementMixin, MethodView):
-    methods = ['GET']
+class CategoryToggleVisibility(BaseToggleVisibility):
     model = Category
-
-    def get(self, *args, **kwargs):
-        self.get_object_or_abort(*args, **kwargs)
-        self.object.visible = not self.object.visible
-
-        db.session.add(self.object)
-        db.session.commit()
-
-        return flask.redirect(flask.url_for('admin.categories'))
+    redirect_url = 'admin.categories'
 
 
 admin_blueprint.add_url_rule(
@@ -832,7 +828,7 @@ class MenuEditView(AdminBaseMixin, FormView, RenderTemplateView):
             c.text = form.text.data
             c.url = form.url.data
             c.position = MenuType.main if form.position.data == 1 else MenuType.secondary
-            flask.flash('Entrée "{}" modifié.'.format(c.text))
+            flask.flash('Entrée "{}" modifiée.'.format(c.text))
 
         db.session.add(c)
         db.session.commit()
@@ -1162,18 +1158,9 @@ class BriefDeleteView(AdminBaseMixin, DeleteObjectView):
 admin_blueprint.add_url_rule('/brève-suppression-<int:id>.html', view_func=BriefDeleteView.as_view('brief-delete'))
 
 
-class BriefToggleVisibility(AdminBaseMixin, ObjectManagementMixin, MethodView):
-    methods = ['GET']
+class BriefToggleVisibility(BaseToggleVisibility):
     model = Brief
-
-    def get(self, *args, **kwargs):
-        self.get_object_or_abort(*args, **kwargs)
-        self.object.visible = not self.object.visible
-
-        db.session.add(self.object)
-        db.session.commit()
-
-        return flask.redirect(flask.url_for('admin.briefs'))
+    redirect_url = 'admin.briefs'
 
 
 admin_blueprint.add_url_rule(
