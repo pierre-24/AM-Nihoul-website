@@ -19,7 +19,7 @@
         <div class="card-deck">
 
         {% for featured in featureds %}
-            <div class="card{% if loop.last %} d-none d-lg-block{% elif loop.index == 2 %} d-none d-md-block{% endif %}">
+            <div class="card{% if loop.last %} d-none d-xl-block{% elif loop.index == 3 %} d-none d-lg-block{% endif %}">
                 <img class="card-img-top" src="{{ featured.image_link }}" alt="Card image cap">
                 <div class="card-body">
                 <h3 class="card-title">{{ featured.title }}</h3>
@@ -48,6 +48,7 @@
             <div class="card{% if loop.last %} d-none d-lg-block{% endif %}">
                 <div class="card-body">
                 <h3 class="card-title">{{ brief.title }}</h3>
+                    <p class="text-muted">Publié {{ brief.date_created|date_formatter }}.</p>
                 <p class="card-text">{{ brief.summary }}</p>
                     <a href="{{ url_for('visitor.brief-view', id=brief.id, slug=brief.slug) }}" class="card-link">Lire la suite</a>
                 </div>

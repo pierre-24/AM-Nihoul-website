@@ -118,6 +118,9 @@ class DeleteView(MethodView):
 
         return flask.redirect(self.success_url)
 
+    def post(self, *args, **kwargs):
+        return self.delete(*args, **kwargs)
+
 
 # --- Object management
 class ObjectManagementMixin:

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 
 # --- Date formatter:
-__FMT_SMALL = 'le %d/%m/%y à %Hh%M'     # Small format
+__FMT_SMALL = 'le %d/%m/%y'     # Small format
 __FMT_NORMAL = '%A %d %B %Y à %Hh%M'    # Normal format
 
 

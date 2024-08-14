@@ -48,6 +48,8 @@
                                 <div class="form-group required">
                                 {{ form.url.label(class_='form-control-label') }} {{ form.url(value=menu.url, class_='form-control') }}
                                 </div>
+
+                                <input type="hidden" name="position" value="{{ menu.position.value }}">
                             {% endset %}
                             {{ create_modal(
                                 'editMenu' + menu.id|string,
