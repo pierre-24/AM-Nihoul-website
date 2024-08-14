@@ -11,12 +11,15 @@
         <a class="btn btn-primary" href="{{ url_for('admin.page-create') }}"><span class="fas fa-plus"></span> Ajouter une page</a>
     </p>
 
+    {% for category in categories %}
+        <h3>{% if category is not none %}{{ category.name }}{% else %}Pas de catégorie{% endif %}</h3>
     <table class="admin-list">
         {% for page in pages %}
+            {% if (category is none and page.category is none) or page.category_id == category.id %}
             <tr>
                 <td class="left">
                     <span class="title"><a href="{{ url_for('visitor.page-view', id=page.id, slug=page.slug) }}">{{ page.title }}</a></span>
-                    <span class="info">{% if page.category_id != None %}{{ categories[page.category_id].name }}{% else %}<i>pas de catégorie</i>{% endif %}</span>
+                    <span class="info">Dernière modification: {{ page.date_modified|date_formatter }}</span>
                 </td>
                 <td class="right">
                     <span class="buttons">
@@ -29,9 +32,11 @@
                             <a class="button-like" href="#"><span class="fas fa-lock"></span></a>
                         {% endif %}
                     </span>
-                    <span class="info">Dernière modification: {{ page.date_modified|date_formatter }}</span>
+                    <span class="info"></span>
                 </td>
             </tr>
+            {% endif %}
         {% endfor %}
     </table>
+    {% endfor %}
 {% endblock %}
