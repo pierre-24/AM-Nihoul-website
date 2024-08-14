@@ -19,7 +19,7 @@
         <div class="card-deck">
 
         {% for featured in featureds %}
-            <div class="card{% if loop.last %} d-none d-lg-block{% elif loop.index == 2 %} d-none d-md-block{% endif %}">
+            <div class="card{% if loop.last %} d-none d-xl-block{% elif loop.index == 3 %} d-none d-lg-block{% endif %}">
                 <img class="card-img-top" src="{{ featured.image_link }}" alt="Card image cap">
                 <div class="card-body">
                 <h3 class="card-title">{{ featured.title }}</h3>
