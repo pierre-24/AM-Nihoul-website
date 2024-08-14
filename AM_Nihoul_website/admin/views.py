@@ -129,7 +129,8 @@ class PagesView(AdminBaseMixin, RenderTemplateView):
 
         # fetch list of pages
         ctx['pages'] = Page.query.order_by(Page.slug).all()
-        ctx['categories'] = dict((c.id, c) for c in Category.query.all())
+        ctx['categories'] = Category.ordered_items().all()
+        ctx['categories'].append(None)
 
         return ctx
 
@@ -145,18 +146,27 @@ class BasePageEditView(AdminBaseMixin, FormView):
         form = super().get_form()
 
         # add choices for categories
-        choices = [(-1, '')]
-        choices.extend((c.id, c.name) for c in Category.query.order_by(Category.name).all())
+        categories = Category.ordered_items().all()
+
+        choices = [(-1, '** pas de catégorie **')]
+        choices.extend((c.id, c.name) for c in categories)
         form.category.choices = choices
 
         # add choices for next
-        choices = [(-1, '')]
+        choices = {}
         q = Page.query.order_by(Page.title)
 
         if isinstance(self, PageEditView):  # avoid getting the page looping to itself
             q = q.filter(Page.id.isnot(self.object.id))
 
-        choices.extend((c.id, c.title) for c in q.all())
+        pages = q.all()
+
+        choices['No category'] = [(-1, '** pas de page suivante **')]
+        choices['No category'].extend((p.id, p.title) for p in pages if p.category_id is None)
+
+        for category in categories:
+            choices[category.name] = [(p.id, p.title) for p in pages if p.category_id == category.id]
+
         form.next.choices = choices
 
         return form
