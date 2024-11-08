@@ -35,7 +35,7 @@
     
     {% include 'newsletter.inc.html' %}
 
-    {% if latest_briefs|length > 0 %}
+    {% if latest_info|length > 0 %}
 
         <div id="index-briefs" class="pb-4">
 
@@ -44,13 +44,13 @@
         <div class="container">
         <div class="card-deck">
 
-        {% for brief in latest_briefs %}
+        {% for info in latest_info %}
             <div class="card{% if loop.last %} d-none d-lg-block{% endif %}">
                 <div class="card-body">
-                <h3 class="card-title">{{ brief.title }}</h3>
-                    <p class="text-muted">Publié {{ brief.date_created|date_formatter }}.</p>
-                <p class="card-text">{{ brief.summary }}</p>
-                    <a href="{{ url_for('visitor.brief-view', id=brief.id, slug=brief.slug) }}" class="card-link">Lire la suite</a>
+                <h3 class="card-title">{{ info.title }}</h3>
+                    <p class="text-muted">{{ info.type }} &bull; Publiée {{ info.date|date_formatter }}.</p>
+                <p class="card-text">{{ info.summary }}</p>
+                    <a href="{{ info.link }}" class="card-link">Lire la suite</a>
                 </div>
             </div>
         {% endfor %}
@@ -58,7 +58,7 @@
         </div>
 
         <div id="list-links" class="container mt-4 mb-4">
-            <a href="{{ url_for('visitor.briefs') }}">Toutes nos infos</a>
+            <a href="{{ url_for('visitor.briefs') }}">Toutes nos brèves</a>
             &bull; <a href="{{ url_for('visitor.newsletters') }}">Toutes nos infolettres</a>
             &bull; <a href="{{ url_for('visitor.albums') }}">Toutes nos photos</a>
         </div>

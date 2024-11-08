@@ -1,4 +1,5 @@
 import pathlib
+import datetime
 
 import flask
 from flask import Blueprint, views, request, send_from_directory, current_app
@@ -17,6 +18,18 @@ visitor_blueprint = Blueprint('visitor', __name__)
 
 
 # -- Index
+class IndexInfo:
+    """Just a placeholder for brief/newsletter
+    """
+
+    def __init__(self, title: str, date: datetime.datetime, summary: str, link: str, type: str):
+        self.title = title
+        self.date = date
+        self.summary = summary
+        self.link = link
+        self.type = type
+
+
 class IndexView(BaseMixin, RenderTemplateView):
     template_name = 'index.html'
 
@@ -24,10 +37,41 @@ class IndexView(BaseMixin, RenderTemplateView):
         ctx = super().get_context_data(*args, **kwargs)
 
         ctx['content'] = db.session.get(Page, current_app.config['PAGES']['visitor_index'])
-        ctx['latest_briefs'] = Brief.query\
+
+        # fetch latest infos
+        latest_info = []
+
+        latest_briefs = Brief.query\
             .filter(Brief.visible.is_(True))\
             .order_by(Brief.id.desc())\
             .all()[:3]
+
+        for brief in latest_briefs:
+            latest_info.append(IndexInfo(
+                title=brief.title,
+                date=brief.date_created,
+                summary=brief.summary,
+                link=flask.url_for('visitor.brief-view', id=brief.id, slug=brief.slug),
+                type='Brève'
+            ))
+
+        latest_newsletters = Newsletter.query\
+            .filter(Newsletter.draft.is_(False))\
+            .order_by(Newsletter.date_published.desc())\
+            .all()[:3]
+
+        for newsletter in latest_newsletters:
+            latest_info.append(IndexInfo(
+                title=newsletter.title,
+                date=newsletter.date_published,
+                summary=newsletter.summary,
+                link=flask.url_for('visitor.newsletter-view', id=newsletter.id, slug=newsletter.slug),
+                type='Infolettre'
+            ))
+
+        latest_info.sort(key=lambda x: x.date, reverse=True)
+
+        ctx['latest_info'] = latest_info[:3]
 
         ctx['featureds'] = Featured.ordered_items()[:4]
 
