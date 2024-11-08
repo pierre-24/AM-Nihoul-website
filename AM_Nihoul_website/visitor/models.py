@@ -103,6 +103,7 @@ class TextMixin:
     title = db.Column(db.VARCHAR(length=150), nullable=False)
     content = db.Column(db.Text)
     slug = db.Column(db.VARCHAR(150), nullable=False)
+    summary = db.Column(db.Text, default='', nullable=False)
 
     def content_with_summary(self, link_page: str = ''):
         return make_summary(self.content, link_page)
@@ -441,7 +442,6 @@ def receive_album_title_set(target, value, oldvalue, initiator):
 class Brief(TextMixin, BaseModel):
 
     visible = db.Column(db.Boolean, default=False, nullable=False)
-    summary = db.Column(db.Text, default='', nullable=False)
 
     @classmethod
     def create(cls, title, summary, content, visible=False):
