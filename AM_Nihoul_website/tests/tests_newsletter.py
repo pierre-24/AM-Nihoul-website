@@ -252,14 +252,15 @@ class TestNewsletter(TestFlask):
         db.session.add(self.subscribed_first_step)
         db.session.add(self.subscribed)
 
-        self.draft_newsletter = Newsletter.create('test1', 'content of test1')
-        self.published_newsletter = Newsletter.create('test2', 'content of test2', draft=False)
+        self.draft_newsletter = Newsletter.create('test1', 'content of test1', summary='x')
+        self.published_newsletter = Newsletter.create('test2', 'content of test2', draft=False, summary='x')
         self.draft_newsletter_with_image = Newsletter.create(
             'test3',
             'content: <img src="{p}" alt="test" /> <img src="{p}" alt="test2" />'.format(p=flask.url_for(
-                'visitor.upload-view', id=self.image.id, filename=self.image.file_name, _external=True)))
+                'visitor.upload-view', id=self.image.id, filename=self.image.file_name, _external=True)),
+            summary='x')
         self.draft_newsletter_with_summary = Newsletter.create(
-            'test4', '<summary></summary> <h1>test</h1> content of test4')
+            'test4', '<summary></summary> <h1>test</h1> content of test4', summary='x')
 
         db.session.add(self.draft_newsletter)
         db.session.add(self.draft_newsletter_with_image)
@@ -318,12 +319,14 @@ class TestNewsletter(TestFlask):
 
         title = 'this is a new title'
         content = 'this is a new text'
+        summary = 'this is a new summary'
 
         response = self.client.post(
             flask.url_for('admin.newsletter-create'),
             data={
                 'title': title,
-                'content': content
+                'content': content,
+                'summary': summary
             }, follow_redirects=False)
 
         self.assertEqual(response.status_code, 302)
@@ -332,6 +335,7 @@ class TestNewsletter(TestFlask):
         n = Newsletter.query.order_by(Newsletter.id.desc()).first()
         self.assertEqual(n.title, title)
         self.assertEqual(n.content, content)
+        self.assertEqual(n.summary, summary)
         self.assertTrue(n.draft)
 
     def test_create_newsletter_not_admin_ko(self):
@@ -441,6 +445,7 @@ class TestNewsletter(TestFlask):
     def test_edit_newsletter_draft_ok(self):
         title = 'this is a new title'
         content = 'this is a new text'
+        summary = 'this is a new summary'
 
         old_slug = self.draft_newsletter.slug
 
@@ -449,7 +454,8 @@ class TestNewsletter(TestFlask):
                 'admin.newsletter-edit', id=self.draft_newsletter.id, slug=self.draft_newsletter.slug),
             data={
                 'title': title,
-                'content': content
+                'content': content,
+                'summary': summary
             }, follow_redirects=False)
 
         self.assertEqual(response.status_code, 302)
@@ -457,6 +463,7 @@ class TestNewsletter(TestFlask):
         n = self.db_session.get(Newsletter, self.draft_newsletter.id)
         self.assertEqual(n.title, title)
         self.assertEqual(n.content, content)
+        self.assertEqual(n.summary, summary)
         self.assertNotEqual(n.slug, old_slug)
 
     def test_edit_newsletter_draft_not_admin_ko(self):
@@ -484,6 +491,7 @@ class TestNewsletter(TestFlask):
     def test_edit_newsletter_published_ok(self):
         title = 'this is a new title'
         content = 'this is a new text'
+        summary = 'summary'
 
         old_slug = self.published_newsletter.slug
 
@@ -492,7 +500,8 @@ class TestNewsletter(TestFlask):
                 'admin.newsletter-edit', id=self.published_newsletter.id, slug=self.published_newsletter.slug),
             data={
                 'title': title,
-                'content': content
+                'content': content,
+                'summary': summary
             }, follow_redirects=False)
 
         self.assertEqual(response.status_code, 302)
@@ -500,6 +509,7 @@ class TestNewsletter(TestFlask):
         n = self.db_session.get(Newsletter, self.published_newsletter.id)
         self.assertEqual(n.title, title)
         self.assertEqual(n.content, content)
+        self.assertEqual(n.summary, summary)
         self.assertEqual(n.slug, old_slug)  # slug does not change, as it is published
 
     def test_delete_newsletter_ok(self):
