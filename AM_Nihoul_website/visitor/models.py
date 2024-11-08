@@ -249,10 +249,11 @@ class Newsletter(TextMixin, BaseModel):
     date_published = db.Column(db.DateTime)
 
     @classmethod
-    def create(cls, title, content, draft=True):
+    def create(cls, title, content, summary='', draft=True):
         o = cls()
         o.draft = draft
         o.title = title
+        o.summary = summary
         o.content = content
 
         if not draft:

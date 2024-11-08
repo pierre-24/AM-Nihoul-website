@@ -10,6 +10,7 @@
     <form method="post">
         {{ form.hidden_tag() }}
         {{ render_field(form.title) }}
+        {{ render_field(form.summary) }}
         {{ render_field(form.content) }}
         {{ render_form_row([form.submit_button, form.submit_button_2]) }}
     </form>

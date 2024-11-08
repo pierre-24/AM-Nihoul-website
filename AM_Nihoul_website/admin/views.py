@@ -574,16 +574,18 @@ class NewsletterEditView(ObjectManagementMixin, BaseNewsletterEditView):
         return {
             'title': self.object.title,
             'content': self.object.content,
+            'summary': self.object.summary,
         }
 
     def form_valid(self, form):
         self.object.title = form.title.data
+        self.object.summary = form.summary.data
         self.object.content = form.content.data
 
         db.session.add(self.object)
         db.session.commit()
 
-        flask.flash('Newsletter "{}" modifiée.'.format(self.object.title))
+        flask.flash('Infolettre "{}" modifiée.'.format(self.object.title))
 
         if form.submit_button_2.data:
             self.success_url = flask.url_for('admin.newsletter-view', id=self.object.id)
@@ -600,7 +602,7 @@ admin_blueprint.add_url_rule(
 class NewsletterCreateView(BaseNewsletterEditView):
 
     def form_valid(self, form):
-        newsletter = Newsletter.create(form.title.data, form.content.data)
+        newsletter = Newsletter.create(form.title.data, form.content.data, summary=form.summary.data)
 
         db.session.add(newsletter)
         db.session.commit()

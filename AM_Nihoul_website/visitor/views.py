@@ -64,7 +64,7 @@ class IndexView(BaseMixin, RenderTemplateView):
             latest_info.append(IndexInfo(
                 title=newsletter.title,
                 date=newsletter.date_published,
-                summary='xx',
+                summary=newsletter.summary,
                 link=flask.url_for('visitor.newsletter-view', id=newsletter.id, slug=newsletter.slug),
                 type='Infolettre'
             ))

@@ -48,6 +48,9 @@ class UploadForm(FlaskForm):
 class NewsletterEditForm(FlaskForm):
     title = f.StringField(
         'Titre', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
+
+    summary = f.StringField('Résumé', validators=[f.validators.InputRequired(), f.validators.Length(max=150)])
+
     content = f.TextAreaField('Texte', widget=TrumbowygTextarea())
 
     submit_button = f.SubmitField('Enregistrer')
