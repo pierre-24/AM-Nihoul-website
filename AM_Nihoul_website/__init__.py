@@ -1,4 +1,4 @@
-___version__ = '0.8.2'
+___version__ = '0.8.3'
 
 import pathlib
 import shutil
@@ -93,7 +93,7 @@ WEBPAGE_INFO = {
     'site_name': 'Association Anne-Marie Nihoul ASBL',
     'site_description': 'aide aux malades',
     'site_keywords': 'leucémie, aide au malades',
-    'site_version': '0.8.2',
+    'site_version': '0.8.3',
 
     # trumpbowyg
     'trumbowyg_version': '2.27.3',
