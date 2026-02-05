@@ -22,7 +22,7 @@ lint:
 	flake8 AM_Nihoul_website --max-line-length=120 --ignore=N802
 
 run:
-	export FLASK_DEBUG=1; flask run --app $(app)
+	export FLASK_DEBUG=1; flask --app $(app) run
 
 test:
 	python -m unittest discover -s AM_Nihoul_website.tests
