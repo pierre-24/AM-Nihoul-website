@@ -108,7 +108,7 @@ ordered-set==4.1.0
     # via flask-limiter
 packaging==26.0
     # via limits
-pillow==12.1.0
+pillow==12.1.1
     # via AM-Nihoul-website (pyproject.toml)
 proto-plus==1.27.1
     # via google-api-core
