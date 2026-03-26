@@ -136,7 +136,7 @@ python-dateutil==2.9.0.post0
     #   simplegmail
 python-slugify==8.0.4
     # via AM-Nihoul-website (pyproject.toml)
-requests==2.32.5
+requests==2.33.0
     # via google-api-core
 rsa==4.9.1
     # via
